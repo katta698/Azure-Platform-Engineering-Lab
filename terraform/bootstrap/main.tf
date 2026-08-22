@@ -182,8 +182,18 @@ resource "azurerm_management_group_subscription_association" "lab" {
 resource "azurerm_consumption_budget_subscription" "lab" {
   for_each = var.create_subscriptions ? var.subscriptions : {}
 
-  name            = "budget-${each.key}-monthly"
-  subscription_id = azurerm_subscription.lab[each.key].id
+  name = "budget-${each.key}-monthly"
+  // NOT azurerm_subscription.lab[each.key].id — that attribute is the ALIAS
+  // resource ID, "/providers/Microsoft.Subscription/aliases/sub-connectivity",
+  // because the resource models the alias rather than the subscription. The
+  // budget wants a subscription ID, and fails to parse the alias form with:
+  //
+  //   parsing "/providers/Microsoft.Subscription/aliases/sub-connectivity":
+  //   parsing segment "subscriptions": the segment at position 0 didn't match
+  //
+  // The `subscription_id` ATTRIBUTE holds the bare GUID, so build the real
+  // resource ID from that.
+  subscription_id = "/subscriptions/${azurerm_subscription.lab[each.key].subscription_id}"
 
   amount     = each.value.monthly_budget
   time_grain = "Monthly"
