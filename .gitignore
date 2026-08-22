@@ -1,0 +1,55 @@
+# Markdown is local by default. The repo publishes READMEs and nothing else —
+# design notes, session state, study material and blog prep all stay on disk.
+# Add an exception deliberately if a doc is genuinely written for a reader.
+*.md
+!README.md
+
+# Terraform
+**/.terraform/
+**/.terraform.lock.hcl
+**/terraform.tfvars
+**/*.auto.tfvars
+**/tfplan
+**/*.tfstate
+**/*.tfstate.*
+
+# Credentials — never commit any of these
+**/*.pem
+**/*.pfx
+**/sp-*.json
+**/azureauth.json
+.env
+.env.*
+!.env.example
+
+# Blog HTML lives in katta698.github.io. Screenshots stay here and ARE
+# committed — the blog embeds them from raw.githubusercontent.com.
+**/docs/blog/*.html
+**/docs/linkedin/
+
+# Build artifacts
+**/functions/builds/
+**/*.zip
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+
+# Script run logs — these contain role assignment IDs
+*.log
+
+# Playwright profile and exported cookies — session credentials
+playwright_profile/
+*_cookies.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Scratch file written by scripts/access-audit.sh
+.access-audit.json
+
+# Playwright profile — holds a live Azure portal session
+scripts/screenshots/playwright_profile/

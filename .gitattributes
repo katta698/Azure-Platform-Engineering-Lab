@@ -1,0 +1,14 @@
+* text=auto
+
+# Shell scripts must keep LF. Committed with CRLF they fail on Linux and in CI
+# with "bad interpreter: /usr/bin/env bash^M", which reads as a missing bash.
+*.sh text eol=lf
+
+# Terraform files stay LF so diffs match what runs in HCP Terraform.
+*.tf text eol=lf
+*.tfvars.example text eol=lf
+
+# Screenshots are the blog's image source — never touch them.
+*.png binary
+*.jpg binary
+*.svg binary
