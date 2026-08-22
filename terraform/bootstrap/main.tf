@@ -297,3 +297,87 @@ resource "azurerm_role_assignment" "terraform_mg_contributor" {
   role_definition_name = "Management Group Contributor"
   principal_id         = azuread_service_principal.terraform.object_id
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// Deny-all on mg-decommissioned
+//
+// This lives in bootstrap rather than in a week, because it is permanent
+// platform governance: the parking bay is useless if the assignment on it can
+// be torn down with the week that happened to create it.
+//
+// Until this existed, mg-decommissioned was an empty management group with no
+// assignment — it would have accepted resources quite happily, while every
+// diagram and README described it as deny-all. A node that is documented as a
+// control and enforces nothing is worse than no node, because it is believed.
+// ═══════════════════════════════════════════════════════════════════════════
+
+resource "azurerm_policy_definition" "deny_all" {
+  name                = "deny-all-resources"
+  display_name        = "Deny all resource creation"
+  description         = <<-EOT
+    Denies creation or update of every resource type. Assigned only to the
+    decommissioned management group, where a cancelled subscription waits out
+    its retention window before Azure removes it.
+  EOT
+  policy_type         = "Custom"
+  management_group_id = azurerm_management_group.root.id
+
+  // mode All, not Indexed. Indexed evaluates only resource types that support
+  // tags and location, which would leave the parking bay accepting everything
+  // else — including resource groups, the very first thing someone would create.
+  mode = "All"
+
+  metadata = jsonencode({
+    category = "General"
+    version  = "1.0.0"
+  })
+
+  policy_rule = jsonencode({
+    if = {
+      field = "type"
+      like  = "*"
+    }
+    then = {
+      effect = "[parameters('effect')]"
+    }
+  })
+
+  parameters = jsonencode({
+    effect = {
+      type = "String"
+      metadata = {
+        displayName = "Effect"
+        description = "Deny to block, Audit to report only, Disabled to switch off."
+      }
+      allowedValues = ["Deny", "Audit", "Disabled"]
+      defaultValue  = "Deny"
+    }
+  })
+}
+
+resource "azurerm_management_group_policy_assignment" "decommissioned_deny_all" {
+  // 24 characters is the hard limit on a policy assignment name — "assign-deny-
+  // all-decommissioned" is 30 and fails at plan time, not apply time.
+  name                 = "assign-deny-all-decomm"
+  display_name         = "Deny all — decommissioned"
+  management_group_id  = azurerm_management_group.decommissioned.id
+  policy_definition_id = azurerm_policy_definition.deny_all.id
+  location             = var.location
+
+  // Enforcing from the moment it exists. There is no report-only phase for this
+  // one: the scope is empty by definition, so there is nothing to measure and
+  // nothing that can break.
+  enforce = true
+
+  identity {
+    type = "SystemAssigned"
+  }
+
+  parameters = jsonencode({
+    effect = { value = "Deny" }
+  })
+
+  non_compliance_message {
+    content = "This subscription is decommissioned and is waiting out its retention window. Nothing may be created in it. If you need these resources, move the subscription out of the decommissioned management group first."
+  }
+}
