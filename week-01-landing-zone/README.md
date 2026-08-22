@@ -182,9 +182,17 @@ is the most misleading state in this whole week.
 ## Compliance data is not immediate
 
 Policy evaluates on resource write straight away — that is why the deny is
-instant. But the scan of *existing* resources runs on its own schedule, up to 30
-minutes. An empty compliance report right after an apply means "not scanned
-yet", not "compliant". To force it:
+instant. Everything else is scheduled, and the intervals differ:
+
+| Trigger | Interval |
+| --- | --- |
+| New or updated assignment applied to its scope | ~5 minutes |
+| A resource deployed or changed | ~15 minutes |
+| A subscription created or moved in the hierarchy | ~30 minutes |
+| Standard sweep of everything else | every 24 hours |
+
+Verified against Microsoft Learn on 2026-08-22. An empty compliance report right
+after an apply means "not scanned yet", not "compliant". To force it:
 
 ```bash
 az policy state trigger-scan --resource-group rg-wk01-landing-zone-dev-scus-001
