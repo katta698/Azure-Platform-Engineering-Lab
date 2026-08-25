@@ -33,6 +33,19 @@ if [[ ${#FILES[@]} -eq 0 ]]; then
   exit 0
 fi
 
+# GUIDs that are public, global and identical in every Azure tenant: built-in
+# role definitions and built-in policy definitions. They are not account
+# identifiers, they appear in Microsoft's own documentation, and blocking on
+# them trains you to ignore this script -- which is the failure mode that
+# actually leaks something.
+#
+# Each one is here because a file in this repo names it in prose or in a
+# variable rather than inside a /providers/... path, where the rule below would
+# already have skipped it. Verify a new entry with:
+#   az role definition list --query "[?name=='<guid>'].roleName"
+#   az policy definition show --name <guid> --query "{n:displayName,t:policyType}"
+PUBLIC_BUILTIN_GUIDS=$(printf '%s|'   749f88d5-cbae-40b8-bcfc-e573ddc772fa   92aaf0da-9dab-42b6-94a3-d43ce8d16293   4a9ae827-6dc8-4573-8ac7-8239d42aa03f   b24988ac-6180-42a0-ab88-20f7382dd24c   59759c62-9a22-4cdf-ae64-074495983fef   ea3f2387-9b95-492a-a190-fcdc54f7b070   cd3aa116-8754-49c9-a813-ad46512ece54   e56962a6-4747-49cd-b67b-bf8b01975c4c   871b6d14-10aa-478d-b590-94f262ecfa99   | sed 's/|$//')
+
 fail=0
 
 check() {
@@ -42,7 +55,7 @@ check() {
          | grep -vE '0{8}-0{4}-0{4}-0{4}-0{12}' \
          | grep -vE 'XXXX-XXXX-XXX-XXX' \
          | grep -vE 'your-email@example\.com' \
-         | grep -vE '/providers/Microsoft\.Authorization/policy(Set)?Definitions/')
+         | grep -vE '/providers/Microsoft\.Authorization/(policy(Set)?Definitions|roleDefinitions)/'          | grep -vE "$PUBLIC_BUILTIN_GUIDS")
   if [[ -n "$hits" ]]; then
     echo ""
     echo "FAIL  $label"
