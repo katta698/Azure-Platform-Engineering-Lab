@@ -64,8 +64,21 @@ bad()  { echo "   RESULT: $*"; fail=$((fail + 1)); }
 # leaving an empty resource ID, which the next command rejected as a usage
 # error. Fewer calls is not the point; not having a lookup that can half-fail
 # between two checks of the same resource is.
+#
+# Two normalisations, both of which produced a wrong answer before they were
+# added:
+#
+#   tr -d '\r'   az writes CRLF line endings on Windows, so the last field of
+#                every row arrives as "value<CR>". It compares equal to nothing,
+#                prints indistinguishably from "value", and turned an untouched
+#                storage account into "changed despite holding no roles"
+#   None -> ""   a null tag comes back as the literal string None in tsv output,
+#                not as an empty field
 storage_inventory() {
-  az storage account list --resource-group "$RG" --subscription "$SUBSCRIPTION_ID"     --query "[].[name, id, tags.\"$TAG_NAME\"]" -o tsv
+  az storage account list --resource-group "$RG" --subscription "$SUBSCRIPTION_ID" \
+    --query "[].[name, id, tags.\"$TAG_NAME\"]" -o tsv \
+    | tr -d '\r' \
+    | awk -F'\t' 'BEGIN{OFS="\t"} {if ($3 == "None") $3 = ""; print}'
 }
 
 # ── 1. Force an evaluation ──────────────────────────────────────────────────
@@ -118,7 +131,7 @@ if [[ "$MODE" == "audit" ]]; then
 
     if [[ "$setting" == "ERROR" ]]; then
       bad "$name could not be read — a lookup that fails is not evidence of anything"
-    elif [[ "$setting" == "0" && ( -z "$tag" || "$tag" == "None" ) ]]; then
+    elif [[ "$setting" == "0" && -z "$tag" ]]; then
       ok "$name untouched — reported, not fixed"
     else
       bad "$name changed during an audit-only stage"
@@ -144,12 +157,38 @@ fi
 # ReEvaluateCompliance would evaluate first, but it re-scans the entire
 # assignment scope, which at management group scope is every subscription
 # underneath it.
+
+# How many resources the last scan flagged for one rule. Remediation acts on
+# exactly this set, so it is also the answer to "should there be anything to do".
+noncompliant_count() {
+  local ref="$1"
+  az policy state summarize \
+    --resource-group "$RG" \
+    --subscription "$SUBSCRIPTION_ID" \
+    --filter "PolicyAssignmentId eq '$ASSIGNMENT_ID'" \
+    --query "policyAssignments[0].policyDefinitions[?policyDefinitionReferenceId=='$ref'].results.nonCompliantResources | [0]" \
+    -o tsv 2>/dev/null | tr -d '\r'
+}
+
 remediate_ref() {
   local ref="$1" expect="$2"
   local name="remediate-${ref}-$(date +%H%M%S)"
 
   echo "── Remediating: $ref"
   note "expecting: $expect"
+
+  # Re-running the week on an already-remediated estate is a legitimate state,
+  # and a task over an empty set succeeds having done nothing. Say so, rather
+  # than creating a task to prove it.
+  local pending
+  pending=$(noncompliant_count "$ref")
+  if [[ "${pending:-0}" == "0" || -z "$pending" ]]; then
+    note "nothing flagged for $ref by the last scan — already remediated"
+    ok "$ref has no non-compliant resources left"
+    echo ""
+    return
+  fi
+  note "$pending resource(s) flagged for $ref"
 
   if ! az policy remediation create \
         --name "$name" \
@@ -158,11 +197,32 @@ remediate_ref() {
         --definition-reference-id "$ref" \
         --resource-discovery-mode ExistingNonCompliant \
         -o none 2>/tmp/wk02-remediate.err; then
-    note "the task could not be created:"
-    sed 's/^/     /' /tmp/wk02-remediate.err | head -5
-    bad "no task — this is a control-plane refusal, not a remediation failure"
-    echo ""
-    return
+
+    # One remediation per assignment per definition reference per scope, at a
+    # time. A second request is refused with InvalidCreateRemediationRequest,
+    # and the message names the task already running. That is not a failure to
+    # remediate — the work is happening, under a different name — so attach to
+    # the running task rather than reporting a problem that does not exist.
+    #
+    # Measured 2026-08-25: the conflict was reported against a task created
+    # seconds earlier that then succeeded. Anything that can run this week
+    # twice at once — two terminals, a rerun while the first is still scanning
+    # — hits it, and a script that treats the refusal as an error reports
+    # FAILED over a remediation that worked.
+    local running
+    running=$(grep -oE "remediate-[A-Za-z0-9-]+" /tmp/wk02-remediate.err \
+                | grep -v "^$name$" | head -1)
+
+    if [[ -n "$running" ]]; then
+      note "a remediation for $ref is already running as $running — attaching to it"
+      name="$running"
+    else
+      note "the task could not be created:"
+      sed 's/^/     /' /tmp/wk02-remediate.err | head -5
+      bad "no task — this is a control-plane refusal, not a remediation failure"
+      echo ""
+      return
+    fi
   fi
 
   # A remediation task is asynchronous. Creating it returns immediately with
@@ -175,6 +235,12 @@ remediate_ref() {
     sleep 15
     waited=$((waited + 15))
   done
+
+  # The per-deployment counters lag the task's own state. Measured on the
+  # no-grants run: the task read Failed while totalDeployments was 2 and both
+  # successful and failed were 0 — a snapshot that reads as "it failed without
+  # attempting anything", which is not what happened. Settle before counting.
+  sleep 20
 
   read -r total succeeded failed <<<"$(az policy remediation show \
     --name "$name" --management-group "$MG" \
@@ -227,7 +293,6 @@ remediate_ref "inherit-tag" "$EXPECT"
 echo "── What the storage accounts actually look like now"
 while IFS=$'	' read -r name id tag; do
   [[ -z "$name" ]] && continue
-  [[ "$tag" == "None" ]] && tag=""
 
   setting=$(az monitor diagnostic-settings list --resource "$id" \
               --query "[?name=='$SETTING_NAME'].workspaceId | [0]" -o tsv) || setting="ERROR"

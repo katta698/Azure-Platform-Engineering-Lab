@@ -100,4 +100,18 @@ if az group show --name "$RG" --subscription "$SUBSCRIPTION_ID" -o none 2>/dev/n
   exit 1
 fi
 
-echo "Clean. Nothing from week 02 remains in the subscription or on the tree."
+# Remediation task records outlive the assignment they ran against. They are
+# history rather than infrastructure — no cost, no permissions, no effect — and
+# they are the only surviving evidence of what this week actually did. Reported
+# rather than deleted, because a teardown that quietly removes the audit trail
+# is worse than one that leaves it.
+tasks=$(az policy remediation list --management-group mg-lz-dev \
+          --query "length([?contains(name, 'remediate-')])" -o tsv 2>/dev/null | tr -d '\r')
+
+if [[ "${tasks:-0}" != "0" ]]; then
+  echo "  $tasks remediation task record(s) remain at mg-lz-dev — history, not infrastructure."
+  echo "  They cost nothing and hold no permissions. To remove them:"
+  echo "    az policy remediation delete --name <name> --management-group mg-lz-dev"
+fi
+
+echo "Clean. No week 02 infrastructure remains in the subscription or on the tree."

@@ -75,10 +75,10 @@ before the things it governs.
 
 | Week | Pattern | Status |
 | --- | --- | --- |
-| Bootstrap | Management group tree, OIDC identity, subscriptions | In progress |
+| Bootstrap | Management group tree, OIDC identity, subscriptions | Complete |
 | **Foundation** | | |
-| 01 | The landing zone, deployed — policy that denies something | Planned |
-| 02 | Policy as code — initiatives and `deployIfNotExists` remediation | Planned |
+| 01 | The landing zone, deployed — policy that denies something | Complete |
+| 02 | Policy as code — initiatives and `deployIfNotExists` remediation | Complete |
 | 03 | A module factory on Azure Verified Modules | Planned |
 | 04 | Subscription vending through the MCA alias API | Planned |
 | 05 | Hub network — Azure Firewall and the private DNS estate | Planned |

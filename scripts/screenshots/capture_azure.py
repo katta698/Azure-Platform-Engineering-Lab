@@ -339,6 +339,8 @@ def main() -> None:
     ap.add_argument("--goto-timeout", type=int, default=90000)
     ap.add_argument("--expand-tree", action="store_true")
     ap.add_argument("--expect", default="", help="Text that must be visible before saving")
+    ap.add_argument("--click-text", default="", help="Click this text before capturing (e.g. a tab)")
+    ap.add_argument("--click-wait-ms", type=int, default=6000)
     ap.add_argument("--login-timeout", type=int, default=300, help="Seconds to wait for sign-in")
     args = ap.parse_args()
 
@@ -397,8 +399,37 @@ def main() -> None:
             settle(page, args.wait_ms)
             assert_not_a_login_page(page)
 
+            # Many portal blades open on a default tab. The Remediation blade
+            # opens on "Policies to remediate", so capturing it without a click
+            # yields a screenshot of the wrong tab that looks entirely plausible
+            # -- it is a real blade with real rows, just not the one asked for.
+            if args.click_text:
+                clicked = False
+                for frame in frames(page):
+                    try:
+                        target = frame.get_by_text(args.click_text, exact=False)
+                        if target.count():
+                            target.first.click(timeout=8000)
+                            page.wait_for_timeout(args.click_wait_ms)
+                            clicked = True
+                            break
+                    except Exception:
+                        continue
+                if not clicked:
+                    sys.exit(f"REFUSING TO SAVE: could not find {args.click_text!r} to click.")
+
             if args.expand_tree:
                 expand_tree(page, args.expect)
+
+            # An --expect with no --expand-tree still has to be honoured, or the
+            # flag silently does nothing outside the tree case.
+            if args.expect and not args.expand_tree:
+                found = any(
+                    args.expect in (f.evaluate("() => document.body ? document.body.innerText : ''") or "")
+                    for f in frames(page)
+                )
+                if not found:
+                    sys.exit(f"REFUSING TO SAVE: {args.expect!r} is not on the page.")
 
             # Redact immediately before the capture. The portal virtualises its
             # grids and repaints on its own schedule, so a redaction done any
