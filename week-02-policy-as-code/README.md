@@ -31,6 +31,10 @@ at management group scope that survive deletion of the resource group. See
 | Identity | `id-wk02-policy-remediation`, granted three roles at `mg-lz-dev` |
 | Test bed | `rg-wk02-policy-as-code-dev-scus-001` — a workspace and two deliberately non-compliant storage accounts |
 
+## How it fits together
+
+![Week 2 architecture](docs/blog/diagrams/week-02-architecture.svg)
+
 ## The design decision: user-assigned, not system-assigned
 
 A policy assignment holds exactly one managed identity either way, so this is
