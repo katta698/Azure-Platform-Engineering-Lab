@@ -61,23 +61,25 @@ locals {
   # The category group is `audit` rather than `allLogs` deliberately: allLogs on
   # a busy account is the single largest ingestion line a lab ever accidentally
   # creates, and audit carries the events anyone actually goes looking for.
-  diagnostics_enabled = var.log_analytics_workspace_id != null
-
-  account_diagnostics = local.diagnostics_enabled ? {
+  # Unconditional as of 2.0.0. In 1.0.0 both of these were gated on the
+  # workspace ID being non-null, because it was allowed to be. Making the input
+  # required removed the branch rather than merely making it unlikely — there is
+  # no longer a way to reach this module and get an account with no audit trail.
+  account_diagnostics = {
     to_law = {
       name                  = "diag-to-law"
       workspace_resource_id = var.log_analytics_workspace_id
       metrics               = [{ category = "Transaction" }]
     }
-  } : {}
+  }
 
-  blob_diagnostics = local.diagnostics_enabled ? {
+  blob_diagnostics = {
     to_law = {
       name                  = "diag-blob-to-law"
       workspace_resource_id = var.log_analytics_workspace_id
       logs                  = [{ category_group = "audit" }]
     }
-  } : {}
+  }
 }
 
 module "storage_account" {

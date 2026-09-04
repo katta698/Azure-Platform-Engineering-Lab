@@ -12,15 +12,13 @@ Published to the private registry as
 ```hcl
 module "storage" {
   source  = "app.terraform.io/Katta/storage-baseline/azurerm"
-  version = "1.0.0"
+  version = "2.0.0"
 
-  workload          = "orders"
-  environment       = "dev"
-  location          = "southcentralus"
-  resource_group_id = azurerm_resource_group.example.id
-  cost_center       = "platform-lab"
-
-  # Optional. Omit it and no diagnostic setting is created.
+  workload                   = "orders"
+  environment                = "dev"
+  location                   = "southcentralus"
+  resource_group_id          = azurerm_resource_group.example.id
+  cost_center                = "platform-lab"
   log_analytics_workspace_id = azurerm_log_analytics_workspace.example.id
 }
 ```
@@ -58,19 +56,27 @@ ingestion line most labs create by accident.
 
 | Version | Change |
 | --- | --- |
-| 1.0.0 | First release |
+| 1.0.0 | First release. `log_analytics_workspace_id` optional, `shared_access_key_enabled` defaults to `true` |
+| 2.0.0 | **Breaking.** `log_analytics_workspace_id` is required. `shared_access_key_enabled` defaults to `false` |
 
-Two of the defaults in this release are known to be wrong, and are left alone
-rather than corrected in place:
+1.0.0 is still in the registry and still installable. It was not corrected in
+place, because a published version is immutable and that property is worth more
+than the two defects in it.
 
-| Input | 1.0.0 | Why it is wrong |
+### Upgrading to 2.0.0
+
+| | Change | How it reaches you |
 | --- | --- | --- |
-| `log_analytics_workspace_id` | optional, `null` | An account with no diagnostics is the default outcome, so the accounts nobody configured are exactly the ones with no audit trail |
-| `shared_access_key_enabled` | `true` | A connection string with an embedded key is the thing managed identities exist to replace |
+| Loud | `log_analytics_workspace_id` now required | `Missing required argument`, at plan. Nothing deploys |
+| Silent | `shared_access_key_enabled` `true` → `false` | No plan error, no apply error. Whatever authenticated with a shared key stops working at runtime |
 
-Changing either is a breaking change and belongs in a major version, not in a
-patch to this one. A published version is immutable — that is the property the
-whole registry is for, and it applies to the versions that were a mistake.
+Pass a workspace ID, and decide explicitly about shared keys before applying —
+`shared_access_key_enabled = true` is still available and is now a choice in
+your code rather than a default you inherited.
+
+The silent one is what makes major versions worth the trouble. A constraint like
+`~> 1.0` would have caught neither, because both changes are in a new major —
+and a team that writes `~> 2.0` after upgrading has re-armed it for 2.1.0.
 
 ## Provider requirements
 

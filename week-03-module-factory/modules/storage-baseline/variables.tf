@@ -67,14 +67,22 @@ variable "cost_center" {
 variable "log_analytics_workspace_id" {
   description = <<-EOT
     Workspace the account's metrics and the blob service's audit logs are sent
-    to. Optional: leave it null and no diagnostic setting is created.
+    to.
 
-    Optional is the wrong default and v2.0.0 of this module removes it. It is
-    here in v1.0.0 because that is what the first version shipped with, and the
-    version that ships is the version consumers pin.
+    REQUIRED as of 2.0.0. It was optional in 1.0.0, which meant the accounts
+    nobody thought about were exactly the accounts with no audit trail — the
+    default outcome was the one you would never choose deliberately.
+
+    This is the LOUD half of the 2.0.0 break. A caller who omits it fails with
+    `Missing required argument` before anything is planned: no deployment, no
+    partial apply, and the error names the input.
   EOT
   type        = string
-  default     = null
+
+  validation {
+    condition     = can(regex("/providers/Microsoft.OperationalInsights/workspaces/", var.log_analytics_workspace_id))
+    error_message = "log_analytics_workspace_id must be a full Log Analytics workspace resource ID."
+  }
 }
 
 variable "shared_access_key_enabled" {
@@ -83,13 +91,17 @@ variable "shared_access_key_enabled" {
     with an embedded key authenticates, which is the thing managed identities
     exist to replace.
 
-    Defaults to true in v1.0.0 and false in v2.0.0. That flip is the more
-    dangerous half of the major bump: it changes behaviour without changing the
-    call, so nothing fails at plan and the break arrives at runtime in whatever
-    was still using a key.
+    Defaulted to true in 1.0.0 and false as of 2.0.0. That flip is the SILENT
+    half of the major bump: it changes behaviour without changing the call, so
+    nothing fails at plan, nothing fails at apply, and the break arrives at
+    runtime in whatever was still authenticating with a key.
+
+    A caller who needs the old behaviour can still ask for it explicitly. That
+    is the difference the version buys — it is now a decision in their code
+    rather than a default they inherited.
   EOT
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "container_name" {
