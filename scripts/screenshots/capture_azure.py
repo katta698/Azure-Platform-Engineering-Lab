@@ -38,6 +38,7 @@ import base64
 import os
 import sys
 from pathlib import Path
+from urllib.parse import urlparse
 
 from playwright.sync_api import sync_playwright
 
@@ -332,7 +333,13 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("url", nargs="?")
     ap.add_argument("output_path", nargs="?")
-    ap.add_argument("--login", action="store_true", help="Open the portal and wait while you sign in.")
+    ap.add_argument("--login", action="store_true", help="Open a site and wait while you sign in.")
+    ap.add_argument(
+        "--login-url",
+        default=PORTAL,
+        help="Where --login goes. Defaults to the Azure portal; pass "
+        "https://app.terraform.io/ to sign into the private module registry.",
+    )
     ap.add_argument("--wait-ms", type=int, default=9000, help="Settle time after load")
     ap.add_argument("--width", type=int, default=1500)
     ap.add_argument("--height", type=int, default=950)
@@ -360,10 +367,17 @@ def main() -> None:
 
         try:
             if args.login:
-                page.goto(PORTAL, wait_until="domcontentloaded", timeout=args.goto_timeout)
-                print("Sign in to the Azure portal in the window that just opened.")
-                print("The profile is saved, so this is a one-time step.")
-                print(f"Waiting up to {args.login_timeout}s for the portal to load...", flush=True)
+                # Not every page worth screenshotting is the Azure portal. The
+                # private module registry is HCP, and signing into it is a
+                # separate session in the same browser profile — so the target
+                # and its "you have arrived" host are parameters, not constants.
+                login_url = args.login_url
+                target_host = urlparse(login_url).hostname or ""
+
+                page.goto(login_url, wait_until="domcontentloaded", timeout=args.goto_timeout)
+                print(f"Sign in to {target_host} in the window that just opened.")
+                print("The profile is saved, so this is a one-time step per site.")
+                print(f"Waiting up to {args.login_timeout}s for {target_host} to load...", flush=True)
 
                 # Polled rather than input(). This is routinely run from a shell
                 # with no stdin attached, where input() dies instantly with
@@ -375,7 +389,7 @@ def main() -> None:
                     waited += 5
                     url = (page.url or "").lower()
                     on_login = any(h in url for h in LOGIN_HOSTS) or any(p in url for p in LOGIN_PATHS)
-                    if not on_login and "portal.azure.com" in url:
+                    if not on_login and target_host in url:
                         try:
                             settle(page, 3000)
                             assert_not_a_login_page(page)
