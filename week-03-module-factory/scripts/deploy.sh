@@ -14,6 +14,23 @@ set -euo pipefail
 export MSYS_NO_PATHCONV=1
 cd "$(dirname "$0")/../terraform"
 
+# ── Windows MAX_PATH ────────────────────────────────────────────────────────
+#
+# AVM nests modules deeply: the storage account pulls avm-utl-interfaces once
+# per sub-resource, producing paths like
+#   .terraform/modules/app_a.storage_account.queues.role_assignments.interfaces/.git/objects/pack/pack-<sha>.pack
+# which exceeds the limit from inside this repo's own path. Measured 2026-09-03:
+# it fails even with core.longpaths=true AND the LongPathsEnabled registry value
+# already 0x1, because git hits the ceiling mid-clone — first as
+# "Filename too long", then as "unable to rename temporary '*.pack' file".
+#
+# The module cache is relocatable and the configuration is not, so the cache
+# moves rather than the repo. Override by exporting TF_DATA_DIR yourself.
+: "${TF_DATA_DIR:=C:/tfd/w03}"
+export TF_DATA_DIR
+mkdir -p "$TF_DATA_DIR"
+
+
 STAGE="${1:-v1}"
 case "$STAGE" in
   v1) ENABLE_V2=false ;;

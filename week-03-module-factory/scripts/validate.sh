@@ -21,6 +21,23 @@ set -uo pipefail
 export MSYS_NO_PATHCONV=1
 cd "$(dirname "$0")/../terraform"
 
+# ── Windows MAX_PATH ────────────────────────────────────────────────────────
+#
+# AVM nests modules deeply: the storage account pulls avm-utl-interfaces once
+# per sub-resource, producing paths like
+#   .terraform/modules/app_a.storage_account.queues.role_assignments.interfaces/.git/objects/pack/pack-<sha>.pack
+# which exceeds the limit from inside this repo's own path. Measured 2026-09-03:
+# it fails even with core.longpaths=true AND the LongPathsEnabled registry value
+# already 0x1, because git hits the ceiling mid-clone — first as
+# "Filename too long", then as "unable to rename temporary '*.pack' file".
+#
+# The module cache is relocatable and the configuration is not, so the cache
+# moves rather than the repo. Override by exporting TF_DATA_DIR yourself.
+: "${TF_DATA_DIR:=C:/tfd/w03}"
+export TF_DATA_DIR
+mkdir -p "$TF_DATA_DIR"
+
+
 ORG="Katta"
 MODULE="storage-baseline"
 PROVIDER="azurerm"
@@ -95,7 +112,10 @@ echo "2. The baseline the module decides, on the deployed accounts"
 while IFS=$'\t' read -r name tls public sharedkey cc; do
   [[ -z "$name" ]] && continue
   note "$name  tls=$tls  publicblob=$public  sharedkey=$sharedkey  cost-center=$cc"
-  if [[ "$tls" == "TLS1_2" && "$public" == "false" && "$cc" == "platform-lab" ]]; then
+  # az renders JSON booleans Python-style — True/False, capitalised — so a
+  # compare against lowercase "false" fails on a correct resource. Lowercased
+  # here rather than at each call site.
+  if [[ "$tls" == "TLS1_2" && "${public,,}" == "false" && "$cc" == "platform-lab" ]]; then
     ok "$name is on the baseline"
   else
     bad "$name is off the baseline"
@@ -152,7 +172,7 @@ else
   b_key=$(awk -F'\t' -v n="$B_NAME" '$1==n {print $4}' <<< "$inventory")
   note "$A_NAME (1.0.0): allowSharedKeyAccess=$a_key"
   note "$B_NAME (2.0.0): allowSharedKeyAccess=$b_key"
-  if [[ "$a_key" == "true" && "$b_key" == "false" ]]; then
+  if [[ "${a_key,,}" == "true" && "${b_key,,}" == "false" ]]; then
     ok "the default flipped, and neither call site changed"
     note "this is the dangerous half of a major bump: no plan error, no apply"
     note "error, and a connection string that stops working at runtime"
@@ -192,8 +212,11 @@ TMP=$(mktemp -d -t wk03-upgrade-XXXXXX)
   echo '}'
 } > "$TMP/main.tf"
 
-if (cd "$TMP" && terraform init -input=false -no-color >/dev/null 2>&1); then
-  out=$( (cd "$TMP" && terraform validate -no-color) 2>&1 )
+# TF_DATA_DIR is set for this week's root at the top of the script. It must NOT
+# leak into this throwaway root, or init reuses the week's module cache and
+# fails against a configuration that never asked for it.
+if (cd "$TMP" && unset TF_DATA_DIR && terraform init -input=false -no-color >/dev/null 2>&1); then
+  out=$( (cd "$TMP" && unset TF_DATA_DIR && terraform validate -no-color) 2>&1 )
   if grep -q "Missing required argument" <<< "$out"; then
     grep -B1 -A3 "Missing required argument" <<< "$out" | sed 's/^/   /'
     ok "the upgrade is refused before anything is planned"

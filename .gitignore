@@ -53,3 +53,6 @@ Thumbs.db
 
 # Playwright profile — holds a live Azure portal session
 scripts/screenshots/playwright_profile/
+
+# Session cookie lifted from another browser for screenshot capture. Never commit.
+scripts/screenshots/.session-cookie

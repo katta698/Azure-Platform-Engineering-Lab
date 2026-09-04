@@ -349,6 +349,13 @@ def main() -> None:
     ap.add_argument("--click-text", default="", help="Click this text before capturing (e.g. a tab)")
     ap.add_argument("--click-wait-ms", type=int, default=6000)
     ap.add_argument("--login-timeout", type=int, default=300, help="Seconds to wait for sign-in")
+    ap.add_argument(
+        "--cookie-file",
+        default="",
+        help="File holding ONE session cookie value, for reusing a login from "
+        "another browser. Format: <domain> <name> <value> on a single line. "
+        "The value is never printed or logged. Keep the file gitignored.",
+    )
     args = ap.parse_args()
 
     if not args.login and not (args.url and args.output_path):
@@ -363,6 +370,36 @@ def main() -> None:
             viewport={"width": args.width, "height": args.height},
             args=["--start-maximized"],
         )
+        # A session cookie lifted from another browser, injected as plaintext.
+        #
+        # Chrome encrypts cookie values with a key that is per-profile, so
+        # copying an encrypted blob from one profile's Cookies database into
+        # another's produces a cookie the destination cannot decrypt — it is
+        # silently ignored and the page renders as signed out. The value has to
+        # arrive decrypted and be set through the API instead.
+        #
+        # Read from a file rather than a flag so the value never reaches a shell
+        # history, a process list or a log. It is not echoed on success either:
+        # the only confirmation is the capture succeeding.
+        if args.cookie_file:
+            raw = Path(args.cookie_file).read_text(encoding="utf-8").strip()
+            parts = raw.split(None, 2)
+            if len(parts) != 3:
+                sys.exit(
+                    f"{args.cookie_file}: expected '<domain> <name> <value>' on one line."
+                )
+            domain, cname, cvalue = parts
+            context.add_cookies([{
+                "name": cname,
+                "value": cvalue,
+                "domain": domain,
+                "path": "/",
+                "httpOnly": True,
+                "secure": True,
+                "sameSite": "Lax",
+            }])
+            print(f"Injected 1 cookie ({cname}) for {domain}")
+
         page = context.pages[0] if context.pages else context.new_page()
 
         try:
