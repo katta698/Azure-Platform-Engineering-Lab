@@ -19,13 +19,32 @@
 
 set -euo pipefail
 export MSYS_NO_PATHCONV=1
-cd "$(dirname "$0")/.."
+
+# The REPO ROOT, not the week directory, because MODULE_PATH below is
+# repo-root-relative and git resolves `<rev>:<path>` relative to the current
+# directory. Run from the week directory, `git archive <tag>:week-03-.../modules/...`
+# does not error — it resolves to an EMPTY TREE and produces a valid tarball
+# containing nothing, which uploads fine and publishes an empty module version.
+cd "$(git -C "$(dirname "$0")" rev-parse --show-toplevel)"
 
 ORG="Katta"
 MODULE="storage-baseline"
 PROVIDER="azurerm"
 MODULE_PATH="week-03-module-factory/modules/storage-baseline"
 API="https://app.terraform.io/api/v2"
+
+# ── Scratch space, in two spellings ─────────────────────────────────────────
+#
+# curl here is a native Windows build, and MSYS_NO_PATHCONV=1 above (which the
+# Azure resource IDs need) stops Git Bash rewriting POSIX paths on its way to
+# native binaries. So `curl -o /tmp/x` writes C:\tmp\x while bash reads
+# /tmp = C:\Users\<user>\AppData\Local\Temp — two different files, and the
+# failure is a "no such file" against a path that curl reported writing fine.
+#
+# WORK is what bash reads. WORK_WIN is what curl is given. Same directory.
+WORK=$(mktemp -d -t wk03-publish-XXXXXX)
+WORK_WIN=$(cygpath -w "$WORK" 2>/dev/null || printf '%s' "$WORK")
+trap 'rm -rf "$WORK"' EXIT
 
 VERSION="${1:-}"
 if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
@@ -95,38 +114,47 @@ fi
 
 # Extracted from the tag, with the module at the root of the archive — the
 # registry expects to find main.tf at the top level, not three directories down.
-TARBALL=$(mktemp -t "${MODULE}-${VERSION}-XXXXXX.tar.gz")
+TARBALL="${WORK}/${MODULE}-${VERSION}.tar.gz"
+TARBALL_WIN="${WORK_WIN}\\${MODULE}-${VERSION}.tar.gz"
 git archive --format=tar "${TAG}:${MODULE_PATH}" | gzip > "$TARBALL"
-echo "  packaged $(tar -tzf "$TARBALL" | wc -l | tr -d ' ') files from the tag"
+
+# An empty archive is a valid archive. It uploads with a 200, reaches status ok
+# and publishes a version containing nothing, which a consumer meets as a module
+# with no inputs rather than as a failure — so it is checked here, not trusted.
+FILE_COUNT=$(tar -tzf "$TARBALL" | wc -l | tr -d ' ')
+echo "  packaged ${FILE_COUNT} files from the tag"
+if [[ "$FILE_COUNT" -eq 0 ]]; then
+  echo "The archive is empty. Nothing was extracted from ${TAG}:${MODULE_PATH}." >&2
+  exit 1
+fi
 
 # ── The module, once ────────────────────────────────────────────────────────
 #
 # Creating a module that already exists returns 422 with a name-taken error,
 # and every version after the first hits that path. It is the expected result
 # of the second publish, not a failure.
-status=$(curl -s -o /tmp/wk03-mod.json -w '%{http_code}' "${auth[@]}" -X POST \
+status=$(curl -s -o "${WORK_WIN}\wk03-mod.json" -w '%{http_code}' "${auth[@]}" -X POST \
   "${API}/organizations/${ORG}/registry-modules" \
   -d "{\"data\":{\"type\":\"registry-modules\",\"attributes\":{\"name\":\"${MODULE}\",\"provider\":\"${PROVIDER}\",\"registry-name\":\"private\"}}}")
 
 case "$status" in
   201) echo "  registry module created" ;;
   422) echo "  registry module already exists" ;;
-  *)   echo "Creating the module failed (HTTP $status):" >&2; cat /tmp/wk03-mod.json >&2; exit 1 ;;
+  *)   echo "Creating the module failed (HTTP $status):" >&2; cat "${WORK}/wk03-mod.json" >&2; exit 1 ;;
 esac
 
 # ── The version ─────────────────────────────────────────────────────────────
-status=$(curl -s -o /tmp/wk03-ver.json -w '%{http_code}' "${auth[@]}" -X POST \
+status=$(curl -s -o "${WORK_WIN}\wk03-ver.json" -w '%{http_code}' "${auth[@]}" -X POST \
   "${API}/organizations/${ORG}/registry-modules/private/${ORG}/${MODULE}/${PROVIDER}/versions" \
   -d "{\"data\":{\"type\":\"registry-module-versions\",\"attributes\":{\"version\":\"${VERSION}\",\"commit-sha\":\"${COMMIT_SHA}\"}}}")
 
 if [[ "$status" == "422" ]]; then
   echo "Version ${VERSION} already exists in the registry." >&2
   echo "Registry versions are immutable. Publish ${VERSION%.*}.$(( ${VERSION##*.} + 1 )) instead of overwriting." >&2
-  rm -f "$TARBALL"
   exit 1
 fi
 if [[ "$status" != "201" ]]; then
-  echo "Creating the version failed (HTTP $status):" >&2; cat /tmp/wk03-ver.json >&2; exit 1
+  echo "Creating the version failed (HTTP $status):" >&2; cat "${WORK}/wk03-ver.json" >&2; exit 1
 fi
 
 # Read through stdin rather than by path. Git Bash's /tmp is
@@ -134,16 +162,15 @@ fi
 # build that cannot open a POSIX path — `open('/tmp/...')` fails with
 # FileNotFoundError against a file `ls` shows plainly. The shell does the
 # redirect, so only bash has to understand the path.
-UPLOAD_URL=$(python -c "import json,sys;print(json.load(sys.stdin)['data']['links']['upload'])" < /tmp/wk03-ver.json)
+UPLOAD_URL=$(python -c "import json,sys;print(json.load(sys.stdin)['data']['links']['upload'])" < "${WORK}/wk03-ver.json")
 echo "  version record created"
 
 # The upload goes to archivist, not to the API host, and it is a PUT of raw
 # bytes. It carries no Authorization header — the URL is the credential, which
 # is why it is single-use and why it must not end up in a log.
-curl -s -f -X PUT --data-binary "@${TARBALL}" \
+curl -s -f -X PUT --data-binary "@${TARBALL_WIN}" \
   -H "Content-Type: application/octet-stream" "$UPLOAD_URL"
 echo "  tarball uploaded"
-rm -f "$TARBALL"
 
 # ── Confirm from the registry, not from the upload ──────────────────────────
 #
