@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 660" width="880" height="660" role="img" aria-label="Week 03 module factory: git tags publish storage-baseline 1.0.0 and 2.0.0 to the HCP private registry, two consumers pin different majors, and the two kinds of breaking change">
+  <defs>
+    <style>
+      .t    { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+      .hdr  { font-size: 13px; font-weight: 700; fill: #1f2933; }
+      .lbl  { font-size: 12px; fill: #1f2933; }
+      .sm   { font-size: 11px; fill: #52606d; }
+      .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; fill: #1f2933; }
+      .box  { fill: #ffffff; stroke: #c3cbd5; stroke-width: 1.2; }
+      .band { fill: #f5f7fa; stroke: #dbe1e8; stroke-width: 1; }
+      .amber{ fill: #fdf6e3; stroke: #e0c068; stroke-width: 1.2; }
+      .red  { fill: #fdf1f1; stroke: #d9a2a2; stroke-width: 1.2; }
+      .arrow{ stroke: #7b8794; stroke-width: 1.4; fill: none; }
+      .ok   { fill: #1b6e3c; }
+      .no   { fill: #a4262c; }
+    </style>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#7b8794"/>
+    </marker>
+  </defs>
+
+  <!-- Row 1: source -> tag -> registry -->
+  <text class="t hdr" x="24" y="28">The factory: a tag is the unit of publication</text>
+
+  <rect class="box" x="24" y="40" width="212" height="92" rx="6"/>
+  <text class="t lbl" x="40" y="62">modules/storage-baseline</text>
+  <text class="t sm"  x="40" y="82">wraps AVM at an exact pin</text>
+  <text class="t mono" x="40" y="102">avm-res-storage-</text>
+  <text class="t mono" x="40" y="118">storageaccount 0.10.0</text>
+
+  <line class="arrow" x1="238" y1="86" x2="316" y2="86" marker-end="url(#a)"/>
+  <text class="t sm" x="244" y="78">git tag</text>
+
+  <rect class="box" x="318" y="40" width="212" height="92" rx="6"/>
+  <text class="t lbl" x="334" y="62">publish.sh</text>
+  <text class="t mono" x="334" y="84">git archive &lt;tag&gt;:&lt;path&gt;</text>
+  <text class="t sm"  x="334" y="104">never from the working tree</text>
+  <text class="t sm"  x="334" y="122">HCP API, not a VCS hook</text>
+
+  <line class="arrow" x1="532" y1="86" x2="610" y2="86" marker-end="url(#a)"/>
+
+  <rect class="amber" x="612" y="40" width="244" height="92" rx="6"/>
+  <text class="t hdr" x="628" y="62">HCP private registry</text>
+  <text class="t mono" x="628" y="84">storage-baseline 1.0.0</text>
+  <text class="t mono" x="628" y="104">storage-baseline 2.0.0</text>
+  <text class="t sm"  x="628" y="122">immutable once published</text>
+
+  <!-- Row 2: consumers -->
+  <text class="t hdr" x="24" y="176">One configuration, one state file, two majors</text>
+  <rect class="band" x="24" y="188" width="832" height="164" rx="6"/>
+  <text class="t sm" x="40" y="208">rg-wk03-module-factory-dev-scus-001</text>
+
+  <line class="arrow" x1="700" y1="134" x2="700" y2="184" marker-end="url(#a)"/>
+  <text class="t sm" x="708" y="160">version pin</text>
+
+  <rect class="box" x="44" y="220" width="376" height="114" rx="6"/>
+  <text class="t lbl" x="60" y="242">module &#8220;app_a&#8221;  &#8212;  version = &#8220;1.0.0&#8221;</text>
+  <text class="t mono" x="60" y="264">stappadev1f3103</text>
+  <text class="t sm ok"  x="60" y="286">shared keys       enabled</text>
+  <text class="t sm"     x="60" y="306">diagnostics       none (workspace omitted)</text>
+  <text class="t sm"     x="60" y="326">never edited after 2.0.0 landed</text>
+
+  <rect class="box" x="460" y="220" width="376" height="114" rx="6"/>
+  <text class="t lbl" x="476" y="242">module &#8220;app_b&#8221;  &#8212;  version = &#8220;2.0.0&#8221;</text>
+  <text class="t mono" x="476" y="264">stappbdev1f3103</text>
+  <text class="t sm no"  x="476" y="286">shared keys       disabled</text>
+  <text class="t sm"     x="476" y="306">diagnostics       account + blob service</text>
+  <text class="t sm"     x="476" y="326">added later, alongside app_a</text>
+
+  <!-- Row 3: the plan result -->
+  <rect class="box" x="24" y="368" width="832" height="52" rx="6"/>
+  <text class="t lbl" x="40" y="390">Adding app_b changed nothing about app_a</text>
+  <text class="t mono" x="40" y="410">terraform plan  &#8594;  module.app_a changes in this plan: 0</text>
+
+  <!-- Row 4: the two breaks -->
+  <text class="t hdr" x="24" y="456">What a major version does to a caller who does not move</text>
+
+  <rect class="red" x="24" y="468" width="406" height="120" rx="6"/>
+  <text class="t hdr" x="40" y="490">LOUD  &#8212;  a required input</text>
+  <text class="t sm"  x="40" y="510">log_analytics_workspace_id becomes required</text>
+  <text class="t mono" x="40" y="534">Error: Missing required argument</text>
+  <text class="t sm"  x="40" y="556">Fails at plan. Nothing deploys.</text>
+  <text class="t sm"  x="40" y="576">You find out immediately.</text>
+
+  <rect class="red" x="450" y="468" width="406" height="120" rx="6"/>
+  <text class="t hdr" x="466" y="490">SILENT  &#8212;  a flipped default</text>
+  <text class="t sm"  x="466" y="510">shared_access_key_enabled  true &#8594; false</text>
+  <text class="t sm"  x="466" y="534">No plan error. No apply error.</text>
+  <text class="t sm"  x="466" y="556">The call site never mentions the setting.</text>
+  <text class="t sm no" x="466" y="576">Breaks at runtime, in whatever used a key.</text>
+
+  <text class="t sm" x="24" y="614">The pin is what separates these two outcomes from a third: the module changing underneath a caller who never asked for either.</text>
+  <text class="t sm" x="24" y="634">A relative path has no version, so every consumer is on HEAD &#8212; and &#8220;which version is app_a running&#8221; has no answer.</text>
+</svg>

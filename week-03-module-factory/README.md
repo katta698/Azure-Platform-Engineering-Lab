@@ -24,6 +24,10 @@ resource above. It deliberately **keeps** the published registry versions unless
 given `--registry`: unpublishing a version breaks every configuration pinned to
 it, which is the opposite of the property this week exists to demonstrate.
 
+## How it fits together
+
+![Week 3 architecture](docs/blog/diagrams/week-03-architecture.svg)
+
 ## The design
 
 ### Consume AVM, wrap it in this lab's own module
@@ -119,9 +123,9 @@ the module version and to nothing else.
 
 | | |
 | --- | --- |
-| ![Both accounts deployed](docs/blog/screenshots/02-both-accounts-deployed.png) | The resource group: two storage accounts from one module at two majors, plus the workspace |
-| ![Shared keys enabled on 1.0.0](docs/blog/screenshots/03-v1-shared-key-enabled.png) | `stappadev1f3103`, built from 1.0.0 — **Allow storage account key access: Enabled** |
-| ![Shared keys disabled on 2.0.0](docs/blog/screenshots/04-v2-shared-key-disabled.png) | `stappbdev1f3103`, built from 2.0.0 — **Disabled**. Every other setting on the blade is identical |
+| ![Both accounts deployed](docs/blog/screenshots/01-both-accounts-deployed.png) | The resource group: two storage accounts from one module at two majors, plus the workspace |
+| ![Shared keys enabled on 1.0.0](docs/blog/screenshots/02-v1-shared-key-enabled.png) | `stappadev1f3103`, built from 1.0.0 — **Allow storage account key access: Enabled** |
+| ![Shared keys disabled on 2.0.0](docs/blog/screenshots/03-v2-shared-key-disabled.png) | `stappbdev1f3103`, built from 2.0.0 — **Disabled**. Every other setting on the blade is identical |
 
 ## Running it
 
@@ -138,6 +142,33 @@ the module version and to nothing else.
 installs every module a configuration refers to before it evaluates what any
 count is, so 2.0.0 has to exist in the registry before stage v1 can initialise
 at all.
+
+## Teardown
+
+Two kinds of thing were created and only one of them should go.
+
+- **The consumers** — the resource group, the workspace, the two storage
+  accounts and the four diagnostic settings. They cost money and prove nothing
+  further once the measurements are taken. Deleted.
+- **The registry versions** — `storage-baseline` 1.0.0 and 2.0.0. **Kept.**
+
+Keeping the versions is not laziness. They cost nothing, they are the week's
+actual output, and deleting a published version is the one destructive act a
+module registry does not forgive: every configuration pinned to it stops
+initialising, including configurations owned by people who were never asked.
+`scripts/cleanup.sh --registry` removes them, and the flag exists so that
+removal is always a deliberate sentence someone typed.
+
+There is an asymmetry worth noticing here. The Azure side of this week is
+disposable and was designed to be. The registry side is not, because other
+people's code can depend on it — which is the same property that made the pin
+meaningful in the first place, seen from the publisher's end.
+
+Run for real on 2026-09-03. `az group list` against `sub-lab-dev` afterwards
+returns only `NetworkWatcherRG`, which Azure creates by itself in any
+subscription where a virtual network has existed and which is not drift. The
+registry was queried after the destroy: 1.0.0 and 2.0.0 both still present at
+status `ok`.
 
 ## What this cost in surprises
 
