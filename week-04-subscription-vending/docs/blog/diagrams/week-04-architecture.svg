@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 700" width="880" height="700" role="img" aria-label="Week 4 subscription vending: four operations across three APIs, the two stages, and the decommission path">
+  <defs>
+    <style>
+      .t    { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+      .hdr  { font-size: 13px; font-weight: 700; fill: #1f2933; }
+      .lbl  { font-size: 12px; fill: #1f2933; }
+      .sm   { font-size: 11px; fill: #52606d; }
+      .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; fill: #1f2933; }
+      .box  { fill: #ffffff; stroke: #c3cbd5; stroke-width: 1.2; }
+      .band { fill: #f5f7fa; stroke: #dbe1e8; stroke-width: 1; }
+      .amber{ fill: #fdf6e3; stroke: #e0c068; stroke-width: 1.2; }
+      .red  { fill: #fdf1f1; stroke: #d9a2a2; stroke-width: 1.2; }
+      .arrow{ stroke: #7b8794; stroke-width: 1.4; fill: none; }
+      .no   { fill: #a4262c; }
+      .ok   { fill: #1b6e3c; }
+    </style>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#7b8794"/>
+    </marker>
+  </defs>
+
+  <!-- Row 1: the request -->
+  <text class="t hdr" x="24" y="28">Vending is four operations across three APIs, not one</text>
+
+  <rect class="box" x="24" y="40" width="160" height="72" rx="6"/>
+  <text class="t lbl" x="40" y="64">the request</text>
+  <text class="t sm"  x="40" y="84">landing zone name,</text>
+  <text class="t sm"  x="40" y="100">owner, budget</text>
+
+  <line class="arrow" x1="186" y1="76" x2="238" y2="76" marker-end="url(#a)"/>
+
+  <rect class="amber" x="240" y="40" width="180" height="72" rx="6"/>
+  <text class="t hdr" x="256" y="64">1. create</text>
+  <text class="t sm"  x="256" y="84">Subscription Alias API</text>
+  <text class="t sm"  x="256" y="100">tenant-level &#183; irreversible</text>
+
+  <line class="arrow" x1="422" y1="76" x2="468" y2="76" marker-end="url(#a)"/>
+
+  <rect class="amber" x="470" y="40" width="180" height="72" rx="6"/>
+  <text class="t hdr" x="486" y="64">2. place</text>
+  <text class="t sm"  x="486" y="84">Management Groups API</text>
+  <text class="t sm no" x="486" y="100">a SEPARATE call</text>
+
+  <line class="arrow" x1="652" y1="76" x2="698" y2="76" marker-end="url(#a)"/>
+
+  <rect class="box" x="700" y="40" width="156" height="72" rx="6"/>
+  <text class="t hdr" x="716" y="64">3. budget</text>
+  <text class="t hdr" x="716" y="88">4. grant</text>
+  <text class="t sm"  x="716" y="104">Consumption &#183; RBAC</text>
+
+  <text class="t sm" x="240" y="134">The alias API creates every subscription under the Tenant Root Group and does not move it. Create without place and you get a</text>
+  <text class="t sm" x="240" y="150">subscription that is billed, healthy and inherits nothing &#8212; visible only when something that should have been stopped is not.</text>
+
+  <!-- Row 2: the two stages -->
+  <text class="t hdr" x="24" y="196">One payload, two stages</text>
+  <rect class="band" x="24" y="208" width="832" height="150" rx="6"/>
+
+  <rect class="box" x="44" y="228" width="376" height="112" rx="6"/>
+  <text class="t lbl" x="60" y="250">deploy.sh config   &#8212;  the repeatable one</text>
+  <text class="t sm"  x="60" y="272">vends onto a subscription that already exists</text>
+  <text class="t sm"  x="60" y="292">steps 2, 3, 4. No alias call.</text>
+  <text class="t sm ok" x="60" y="316">tears down completely</text>
+
+  <rect class="box" x="460" y="228" width="376" height="112" rx="6"/>
+  <text class="t lbl" x="476" y="250">deploy.sh vend   &#8212;  the one-way one</text>
+  <text class="t sm"  x="476" y="272">creates a subscription, then does 2, 3, 4</text>
+  <text class="t mono" x="476" y="292">alias created in 2m16s</text>
+  <text class="t sm no" x="476" y="316">cannot be deleted today</text>
+
+  <!-- Row 3: the lifecycle problem -->
+  <text class="t hdr" x="24" y="396">Why teardown is the hard half</text>
+
+  <rect class="red" x="24" y="408" width="832" height="96" rx="6"/>
+  <text class="t lbl" x="44" y="432">A vended subscription is the one object this lab can create and cannot delete.</text>
+  <text class="t sm"  x="44" y="456">cancel  &#8594;  billing stops immediately</text>
+  <text class="t sm"  x="44" y="476">delete  &#8594;  the option does not appear for 3 DAYS; Azure removes it automatically after 90</text>
+  <text class="t sm"  x="44" y="496">so &#8220;cleanup&#8221; for a subscription means decommission, not delete</text>
+
+  <!-- Row 4: decommission path -->
+  <text class="t hdr" x="24" y="542">Decommission, in the order that matters</text>
+
+  <rect class="box" x="24" y="554" width="250" height="76" rx="6"/>
+  <text class="t lbl" x="40" y="578">1. move</text>
+  <text class="t sm"  x="40" y="598">to mg-decommissioned</text>
+  <text class="t sm"  x="40" y="616">while it still accepts writes</text>
+
+  <line class="arrow" x1="276" y1="592" x2="318" y2="592" marker-end="url(#a)"/>
+
+  <rect class="amber" x="320" y="554" width="266" height="76" rx="6"/>
+  <text class="t lbl" x="336" y="578">2. prove the deny</text>
+  <text class="t sm"  x="336" y="598">attempt a deployment there</text>
+  <text class="t sm"  x="336" y="616">the deny-all should refuse it</text>
+
+  <line class="arrow" x1="588" y1="592" x2="630" y2="592" marker-end="url(#a)"/>
+
+  <rect class="box" x="632" y="554" width="224" height="76" rx="6"/>
+  <text class="t lbl" x="648" y="578">3. cancel</text>
+  <text class="t sm"  x="648" y="598">billing stops immediately</text>
+  <text class="t sm"  x="648" y="616">the object remains</text>
+
+  <text class="t sm" x="24" y="656">Move before cancel: a cancelled subscription is read-only, so the move has to happen while writes are still accepted. The move is</text>
+  <text class="t sm" x="24" y="674">also the actual control &#8212; a subscription left in the landing zone tree with &#8220;we will cancel it next week&#8221; attached is one somebody deploys into.</text>
+</svg>

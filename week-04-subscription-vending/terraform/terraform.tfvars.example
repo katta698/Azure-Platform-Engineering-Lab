@@ -1,0 +1,25 @@
+# Copy to terraform.tfvars and fill in. terraform.tfvars is gitignored.
+#
+# Every value below is an identifier this repo does not publish. The billing
+# names come from the bootstrap's own tfvars; the principal ID is an Entra
+# object ID. `scripts/secret-sweep.sh` checks that none of them reach a commit.
+
+tenant_id       = "00000000-0000-0000-0000-000000000000"
+subscription_id = "00000000-0000-0000-0000-000000000000" # sub-lab-dev, what the providers authenticate as
+
+# The subscription the configuration-only stage vends onto. Normally the same
+# value as subscription_id.
+existing_subscription_id = "00000000-0000-0000-0000-000000000000"
+
+# ── Billing scope for the alias call ────────────────────────────────────────
+# Three names, assembled into one resource ID by the configuration. All three
+# come from `terraform/bootstrap/terraform.tfvars`.
+billing_account_name = "00000000-0000-0000-0000-000000000000:00000000-0000-0000-0000-000000000000_2019-05-31"
+billing_profile_name = "XXXX-XXXX-XXX-XXX"
+invoice_section_name = "XXXX-XXXX-XXX-XXX"
+
+# ── What vending hands over ─────────────────────────────────────────────────
+budget_alert_emails         = ["you@example.com"]
+role_assignment_principal_id = "00000000-0000-0000-0000-000000000000" # object ID, not a UPN
+
+location = "southcentralus"

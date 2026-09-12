@@ -343,6 +343,8 @@ def main() -> None:
     ap.add_argument("--wait-ms", type=int, default=9000, help="Settle time after load")
     ap.add_argument("--width", type=int, default=1500)
     ap.add_argument("--height", type=int, default=950)
+    ap.add_argument("--scale", type=int, default=2,
+                    help="Device scale factor. Integer only - fractional scaling blurs text.")
     ap.add_argument("--goto-timeout", type=int, default=90000)
     ap.add_argument("--expand-tree", action="store_true")
     ap.add_argument("--expect", default="", help="Text that must be visible before saving")
@@ -368,6 +370,19 @@ def main() -> None:
             str(PROFILE),
             headless=False,
             viewport={"width": args.width, "height": args.height},
+            # Pinned, and pinned to an INTEGER.
+            #
+            # Left unset, Chromium inherits the display scaling of whatever
+            # monitor the session happens to run on. Weeks 01-03 were captured
+            # at 1.5x (2250x1425) and week 04 at 2.0x (3000x1900) from the same
+            # script, with nothing in the repo recording why. Fractional scaling
+            # is what makes portal text look soft: glyphs are rasterised onto
+            # fractional pixel boundaries. An integer factor re-renders cleanly.
+            #
+            # It also makes the output reproducible - the same command produces
+            # the same pixels on any machine, which a screenshot that ships in a
+            # published post ought to.
+            device_scale_factor=args.scale,
             args=["--start-maximized"],
         )
         # A session cookie lifted from another browser, injected as plaintext.
