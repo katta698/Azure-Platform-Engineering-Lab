@@ -1,0 +1,12 @@
+# Copy to terraform.tfvars and fill in. terraform.tfvars is gitignored.
+
+tenant_id                    = "00000000-0000-0000-0000-000000000000"
+connectivity_subscription_id = "00000000-0000-0000-0000-000000000000" # sub-connectivity — the hub
+spoke_subscription_id        = "00000000-0000-0000-0000-000000000000" # sub-lab-dev — the spoke
+
+location = "southcentralus"
+
+# The firewall is the only billable thing here. Left false, this week deploys
+# the permanent layer only and costs approximately nothing.
+deploy_firewall   = false
+firewall_sku_tier = "Basic"

@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 700" width="900" height="700" role="img" aria-label="Week 5 hub network: a permanent free layer of hub VNet, spoke, peerings and private DNS estate, and a disposable billable layer of Azure Firewall Basic with its mandatory management NIC">
+  <defs>
+    <style>
+      .t    { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+      .hdr  { font-size: 13px; font-weight: 700; fill: #1f2933; }
+      .lbl  { font-size: 12px; fill: #1f2933; }
+      .sm   { font-size: 11px; fill: #52606d; }
+      .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; fill: #1f2933; }
+      .box  { fill: #ffffff; stroke: #c3cbd5; stroke-width: 1.2; }
+      .free { fill: #f2f9f4; stroke: #8fbf9f; stroke-width: 1.2; }
+      .bill { fill: #fdf1f1; stroke: #d9a2a2; stroke-width: 1.4; }
+      .band { fill: #f5f7fa; stroke: #dbe1e8; stroke-width: 1; }
+      .arrow{ stroke: #7b8794; stroke-width: 1.4; fill: none; }
+      .ok   { fill: #1b6e3c; }
+      .no   { fill: #a4262c; }
+    </style>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#7b8794"/>
+    </marker>
+  </defs>
+
+  <text class="t hdr" x="24" y="26">Two layers, split by what they cost</text>
+
+  <!-- PERMANENT LAYER -->
+  <rect class="free" x="24" y="38" width="852" height="286" rx="8"/>
+  <text class="t hdr ok" x="42" y="60">PERMANENT &#183; ~$0/hour &#183; weeks 06+ attach to this</text>
+
+  <!-- hub -->
+  <rect class="box" x="42" y="74" width="390" height="150" rx="6"/>
+  <text class="t lbl" x="58" y="96">sub-connectivity</text>
+  <text class="t mono" x="58" y="116">vnet-hub  10.0.0.0/16</text>
+  <rect class="box" x="58" y="128" width="356" height="34" rx="4"/>
+  <text class="t mono" x="72" y="150">AzureFirewallSubnet          10.0.0.0/26</text>
+  <rect class="box" x="58" y="170" width="356" height="40" rx="4"/>
+  <text class="t mono" x="72" y="188">AzureFirewallManagementSubnet 10.0.0.64/26</text>
+  <text class="t sm no" x="72" y="204">created always &#8212; Basic mandates it</text>
+
+  <!-- spoke -->
+  <rect class="box" x="468" y="74" width="390" height="150" rx="6"/>
+  <text class="t lbl" x="484" y="96">sub-lab-dev</text>
+  <text class="t mono" x="484" y="116">vnet-spoke  10.1.0.0/16</text>
+  <rect class="box" x="484" y="128" width="356" height="34" rx="4"/>
+  <text class="t mono" x="498" y="150">snet-workload   10.1.0.0/24</text>
+  <rect class="box" x="484" y="170" width="356" height="40" rx="4"/>
+  <text class="t mono" x="498" y="188">rt-spoke  (route table)</text>
+  <text class="t sm" x="498" y="204">0.0.0.0/0 route added only with a firewall</text>
+
+  <!-- peering -->
+  <line class="arrow" x1="434" y1="130" x2="466" y2="130" marker-end="url(#a)"/>
+  <line class="arrow" x1="466" y1="146" x2="434" y2="146" marker-end="url(#a)"/>
+  <text class="t sm" x="404" y="250">two peering resources, one per side &#8212; one alone reports Initiated and carries nothing</text>
+
+  <!-- dns -->
+  <rect class="box" x="42" y="238" width="816" height="70" rx="6"/>
+  <text class="t lbl" x="58" y="260">private DNS estate &#8212; 6 zones in the hub, each linked to BOTH virtual networks</text>
+  <text class="t mono" x="58" y="280">privatelink.blob.core.windows.net &#183; .file &#183; .vaultcore.azure.net &#183; .database.windows.net &#183; .azurecr.io &#183; .monitor</text>
+  <text class="t sm no" x="58" y="298">linked to the hub only: the spoke resolves the PUBLIC ip and fails closed later, looking like a firewall fault</text>
+
+  <!-- BILLABLE LAYER -->
+  <rect class="bill" x="24" y="340" width="852" height="212" rx="8"/>
+  <text class="t hdr no" x="42" y="362">BILLABLE &#183; $0.405/hour on Basic &#183; ~$296/month &#183; deployed deliberately, destroyed same day</text>
+
+  <rect class="box" x="42" y="376" width="404" height="120" rx="6"/>
+  <text class="t lbl" x="58" y="398">Azure Firewall Basic</text>
+  <text class="t mono" x="58" y="420">ip_configuration          &#8594; data pip     $0.005/hr</text>
+  <text class="t mono" x="58" y="440">management_ip_configuration &#8594; mgmt pip   $0.005/hr</text>
+  <text class="t mono" x="58" y="460">deployment                              $0.395/hr</text>
+  <text class="t sm" x="58" y="482">no DNS proxy &#183; no network FQDN rules &#183; 250 Mbps</text>
+
+  <rect class="box" x="472" y="376" width="386" height="120" rx="6"/>
+  <text class="t lbl" x="488" y="398">Firewall policy hierarchy</text>
+  <rect class="box" x="488" y="410" width="354" height="32" rx="4"/>
+  <text class="t mono" x="502" y="431">afwp-platform-baseline   (parent)</text>
+  <line class="arrow" x1="510" y1="444" x2="510" y2="456" marker-end="url(#a)"/>
+  <rect class="box" x="488" y="458" width="354" height="32" rx="4"/>
+  <text class="t mono" x="502" y="479">afwp-lz-dev   base_policy_id &#8594; parent</text>
+
+  <text class="t sm" x="42" y="520">Policy tier must MATCH the firewall tier. The child inherits the parent's rule collection groups and is evaluated after them,</text>
+  <text class="t sm" x="42" y="538">so a landing zone can add rules and cannot remove the platform's &#8212; which is the only reason to run two policies.</text>
+
+  <!-- the switch -->
+  <rect class="band" x="24" y="568" width="852" height="112" rx="6"/>
+  <text class="t hdr" x="42" y="590">One variable separates them</text>
+  <text class="t mono" x="42" y="614">deploy.sh hub        deploy_firewall = false   &#8594;  permanent layer only</text>
+  <text class="t mono" x="42" y="634">deploy.sh firewall   deploy_firewall = true    &#8594;  + firewall, + route</text>
+  <text class="t mono" x="42" y="654">cleanup.sh           back to false             &#8594;  firewall and route removed together</text>
+  <text class="t sm" x="42" y="672">The route is gated on the same variable, so the spoke never keeps a default route to a next hop that stopped existing.</text>
+</svg>
