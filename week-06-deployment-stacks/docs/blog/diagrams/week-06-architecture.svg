@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 640" width="900" height="640" role="img" aria-label="Week 6 deployment stacks: a control storage account built by Terraform in sub-lab-dev with no protection, and a protected storage account owned by a deployment stack scoped at mg-lz-dev whose deny assignment refuses a delete from an Owner">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 680" width="900" height="680" role="img" aria-label="Week 6 deployment stacks. One caller holding Owner and User Access Administrator attempts to delete two identical storage accounts in sub-lab-dev. The control, built by Terraform, deletes successfully. The protected one, owned by a deployment stack scoped at the mg-lz-dev management group with denyWriteAndDelete, is refused by a deny assignment.">
   <defs>
     <style>
       .t    { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
@@ -10,74 +10,74 @@
       .free { fill: #f2f9f4; stroke: #8fbf9f; stroke-width: 1.2; }
       .bill { fill: #fdf1f1; stroke: #d9a2a2; stroke-width: 1.4; }
       .band { fill: #f5f7fa; stroke: #dbe1e8; stroke-width: 1; }
-      .arrow{ stroke: #7b8794; stroke-width: 1.4; fill: none; }
       .deny { stroke: #a4262c; stroke-width: 1.8; fill: none; }
       .ok   { fill: #1b6e3c; }
       .no   { fill: #a4262c; }
     </style>
-    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M0,0 L10,5 L0,10 z" fill="#7b8794"/>
-    </marker>
     <marker id="r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M0,0 L10,5 L0,10 z" fill="#a4262c"/>
     </marker>
   </defs>
 
-  <text class="t hdr" x="24" y="26">Same Owner, same subscription, same SKU. One delete is refused.</text>
+  <!-- Opaque background. Without it the labels that sit outside a box are dark
+       grey on whatever the page is, and vanish entirely in dark mode. -->
+  <rect x="0" y="0" width="900" height="680" fill="#ffffff"/>
+
+  <text class="t hdr" x="24" y="28">Same Owner, same subscription, same SKU. One delete is refused.</text>
 
   <!-- CALLER -->
-  <rect class="band" x="24" y="40" width="852" height="58" rx="8"/>
-  <text class="t hdr" x="42" y="64">THE CALLER</text>
-  <text class="t sm" x="42" y="84">one signed-in user, holding <tspan class="mono">Owner</tspan> + <tspan class="mono">User Access Administrator</tspan> on sub-lab-dev &#183; both deletes attempted with the same identity</text>
+  <rect class="band" x="24" y="42" width="852" height="62" rx="8"/>
+  <text class="t hdr" x="42" y="66">THE CALLER</text>
+  <text class="t sm" x="42" y="88">one signed-in user, holding <tspan class="mono">Owner</tspan> + <tspan class="mono">User Access Administrator</tspan> on sub-lab-dev &#183; both deletes attempted with the same identity</text>
 
-  <!-- SCOPE BAND: management group -->
-  <rect class="band" x="24" y="112" width="852" height="94" rx="8"/>
-  <text class="t hdr" x="42" y="136">mg-lz-dev &#8212; MANAGEMENT GROUP SCOPE</text>
-  <rect class="bill" x="42" y="146" width="380" height="46" rx="6"/>
-  <text class="t lbl" x="58" y="166">deployment stack <tspan class="mono">stack-wk06-protected</tspan></text>
-  <text class="t sm" x="58" y="183"><tspan class="mono">denySettingsMode: denyWriteAndDelete</tspan></text>
-  <text class="t sm" x="440" y="166">The stack lives ABOVE the subscription on purpose.</text>
-  <text class="t sm" x="440" y="183">A Contributor on sub-lab-dev cannot reach it to lift its own restriction.</text>
+  <!-- MANAGEMENT GROUP -->
+  <rect class="band" x="24" y="116" width="852" height="96" rx="8"/>
+  <text class="t hdr" x="42" y="140">mg-lz-dev &#8212; MANAGEMENT GROUP SCOPE</text>
+  <rect class="bill" x="42" y="150" width="380" height="48" rx="6"/>
+  <text class="t lbl" x="58" y="172">deployment stack <tspan class="mono">stack-wk06-protected</tspan></text>
+  <text class="t sm" x="58" y="190"><tspan class="mono">denySettingsMode: denyWriteAndDelete</tspan></text>
+  <text class="t sm" x="446" y="172">The stack lives ABOVE the subscription on purpose.</text>
+  <text class="t sm" x="446" y="190">A Contributor on sub-lab-dev cannot reach it to lift its own restriction.</text>
 
   <!-- SUBSCRIPTION -->
-  <rect class="band" x="24" y="220" width="852" height="300" rx="8"/>
-  <text class="t hdr" x="42" y="244">sub-lab-dev &#8212; both halves deploy here</text>
+  <rect class="band" x="24" y="232" width="852" height="286" rx="8"/>
+  <text class="t hdr" x="42" y="256">sub-lab-dev &#8212; both halves deploy here</text>
+
+  <!-- The one arrow in the diagram: the stack's deny reaching the protected
+       half. Drawn AFTER the band it crosses, because the band's fill would
+       otherwise paint over it. Routed as an elbow down a clear corridor, with
+       its label set BESIDE the line rather than across the arrowhead. -->
+  <path class="deny" d="M 232 198 L 232 218 L 663 218 L 663 262" marker-end="url(#r)"/>
+  <text class="t sm no" x="676" y="250">deny assignment</text>
 
   <!-- control -->
-  <rect class="free" x="42" y="258" width="390" height="230" rx="6"/>
-  <text class="t hdr ok" x="60" y="282">CONTROL &#183; no protection</text>
-  <text class="t sm" x="60" y="302">built by Terraform, state in HCP</text>
-  <rect class="box" x="60" y="314" width="354" height="60" rx="6"/>
-  <text class="t lbl" x="76" y="336"><tspan class="mono">rg-wk06-control-dev-scus-001</tspan></text>
-  <text class="t sm" x="76" y="356">storage account &#183; Standard_LRS &#183; StorageV2 &#183; TLS1_2</text>
-  <text class="t lbl ok" x="60" y="400">delete attempted &#8594; <tspan class="hdr">SUCCEEDS</tspan></text>
-  <text class="t sm" x="60" y="420">This is the half that makes the other half mean something.</text>
-  <text class="t sm" x="60" y="438">Without it, &#8220;the delete failed&#8221; has more than one</text>
-  <text class="t sm" x="60" y="456">explanation. Terraform re-creates it on the next apply.</text>
+  <rect class="free" x="42" y="268" width="390" height="236" rx="6"/>
+  <text class="t hdr ok" x="60" y="292">CONTROL &#183; no protection</text>
+  <text class="t sm" x="60" y="312">built by Terraform, state in HCP</text>
+  <rect class="box" x="60" y="324" width="354" height="60" rx="6"/>
+  <text class="t lbl" x="76" y="346"><tspan class="mono">rg-wk06-control-dev-scus-001</tspan></text>
+  <text class="t sm" x="76" y="368">storage account &#183; Standard_LRS &#183; StorageV2 &#183; TLS1_2</text>
+  <text class="t lbl ok" x="60" y="410">delete attempted &#8594; <tspan class="hdr ok">SUCCEEDS</tspan></text>
+  <text class="t sm" x="60" y="434">This is the half that makes the other half mean something.</text>
+  <text class="t sm" x="60" y="454">Without it, &#8220;the delete failed&#8221; has more than one</text>
+  <text class="t sm" x="60" y="474">explanation. Terraform re-creates it on the next apply.</text>
 
   <!-- protected -->
-  <rect class="bill" x="468" y="258" width="390" height="230" rx="6"/>
-  <text class="t hdr no" x="486" y="282">PROTECTED &#183; owned by the stack</text>
-  <text class="t sm" x="486" y="302">deployed from ARM JSON by <tspan class="mono">az stack mg create</tspan></text>
-  <rect class="box" x="486" y="314" width="354" height="60" rx="6"/>
-  <text class="t lbl" x="502" y="336"><tspan class="mono">rg-wk06-protected-dev-scus-001</tspan></text>
-  <text class="t sm" x="502" y="356">storage account &#183; identical configuration to the control</text>
-  <text class="t lbl no" x="486" y="400">delete attempted &#8594; <tspan class="hdr">REFUSED</tspan></text>
-  <text class="t sm" x="486" y="420"><tspan class="mono">DenyAssignmentAuthorizationFailed</tspan></text>
-  <text class="t sm" x="486" y="438">&#8220;...has permission to perform action</text>
-  <text class="t sm" x="486" y="456"><tspan class="mono">Microsoft.Storage/storageAccounts/delete</tspan>&#8221; &#8212; and still cannot.</text>
-
-  <!-- deny arrow from stack down to protected -->
-  <path class="deny" d="M 232 192 L 232 214" marker-end="url(#r)" transform="translate(431,0)"/>
-  <text class="t sm no" x="676" y="212" text-anchor="middle">deny assignment</text>
-
-  <!-- caller arrows -->
-  <path class="arrow" d="M 237 98 L 237 254" marker-end="url(#a)"/>
-  <path class="arrow" d="M 663 98 L 663 146" marker-end="url(#a)"/>
+  <rect class="bill" x="468" y="268" width="390" height="236" rx="6"/>
+  <text class="t hdr no" x="486" y="292">PROTECTED &#183; owned by the stack</text>
+  <text class="t sm" x="486" y="312">deployed from ARM JSON by <tspan class="mono">az stack mg create</tspan></text>
+  <rect class="box" x="486" y="324" width="354" height="60" rx="6"/>
+  <text class="t lbl" x="502" y="346"><tspan class="mono">rg-wk06-protected-dev-scus-001</tspan></text>
+  <text class="t sm" x="502" y="368">storage account &#183; identical configuration to the control</text>
+  <text class="t lbl no" x="486" y="410">delete attempted &#8594; <tspan class="hdr no">REFUSED</tspan></text>
+  <text class="t mono" x="486" y="434">DenyAssignmentAuthorizationFailed</text>
+  <text class="t sm" x="486" y="454">&#8220;...has permission to perform action</text>
+  <text class="t sm" x="486" y="474"><tspan class="mono">Microsoft.Storage/storageAccounts/delete</tspan>&#8221; &#8212; and still cannot.</text>
 
   <!-- TEARDOWN -->
-  <rect class="band" x="24" y="534" width="852" height="82" rx="8"/>
-  <text class="t hdr" x="42" y="558">TEARDOWN &#8212; the protected half is removed by deleting the STACK, never the resource</text>
-  <text class="t mono" x="42" y="580">az stack mg delete --action-on-unmanage deleteAll</text>
-  <text class="t sm no" x="42" y="600">The default is <tspan class="mono">detach</tspan>: omit the flag and every resource keeps running, untracked and unowned, while the command reports success.</text>
+  <rect class="band" x="24" y="546" width="852" height="106" rx="8"/>
+  <text class="t hdr" x="42" y="572">TEARDOWN &#8212; the protected half is removed by deleting the STACK, never the resource</text>
+  <text class="t mono" x="42" y="598">az stack mg delete --action-on-unmanage deleteAll</text>
+  <text class="t sm no" x="42" y="622">The default is <tspan class="mono no">detach</tspan>: omit the flag and every resource keeps running,</text>
+  <text class="t sm no" x="42" y="640">untracked and unowned, while the command reports success.</text>
 </svg>
