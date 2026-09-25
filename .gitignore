@@ -53,6 +53,15 @@ Thumbs.db
 
 # Playwright profile — holds a live Azure portal session
 scripts/screenshots/playwright_profile/
+# One profile per browser channel: playwright_profile_msedge, _chrome.
+# The bare pattern above does not match them, and a browser profile holds
+# live session cookies.
+playwright_profile_*/
+scripts/screenshots/playwright_profile_*/
 
 # Session cookie lifted from another browser for screenshot capture. Never commit.
 scripts/screenshots/.session-cookie
+
+# Runtime marker: the generated storage account name deploy.sh hands to
+# validate.sh. Regenerated on every deploy, meaningless to anyone else.
+.protected-storage-account

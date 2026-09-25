@@ -1,0 +1,100 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2018-05-01/subscriptionDeploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "metadata": {
+    "_comment": [
+      "The template a deployment stack deploys, and the only part of this week that",
+      "is not Terraform.",
+      "",
+      "Deployment stacks have no Terraform resource. Checked 2026-09-20 against the",
+      "azurerm provider's own documentation tree: there are *_template_deployment",
+      "resources, and nothing for Microsoft.Resources/deploymentStacks. Microsoft's",
+      "guidance says as much - 'To create and update a deployment stack, use the",
+      "Azure CLI, Azure PowerShell, or the Azure portal with Bicep files.'",
+      "",
+      "SUBSCRIPTION-scoped, because a stack at management group scope deploys INTO a",
+      "subscription. That is also why it creates its own resource group: the stack",
+      "must own everything it protects, and a resource group created by Terraform",
+      "would have two owners and an ambiguous teardown.",
+      "",
+      "ARM JSON rather than Bicep deliberately - it needs no extra toolchain, and it",
+      "is what Bicep compiles to before the stack ever sees it."
+    ],
+    "_armNote": "ARM rejects a top-level '//' member with InvalidRequestContent: \"Could not find member '//' on object of type 'Template'\". Commentary belongs in metadata, which is a schema member."
+  },
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "southcentralus"
+    },
+    "resourceGroupName": {
+      "type": "string",
+      "defaultValue": "rg-wk06-protected-dev-scus-001"
+    },
+    "storageAccountName": {
+      "type": "string",
+      "metadata": {
+        "description": "Globally unique. Passed in rather than derived, so the same name is used by the deploy and by the checks that try to delete it."
+      }
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/resourceGroups",
+      "apiVersion": "2021-04-01",
+      "name": "[parameters('resourceGroupName')]",
+      "location": "[parameters('location')]",
+      "tags": {
+        "week": "06",
+        "env": "dev",
+        "managed-by": "deployment-stack",
+        "cost-center": "platform-lab"
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2021-04-01",
+      "name": "protected-storage",
+      "resourceGroup": "[parameters('resourceGroupName')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Resources/resourceGroups', parameters('resourceGroupName'))]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "resources": [
+            {
+              "type": "Microsoft.Storage/storageAccounts",
+              "apiVersion": "2023-05-01",
+              "name": "[parameters('storageAccountName')]",
+              "location": "[parameters('location')]",
+              "sku": {
+                "name": "Standard_LRS"
+              },
+              "kind": "StorageV2",
+              "properties": {
+                "minimumTlsVersion": "TLS1_2",
+                "supportsHttpsTrafficOnly": true,
+                "allowBlobPublicAccess": false
+              },
+              "tags": {
+                "week": "06",
+                "env": "dev",
+                "managed-by": "deployment-stack",
+                "cost-center": "platform-lab"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "protectedStorageAccount": {
+      "type": "string",
+      "value": "[parameters('storageAccountName')]"
+    }
+  }
+}

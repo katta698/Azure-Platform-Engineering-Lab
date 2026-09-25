@@ -36,6 +36,7 @@ history or in this file:
 import argparse
 import base64
 import os
+import json
 import sys
 from pathlib import Path
 from urllib.parse import urlparse
@@ -333,6 +334,11 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("url", nargs="?")
     ap.add_argument("output_path", nargs="?")
+    # Sites whose auth token is memory-only can only be captured in the
+    # session that signed in, so every shot from such a site has to happen
+    # in one run. --also adds a target to that same run.
+    ap.add_argument("--also", nargs=2, action="append", metavar=("URL", "PATH"),
+                    default=[], help="Capture another url/path in the same session")
     ap.add_argument("--login", action="store_true", help="Open a site and wait while you sign in.")
     ap.add_argument(
         "--login-url",
@@ -351,6 +357,20 @@ def main() -> None:
     ap.add_argument("--click-text", default="", help="Click this text before capturing (e.g. a tab)")
     ap.add_argument("--click-wait-ms", type=int, default=6000)
     ap.add_argument("--login-timeout", type=int, default=300, help="Seconds to wait for sign-in")
+    # A memory-only session cookie is lost when the window closes, which also
+    # means it is lost to any mistake made during the capture. Writing the
+    # cookies out the instant sign-in is detected turns one sign-in into as
+    # many retries as the session lasts. Keep the file OUT of the repo: it is
+    # a bearer credential.
+    # Chromium for Testing is a separate install from whatever browser the
+    # machine normally runs, and it can be broken on its own. Edge ships with
+    # Windows and shares the engine, so it is the fallback that needs no
+    # download. Each channel keeps its OWN profile directory: a sign-in in one
+    # is not a sign-in in another.
+    ap.add_argument("--browser", choices=["chromium", "msedge", "chrome"], default="chromium",
+                    help="Which browser to drive")
+    ap.add_argument("--save-session", default="", help="Write cookies here once signed in")
+    ap.add_argument("--load-session", default="", help="Replay cookies written by --save-session")
     ap.add_argument(
         "--cookie-file",
         default="",
@@ -366,9 +386,15 @@ def main() -> None:
     PROFILE.mkdir(parents=True, exist_ok=True)
 
     with sync_playwright() as pw:
+        profile_dir = PROFILE if args.browser == "chromium" else PROFILE.with_name(
+            f"{PROFILE.name}_{args.browser}"
+        )
+        profile_dir.mkdir(parents=True, exist_ok=True)
+
         context = pw.chromium.launch_persistent_context(
-            str(PROFILE),
+            str(profile_dir),
             headless=False,
+            **({} if args.browser == "chromium" else {"channel": args.browser}),
             viewport={"width": args.width, "height": args.height},
             # Pinned, and pinned to an INTEGER.
             #
@@ -415,6 +441,11 @@ def main() -> None:
             }])
             print(f"Injected 1 cookie ({cname}) for {domain}")
 
+        if args.load_session:
+            saved = json.loads(Path(args.load_session).read_text(encoding="utf-8"))
+            context.add_cookies(saved["cookies"])
+            print(f"Replayed {len(saved['cookies'])} cookies from {args.load_session}")
+
         page = context.pages[0] if context.pages else context.new_page()
 
         try:
@@ -439,81 +470,159 @@ def main() -> None:
                 while waited < deadline:
                     page.wait_for_timeout(5000)
                     waited += 5
-                    url = (page.url or "").lower()
-                    on_login = any(h in url for h in LOGIN_HOSTS) or any(p in url for p in LOGIN_PATHS)
-                    if not on_login and target_host in url:
+
+                    # Scan EVERY page, not just the one opened first. A sign-in
+                    # that hands off to an identity provider frequently finishes
+                    # in a popup or a second tab, leaving the original page on
+                    # the form forever - which reads as "sign-in never happened"
+                    # when in fact it happened somewhere nobody was watching.
+                    if waited % 30 == 0:
+                        # Emitted BEFORE the landed-branch. It used to sit after
+                        # it, so an iteration that found the target host and then
+                        # bounced on the login-page check skipped the tick - the
+                        # run printed nothing at all in the one state anybody
+                        # would want reported.
+                        for i, pg in enumerate(context.pages):
+                            try:
+                                body = (pg.evaluate(
+                                    "() => document.body ? document.body.innerText.slice(0,120) : ''"
+                                ) or "").replace(chr(10), " / ")
+                            except Exception:
+                                body = "<unreadable>"
+                            print(f"  {waited}s: [{i}] {pg.url}", flush=True)
+                            print(f"         text: {body}", flush=True)
+
+                    landed = None
+                    for pg in context.pages:
+                        u = (pg.url or "").lower()
+                        on_login = any(h in u for h in LOGIN_HOSTS) or any(p in u for p in LOGIN_PATHS)
+                        if not on_login and target_host in u:
+                            landed = pg
+                            break
+                    if landed is not None:
+                        page = landed
                         try:
                             settle(page, 3000)
                             assert_not_a_login_page(page)
                         except SystemExit:
                             continue  # still mid sign-in; keep waiting
-                        print(f"Signed in after {waited}s. Profile stored at: {PROFILE}")
-                        return
-                    if waited % 30 == 0:
-                        print(f"  {waited}s: still waiting...", flush=True)
-
-                sys.exit(f"Timed out after {deadline}s without reaching a signed-in portal page.")
+                        except Exception as e:
+                            # Closing the window mid-run surfaces as
+                            # TargetClosedError from deep inside Playwright and
+                            # prints a 20-line traceback that buries the cause.
+                            if "closed" not in str(e).lower():
+                                raise
+                            sys.exit(
+                                "The browser window was closed before the capture ran. "
+                                "Leave it open: this site's auth token is memory-only, so "
+                                "signing in and capturing must happen in one session."
+                            )
+                        print(f"Signed in after {waited}s. Profile stored at: {profile_dir}")
+                        if args.save_session:
+                            # First thing after sign-in, before the capture is
+                            # attempted. Two runs died here with the window
+                            # closed mid-capture and 14 minutes of sign-in
+                            # thrown away with it.
+                            sp = Path(args.save_session)
+                            sp.parent.mkdir(parents=True, exist_ok=True)
+                            sp.write_text(json.dumps({"cookies": context.cookies()}), encoding="utf-8")
+                            print(f"Session saved to {sp} - retries no longer need a sign-in.")
+                        # Fall THROUGH to capture when a url was also given.
+                        #
+                        # Some sites authenticate with a SESSION cookie, which Chromium
+                        # holds in memory and never writes to the profile. HCP Terraform
+                        # is one: after --login the profile keeps _atlas_session_data and
+                        # loses the token, so a later run lands back on the sign-in page
+                        # however carefully the sign-in was done. Measured 2026-09-25,
+                        # after three failed attempts across three weeks.
+                        #
+                        # The only reliable fix is to not close the browser in between:
+                        # sign in and capture in one session.
+                        if not (args.url and args.output_path):
+                            return
+                        print("Signed in - capturing in the SAME session, because the")
+                        print("auth token is memory-only and will not survive a restart.")
+                        break
+                else:
+                    # Only when the loop ran out of time. A `break` above means
+                    # signed in, and must not land on this exit.
+                    sys.exit(f"Timed out after {deadline}s without reaching a signed-in portal page.")
 
             secrets = secrets_from_env()
             if not secrets:
                 print("NOTE: no AZ_* identifiers set — nothing will be masked.")
 
-            out = Path(args.output_path)
-            out.parent.mkdir(parents=True, exist_ok=True)
+            for url, output_path in [(args.url, args.output_path)] + [tuple(a) for a in args.also]:
+                out = Path(output_path)
+                out.parent.mkdir(parents=True, exist_ok=True)
 
-            page.goto(args.url, wait_until="domcontentloaded", timeout=args.goto_timeout)
-            settle(page, args.wait_ms)
-            assert_not_a_login_page(page)
+                page.goto(url, wait_until="domcontentloaded", timeout=args.goto_timeout)
+                settle(page, args.wait_ms)
+                assert_not_a_login_page(page)
 
-            # Many portal blades open on a default tab. The Remediation blade
-            # opens on "Policies to remediate", so capturing it without a click
-            # yields a screenshot of the wrong tab that looks entirely plausible
-            # -- it is a real blade with real rows, just not the one asked for.
-            if args.click_text:
-                clicked = False
-                for frame in frames(page):
-                    try:
-                        target = frame.get_by_text(args.click_text, exact=False)
-                        if target.count():
-                            target.first.click(timeout=8000)
-                            page.wait_for_timeout(args.click_wait_ms)
-                            clicked = True
-                            break
-                    except Exception:
-                        continue
-                if not clicked:
-                    sys.exit(f"REFUSING TO SAVE: could not find {args.click_text!r} to click.")
+                # Many portal blades open on a default tab. The Remediation blade
+                # opens on "Policies to remediate", so capturing it without a click
+                # yields a screenshot of the wrong tab that looks entirely plausible
+                # -- it is a real blade with real rows, just not the one asked for.
+                if args.click_text:
+                    clicked = False
+                    for frame in frames(page):
+                        try:
+                            target = frame.get_by_text(args.click_text, exact=False)
+                            if target.count():
+                                target.first.click(timeout=8000)
+                                page.wait_for_timeout(args.click_wait_ms)
+                                clicked = True
+                                break
+                        except Exception:
+                            continue
+                    if not clicked:
+                        sys.exit(f"REFUSING TO SAVE: could not find {args.click_text!r} to click.")
 
-            if args.expand_tree:
-                expand_tree(page, args.expect)
+                if args.expand_tree:
+                    expand_tree(page, args.expect)
 
-            # An --expect with no --expand-tree still has to be honoured, or the
-            # flag silently does nothing outside the tree case.
-            if args.expect and not args.expand_tree:
-                found = any(
-                    args.expect in (f.evaluate("() => document.body ? document.body.innerText : ''") or "")
-                    for f in frames(page)
-                )
-                if not found:
-                    sys.exit(f"REFUSING TO SAVE: {args.expect!r} is not on the page.")
+                # An --expect with no --expand-tree still has to be honoured, or the
+                # flag silently does nothing outside the tree case.
+                if args.expect and not args.expand_tree:
+                    found = any(
+                        args.expect in (f.evaluate("() => document.body ? document.body.innerText : ''") or "")
+                        for f in frames(page)
+                    )
+                    if not found:
+                        sys.exit(f"REFUSING TO SAVE: {args.expect!r} is not on the page.")
 
-            # Redact immediately before the capture. The portal virtualises its
-            # grids and repaints on its own schedule, so a redaction done any
-            # earlier can be undone by a re-render before the shutter fires.
-            changed = redact(page, secrets)
-            assert_gone(page, secrets)
+                # Redact immediately before the capture. The portal virtualises its
+                # grids and repaints on its own schedule, so a redaction done any
+                # earlier can be undone by a re-render before the shutter fires.
+                changed = redact(page, secrets)
+                assert_gone(page, secrets)
 
-            # Checked twice on purpose. A session can lapse between the first
-            # check and the save, and the screenshot is what reaches disk — so
-            # the guard that matters is the one closest to it.
-            assert_not_a_login_page(page)
-            screenshot_via_cdp(page, out)
+                # Checked twice on purpose. A session can lapse between the first
+                # check and the save, and the screenshot is what reaches disk — so
+                # the guard that matters is the one closest to it.
+                assert_not_a_login_page(page)
+                screenshot_via_cdp(page, out)
 
-            masked = ", ".join(sorted({label for _, label in secrets})) or "nothing"
-            print(f"Verified: masked {masked} ({changed} replacements)")
-            print(f"Saved: {out}")
+                masked = ", ".join(sorted({label for _, label in secrets})) or "nothing"
+                print(f"Verified: masked {masked} ({changed} replacements)")
+                print(f"Saved: {out}")
+        except Exception as e:
+            # Same reason as the guard in the sign-in loop: closing the window
+            # mid-capture raises TargetClosedError from deep inside Playwright,
+            # and the traceback buries the one fact that matters.
+            if "closed" not in str(e).lower():
+                raise
+            sys.exit(
+                "The browser window was closed before the capture finished. "
+                "Re-run with --load-session to reuse the saved cookies instead "
+                "of signing in again."
+            )
         finally:
-            context.close()
+            try:
+                context.close()
+            except Exception:
+                pass  # already gone if the window was closed by hand
 
 
 if __name__ == "__main__":
