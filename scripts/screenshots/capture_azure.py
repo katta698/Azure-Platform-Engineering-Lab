@@ -339,6 +339,17 @@ def main() -> None:
     # in one run. --also adds a target to that same run.
     ap.add_argument("--also", nargs=2, action="append", metavar=("URL", "PATH"),
                     default=[], help="Capture another url/path in the same session")
+    # DO NOT point --login at app.terraform.io. HCP Terraform detects the
+    # automated browser and refuses the sign-in as a security risk - in
+    # Chromium for Testing, in Edge and in installed Chrome alike, on
+    # 2026-09-25. Four attempts, two of them after a successful sign-in that
+    # was then rejected. The session-cookie work below is real and worth
+    # keeping for other sites, but it does not get past this: the block is on
+    # signing in at all, not on holding the session afterwards.
+    #
+    # HCP screenshots are taken by hand and committed like any other asset.
+    # Working around a vendor's anti-automation control to screenshot your own
+    # account is not a thing this repo does.
     ap.add_argument("--login", action="store_true", help="Open a site and wait while you sign in.")
     ap.add_argument(
         "--login-url",
