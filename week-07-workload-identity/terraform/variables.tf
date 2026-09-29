@@ -22,3 +22,13 @@ variable "github_repo" {
   type        = string
   description = "Repository name. Combined with the org into the credential's subject."
 }
+
+variable "github_subject_prefix" {
+  type        = string
+  description = <<-EOT
+    The subject prefix GitHub actually presents, read at deploy time from
+    /repos/{owner}/{repo}/actions/oidc/customization/sub. With immutable
+    subject claims on it carries numeric IDs, so it cannot be derived from the
+    org and repo names alone.
+  EOT
+}

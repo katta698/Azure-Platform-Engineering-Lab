@@ -32,7 +32,23 @@ if [[ "$state" != "Registered" ]]; then
   az provider register --namespace Microsoft.ManagedIdentity --subscription "$SUB" --wait -o none
 fi
 
-( cd terraform && terraform init -input=false && terraform apply -input=false -auto-approve )
+ORG=$(grep '^github_org' terraform/terraform.tfvars | cut -d'"' -f2)
+REPO=$(grep '^github_repo' terraform/terraform.tfvars | cut -d'"' -f2)
+
+# Ask GitHub what subject its runners will actually present, rather than
+# assuming the documented repo:owner/repo form. With immutable subject claims
+# on - now the default - the prefix carries numeric owner and repo IDs, and a
+# credential built from the names matches nothing. The failure is
+# AADSTS700213 at login time, long after the apply reported success.
+PREFIX=$(gh api "repos/${ORG}/${REPO}/actions/oidc/customization/sub"            --jq '.sub_claim_prefix' 2>/dev/null | tr -d '')
+if [[ -z "$PREFIX" ]]; then
+  PREFIX="repo:${ORG}/${REPO}"
+  echo "NOTE: could not read the subject prefix from GitHub; assuming $PREFIX"
+else
+  echo "Subject prefix as GitHub reports it: $PREFIX"
+fi
+
+( cd terraform && terraform init -input=false     && terraform apply -input=false -auto-approve -var="github_subject_prefix=${PREFIX}" )
 
 echo ""
 echo "── Put these in GitHub as repository VARIABLES (not secrets) ──"

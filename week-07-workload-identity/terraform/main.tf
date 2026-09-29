@@ -41,6 +41,15 @@ resource "azurerm_user_assigned_identity" "ci" {
 # token from a different repo, or from a branch other than main, does not
 # match and is refused - which is why a fork raising a pull request cannot
 # obtain this identity.
+#
+# The prefix is READ FROM GITHUB rather than built from the org and repo name,
+# because GitHub now defaults to immutable subject claims: the owner and the
+# repository each carry their numeric ID, as in
+# repo:owner@63027619/repo@1342954118. Renaming or transferring the repo
+# therefore does NOT carry the trust with it, which is the point of the
+# feature - and it means the documented repo:owner/repo form is no longer what
+# a runner actually presents. Building the string by hand produces a
+# credential that looks correct and matches nothing.
 resource "azurerm_federated_identity_credential" "main_branch" {
   name = "github-main"
 
@@ -51,7 +60,7 @@ resource "azurerm_federated_identity_credential" "main_branch" {
 
   audience = ["api://AzureADTokenExchange"]
   issuer   = "https://token.actions.githubusercontent.com"
-  subject  = "repo:${var.github_org}/${var.github_repo}:ref:refs/heads/main"
+  subject  = "${var.github_subject_prefix}:ref:refs/heads/main"
 }
 
 # Reader, not Contributor.

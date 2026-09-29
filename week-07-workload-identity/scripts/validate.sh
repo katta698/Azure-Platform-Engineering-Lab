@@ -69,7 +69,8 @@ echo ""
 echo "3. The subject names this repo and branch exactly"
 SUBJECT=$(az identity federated-credential list --identity-name "$NAME" --resource-group "$RG" \
       --subscription "$SUB" --query "[0].subject" -o tsv 2>/dev/null | tr -d '\r')
-EXPECTED="repo:${ORG}/${REPO}:ref:refs/heads/main"
+PREFIX=$(gh api "repos/${ORG}/${REPO}/actions/oidc/customization/sub" --jq '.sub_claim_prefix' 2>/dev/null | tr -d '')
+EXPECTED="${PREFIX:-repo:${ORG}/${REPO}}:ref:refs/heads/main"
 note "subject:  $SUBJECT"
 if [[ "$SUBJECT" == "$EXPECTED" ]]; then
   ok "matches $EXPECTED"
