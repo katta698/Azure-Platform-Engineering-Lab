@@ -1,0 +1,62 @@
+name: Azure login with no secret
+
+# The week's claim, written as a workflow: this authenticates to Azure and
+# there is no secret anywhere in the repository.
+#
+# Everything it needs is a repository VARIABLE. Variables are visible to anyone
+# who can read the repo settings, and that is fine - none of them is a
+# credential. Knowing the client ID grants nothing without a token GitHub will
+# only mint for this repo, on this branch.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'week-07-workload-identity/**'
+      - '.github/workflows/week-07-azure-oidc.yml'
+
+# Without id-token: write, GitHub does not mint an OIDC token at all and the
+# login fails with a message about a missing token rather than about
+# permissions - which sends you looking at Azure instead of at this block.
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  prove-it:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show that no secret is in play
+        run: |
+          echo "client id  : ${{ vars.AZURE_CLIENT_ID }}"   # a variable, not a secret
+          echo "secrets    : none configured for this repo"
+
+      - name: Log in to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          # No client-secret. There is no input for one here, and that is the
+          # point of the week.
+
+      - name: Prove the token is real
+        run: |
+          echo "── who am I ──"
+          az account show --query "{subscription:name, tenant:tenantId}" -o table
+
+          echo ""
+          echo "── what can I see ──"
+          az group list --query "[?starts_with(name,'rg-wk07')].name" -o tsv
+
+          echo ""
+          echo "── what I cannot do (Reader, deliberately) ──"
+          if az group create --name rg-wk07-should-not-exist --location southcentralus -o none 2>/dev/null; then
+            echo "UNEXPECTED: the create succeeded. The role is wider than Reader."
+            exit 1
+          else
+            echo "refused, as designed - this identity reads and nothing more"
+          fi
