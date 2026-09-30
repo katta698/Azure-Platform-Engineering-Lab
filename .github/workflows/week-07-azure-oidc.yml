@@ -8,13 +8,11 @@ name: Azure login with no secret
 # credential. Knowing the client ID grants nothing without a token GitHub will
 # only mint for this repo, on this branch.
 
+# Manual only, since the teardown ran. The identity this logs into no longer
+# exists, so an automatic run would fail with AADSTS700016 - correct, and
+# useless as a signal. Re-run ./scripts/deploy.sh first, then dispatch this.
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - 'week-07-workload-identity/**'
-      - '.github/workflows/week-07-azure-oidc.yml'
 
 # Without id-token: write, GitHub does not mint an OIDC token at all and the
 # login fails with a message about a missing token rather than about

@@ -15,7 +15,15 @@ export TF_DATA_DIR
 SUB=$(grep '^subscription_id' terraform/terraform.tfvars | cut -d'"' -f2)
 RG="rg-wk07-identity-dev-scus-001"
 
-( cd terraform && terraform destroy -input=false -auto-approve )
+# The same variable deploy.sh passes. Terraform requires every declared
+# variable to have a value at destroy too, so a var added to one script and not
+# the other fails the teardown - which is the worst place to find out.
+ORG=$(grep '^github_org' terraform/terraform.tfvars | cut -d'"' -f2)
+REPO=$(grep '^github_repo' terraform/terraform.tfvars | cut -d'"' -f2)
+PREFIX=$(gh api "repos/${ORG}/${REPO}/actions/oidc/customization/sub"            --jq '.sub_claim_prefix' 2>/dev/null | tr -d '')
+PREFIX="${PREFIX:-repo:${ORG}/${REPO}}"
+
+( cd terraform && terraform destroy -input=false -auto-approve     -var="github_subject_prefix=${PREFIX}" )
 
 echo ""
 echo "Verifying nothing survived..."
