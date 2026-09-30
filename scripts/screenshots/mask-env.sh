@@ -24,7 +24,22 @@ export MSYS_NO_PATHCONV=1
 
 AZ_TENANT_ID=$(az account list --all --query "[0].tenantId" -o tsv 2>/dev/null | tr -d '\r')
 AZ_SUBSCRIPTION_IDS=$(az account list --all --query "[].id" -o tsv 2>/dev/null | tr -d '\r' | paste -sd, -)
-export AZ_TENANT_ID AZ_SUBSCRIPTION_IDS
+# The signed-in account, which the portal renders in the top bar of every
+# blade. Derived rather than hardcoded, for the same reason the subscription
+# list is: a per-week allowlist is how a real identifier reached a published
+# screenshot once already.
+AZ_ACCOUNT_EMAILS=$(az account list --all --query "[].user.name" -o tsv 2>/dev/null | tr -d '' | sort -u | paste -sd, -)
+# Entra often shows a live.com# prefixed form of the same address.
+AZ_ACCOUNT_EMAILS="${AZ_ACCOUNT_EMAILS},$(echo "$AZ_ACCOUNT_EMAILS" | sed 's/[^,]*/live.com#&/g')"
+# Case variants, because redaction is an exact string match and the portal
+# renders the directory name UPPERCASE in the top bar while the account is
+# lowercase two inches to its left. One spelling masked, the other published.
+AZ_ACCOUNT_EMAILS="${AZ_ACCOUNT_EMAILS},$(echo "$AZ_ACCOUNT_EMAILS" | tr 'a-z' 'A-Z')"
+# The local part alone, which is what a truncated directory name shows.
+AZ_ACCOUNT_NAMES=$(echo "$AZ_ACCOUNT_EMAILS" | tr ',' '
+' | sed 's/@.*//' | sed 's/^live.com#//'                    | grep -v '^$' | sort -u | paste -sd, -)
+AZ_ACCOUNT_NAMES="${AZ_ACCOUNT_NAMES},$(echo "$AZ_ACCOUNT_NAMES" | tr 'a-z' 'A-Z')"
+export AZ_TENANT_ID AZ_SUBSCRIPTION_IDS AZ_ACCOUNT_EMAILS AZ_ACCOUNT_NAMES
 
 if [[ -z "$AZ_TENANT_ID" || -z "$AZ_SUBSCRIPTION_IDS" ]]; then
   echo "mask-env: could not read the Azure profile — capture would run UNMASKED." >&2

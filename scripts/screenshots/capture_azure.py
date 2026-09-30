@@ -57,6 +57,11 @@ def secrets_from_env() -> list[tuple[str, str]]:
         ("AZ_SUBSCRIPTION_IDS", "subscription ID"),
         ("AZ_BILLING_IDS", "billing identifier"),
         ("AZ_OBJECT_IDS", "object ID"),
+        # The portal prints the signed-in account in the top bar of every
+        # blade, so this leaks from any screenshot regardless of subject.
+        # Masking is an allowlist: what is not named here is published.
+        ("AZ_ACCOUNT_EMAILS", "account email"),
+        ("AZ_ACCOUNT_NAMES", "account name"),
     ):
         for value in os.environ.get(key, "").split(","):
             if value := value.strip():
