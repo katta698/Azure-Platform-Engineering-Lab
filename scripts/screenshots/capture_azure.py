@@ -385,6 +385,18 @@ def main() -> None:
     # is not a sign-in in another.
     ap.add_argument("--browser", choices=["chromium", "msedge", "chrome"], default="chromium",
                     help="Which browser to drive")
+    # Attach to a browser the USER is already signed into, over the DevTools
+    # protocol, instead of driving a fresh profile.
+    #
+    # This is the answer to HCP Terraform, which refuses to let an automated
+    # browser sign in and holds its session in memory so it cannot be replayed.
+    # Jay's Chrome already exposes 127.0.0.1:9222 and already has HCP open, so
+    # there is nothing to sign into - the session is simply already there.
+    #
+    # A NEW TAB is opened and closed again, so the user's own tabs are left
+    # exactly as they were.
+    ap.add_argument("--cdp", default="",
+                    help="Attach to a running browser, e.g. http://127.0.0.1:9222")
     ap.add_argument("--save-session", default="", help="Write cookies here once signed in")
     ap.add_argument("--load-session", default="", help="Replay cookies written by --save-session")
     ap.add_argument(
@@ -402,12 +414,28 @@ def main() -> None:
     PROFILE.mkdir(parents=True, exist_ok=True)
 
     with sync_playwright() as pw:
+        if args.cdp:
+            browser = pw.chromium.connect_over_cdp(args.cdp)
+            context = browser.contexts[0]
+            opened_tab = context.new_page()
+            page = opened_tab
+            # An attached tab inherits the real window's size, so --width and
+            # --height are ignored unless the metrics are overridden. Without
+            # this the capture is whatever shape the user left their browser.
+            try:
+                opened_tab.set_viewport_size({"width": args.width, "height": args.height})
+            except Exception as e:
+                print(f"NOTE: could not set the viewport ({e}); using the window as-is")
+            print(f"Attached to the running browser at {args.cdp}")
+        else:
+            opened_tab = None
+
         profile_dir = PROFILE if args.browser == "chromium" else PROFILE.with_name(
             f"{PROFILE.name}_{args.browser}"
         )
         profile_dir.mkdir(parents=True, exist_ok=True)
 
-        context = pw.chromium.launch_persistent_context(
+        context = context if args.cdp else pw.chromium.launch_persistent_context(
             str(profile_dir),
             headless=False,
             **({} if args.browser == "chromium" else {"channel": args.browser}),
@@ -462,7 +490,9 @@ def main() -> None:
             context.add_cookies(saved["cookies"])
             print(f"Replayed {len(saved['cookies'])} cookies from {args.load_session}")
 
-        page = context.pages[0] if context.pages else context.new_page()
+        # Attached: use the tab we opened. Launched: reuse or make one.
+        if not args.cdp:
+            page = context.pages[0] if context.pages else context.new_page()
 
         try:
             if args.login:
@@ -636,7 +666,13 @@ def main() -> None:
             )
         finally:
             try:
-                context.close()
+                if args.cdp:
+                    # Close ONLY the tab we opened. Closing the context here
+                    # would shut the user's whole browser, every tab in it.
+                    if opened_tab is not None:
+                        opened_tab.close()
+                else:
+                    context.close()
             except Exception:
                 pass  # already gone if the window was closed by hand
 
