@@ -65,3 +65,9 @@ scripts/screenshots/.session-cookie
 # Runtime marker: the generated storage account name deploy.sh hands to
 # validate.sh. Regenerated on every deploy, meaningless to anyone else.
 .protected-storage-account
+
+# Scratch files validate.sh writes beside itself. They live in the week
+# directory rather than /tmp because bash, native python and curl disagree
+# about what /tmp means on Windows - one writes to AppData, the others read
+# C:\tmp, and the file is simply missing.
+.tmp-*
