@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 540" width="900" height="540" role="img" aria-label="Week 12 Log Analytics. One hundred rows are sent to a data collection endpoint. The collection rule applies a KQL transformation that keeps only Warning and above, so twenty rows reach the workspace and eighty are dropped before billing. The workspace holds two custom tables on different plans: PlatformLogs_CL on Analytics and PlatformVerbose_CL on Basic. A daily cap sits behind it as a backstop with an alert.">
+  <defs>
+    <style>
+      .t    { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+      .hdr  { font-size: 13px; font-weight: 700; fill: #1f2933; }
+      .lbl  { font-size: 12px; fill: #1f2933; }
+      .sm   { font-size: 11px; fill: #52606d; }
+      .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; fill: #1f2933; }
+      .box  { fill: #ffffff; stroke: #c3cbd5; stroke-width: 1.2; }
+      .keep { fill: #f2f9f4; stroke: #8fbf9f; stroke-width: 1.2; }
+      .drop { fill: #fdf1f1; stroke: #d9a2a2; stroke-width: 1.4; }
+      .band { fill: #f5f7fa; stroke: #dbe1e8; stroke-width: 1; }
+      .flow { stroke: #4a7fb5; stroke-width: 1.8; fill: none; }
+      .gone { stroke: #a4262c; stroke-width: 1.6; fill: none; stroke-dasharray: 5 3; }
+      .ok   { fill: #1b6e3c; }
+      .no   { fill: #a4262c; }
+    </style>
+    <marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#4a7fb5"/>
+    </marker>
+    <marker id="r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#a4262c"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="900" height="540" fill="#ffffff"/>
+  <text class="t hdr" x="24" y="28">The cheapest log is the one you never ingested.</text>
+
+  <!-- IN -->
+  <rect class="box" x="24" y="48" width="180" height="80" rx="6"/>
+  <text class="t hdr" x="40" y="72">SENT</text>
+  <text class="t lbl" x="40" y="94">100 rows</text>
+  <text class="t sm" x="40" y="114">20 Warning or above</text>
+
+  <!-- RULE -->
+  <rect class="band" x="252" y="40" width="300" height="96" rx="8"/>
+  <text class="t hdr" x="270" y="64">COLLECTION RULE</text>
+  <text class="t sm" x="270" y="84">one line of KQL, applied at ingest</text>
+  <text class="t mono" x="270" y="106">source | where Level in</text>
+  <text class="t mono" x="270" y="122">  ('Warning','Error','Critical')</text>
+
+  <path class="flow" d="M 206 88 L 250 88" marker-end="url(#b)"/>
+
+  <!-- DROPPED -->
+  <rect class="drop" x="600" y="40" width="276" height="56" rx="6"/>
+  <text class="t hdr no" x="618" y="64">80 rows dropped</text>
+  <text class="t sm" x="618" y="84">never stored, never billed, never counted by the cap</text>
+  <path class="gone" d="M 402 38 L 402 24 L 738 24 L 738 38" marker-end="url(#r)"/>
+
+  <!-- KEPT -->
+  <path class="flow" d="M 402 138 L 402 166" marker-end="url(#b)"/>
+  <text class="t sm ok" x="414" y="158">20 rows kept</text>
+
+  <!-- WORKSPACE -->
+  <rect class="band" x="24" y="176" width="852" height="188" rx="8"/>
+  <text class="t hdr" x="42" y="200">LOG ANALYTICS WORKSPACE &#183; sub-management &#183; pay-as-you-go</text>
+
+  <rect class="keep" x="42" y="212" width="400" height="136" rx="6"/>
+  <text class="t hdr ok" x="60" y="236">PlatformLogs_CL &#183; ANALYTICS</text>
+  <text class="t sm" x="60" y="258">the alerting path &#8212; queried constantly</text>
+  <text class="t sm" x="60" y="278">30 days interactive, 90 days total</text>
+  <text class="t sm" x="60" y="302">Highest ingestion price.</text>
+  <text class="t sm" x="60" y="322">Queries are FREE to run, however often.</text>
+
+  <rect class="box" x="462" y="212" width="396" height="136" rx="6"/>
+  <text class="t hdr" x="480" y="236">PlatformVerbose_CL &#183; BASIC</text>
+  <text class="t sm" x="480" y="258">the incident path &#8212; read when something breaks</text>
+  <text class="t sm" x="480" y="278">no interactive retention, 1 year total</text>
+  <text class="t sm" x="480" y="302">Cheaper to ingest.</text>
+  <text class="t sm no" x="480" y="322">Queries BILL PER GB SCANNED.</text>
+
+  <!-- CAP -->
+  <rect class="band" x="24" y="384" width="852" height="132" rx="8"/>
+  <text class="t hdr" x="42" y="408">THE DAILY CAP IS A BACKSTOP, NOT A STRATEGY</text>
+  <text class="t sm" x="42" y="430">A cap stops COLLECTION once the threshold is hit &#8212; the money is already spent and the data is lost.</text>
+  <text class="t sm" x="42" y="450">The transformation above never let those rows arrive, so the cap never had to count them.</text>
+  <text class="t sm" x="42" y="474">Set it where it catches a runaway, not a busy Tuesday. 1 GB/day here, far above anything this lab sends.</text>
+  <text class="t sm no" x="42" y="496">A cap that trips in silence is data loss nobody noticed &#8212; hence the action group.</text>
+</svg>
