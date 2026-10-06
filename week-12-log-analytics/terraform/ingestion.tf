@@ -118,3 +118,47 @@ resource "azurerm_role_assignment" "ingest" {
   # managed identity - week 07's, for instance - never a person.
   principal_id = data.azurerm_client_config.current.object_id
 }
+
+# ── The alarm itself ────────────────────────────────────────────────────────
+#
+# An action group is a DESTINATION. On its own it never fires, so a cap with an
+# action group and no rule still trips in total silence - which is the exact
+# failure the action group was added to prevent.
+#
+# Azure has no "daily cap reached" metric. It writes the event into the
+# Operation table, so the alert is a scheduled QUERY rule.
+resource "azurerm_monitor_scheduled_query_rules_alert_v2" "daily_cap" {
+  name                = "alert-daily-cap-reached-prod-scus-001"
+  resource_group_name = azurerm_resource_group.observability.name
+  location            = azurerm_resource_group.observability.location
+
+  scopes               = [azurerm_log_analytics_workspace.platform.id]
+  severity             = 1
+  evaluation_frequency = "PT5M"
+  window_duration      = "PT30M"
+
+  criteria {
+    query                   = <<-KQL
+      Operation
+      | where OperationCategory == "Data Collection Status"
+      | where Detail has "OverQuota"
+    KQL
+    time_aggregation_method = "Count"
+    threshold               = 0
+    operator                = "GreaterThan"
+
+    failing_periods {
+      minimum_failing_periods_to_trigger_alert = 1
+      number_of_evaluation_periods             = 1
+    }
+  }
+
+  action {
+    action_groups = [azurerm_monitor_action_group.observability.id]
+  }
+
+  description  = "The daily cap stopped collection. Data is being dropped right now."
+  display_name = "Daily cap reached - collection stopped"
+  enabled      = true
+  tags         = local.common_tags
+}

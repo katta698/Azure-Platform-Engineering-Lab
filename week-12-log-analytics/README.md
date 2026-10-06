@@ -7,6 +7,10 @@ rather than left at their defaults.
 **The claim:** the cheapest log is the one you never ingested. Measured —
 **100 rows sent, 20 stored, 80 dropped before they were ever billed.**
 
+And the two levers compound. Dropping 80% of rows at ingest, then putting what
+survives on the right plan, is the difference between paying $2.76 a GB for
+everything and paying $2.76 for the fifth you actually query.
+
 ## Cost note
 
 | What runs | Cost |
@@ -18,8 +22,9 @@ rather than left at their defaults.
 **This week stays up.** Weeks 13–16 send their data here, and an idle workspace
 costs nothing. `cleanup.sh` refuses without `--force` for that reason.
 
-Commitment tiers save up to 30% but start at **100 GB/day**. A lab never reaches
-the first tier, so pay-as-you-go is correct here and the discount is not claimed.
+Commitment tiers start at **100 GB/day**, and the portal puts that first tier at
+**20% off** pay-as-you-go. A lab never reaches it, so pay-as-you-go is correct
+here and the discount is not claimed.
 
 ## How it fits together
 
@@ -29,11 +34,18 @@ the first tier, so pay-as-you-go is correct here and the discount is not claimed
 
 ### 1. Table plans follow how data is USED, not how big it is
 
-| Plan | Ingest price | Queries | Interactive window |
+Prices read from this workspace's own Usage and estimated costs blade, not from
+a pricing page:
+
+| Plan | Per GB ingested | Queries | Interactive window |
 | --- | --- | --- | --- |
-| **Analytics** | highest | **free to run** | up to 2 years |
-| **Basic** | reduced | **bill per GB scanned** | fixed 30 days |
-| **Auxiliary** | lowest | **bill per GB scanned** | full retention |
+| **Analytics** | **$2.76** | **free to run** | up to 2 years |
+| **Basic** | **$0.60** | **bill per GB scanned** | fixed 30 days |
+| **Auxiliary / Lake** | **$0.06** | **bill per GB scanned** | full retention |
+
+That is a **46x spread** between the most and least expensive plan. Moving one
+table from Analytics to Basic cuts its ingestion cost by **78%**; to Auxiliary,
+by **98%**.
 
 So a cheap table queried often can cost more than an expensive one queried
 rarely. That is the decision, and it is not about volume.
@@ -134,6 +146,11 @@ known data and count what survived.
 ![The workspace](docs/blog/screenshots/01-workspace.png)
 
 ![Table plans](docs/blog/screenshots/02-table-plans.png)
+
+![Pricing tiers and the daily cap](docs/blog/screenshots/04-daily-cap.png)
+
+Azure's own numbers, from this workspace: Analytics $2.76/GB, Basic $0.60/GB,
+Auxiliary $0.06/GB, and a note confirming the daily cap is configured.
 
 The Tables blade is the clearest view of the design: two custom tables on
 deliberately different plans, next to every built-in table sitting on the

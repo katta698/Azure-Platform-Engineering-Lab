@@ -134,14 +134,25 @@ fi
 echo ""
 
 # ── 5 ───────────────────────────────────────────────────────────────────────
-echo "5. The cap has an alarm on it"
-AG=$(az monitor action-group list -g "$RG" --subscription "$SUB" \
-       --query "length(@)" -o tsv 2>/dev/null | tr -d '\r')
-note "action groups in $RG: ${AG:-0}"
-if [[ "${AG:-0}" -ge 1 ]]; then
-  ok "an alert path exists - a cap that trips silently is data loss nobody noticed"
+echo "5. The cap has an alarm that actually fires"
+#
+# An action group is a DESTINATION, not an alarm. This check used to count
+# action groups and report "an alert path exists" - which passed while the cap
+# could still trip in total silence, because nothing was wired to fire it.
+# A mailbox is not a smoke detector.
+# --only-show-errors as well as the dynamic-install setting: installing an
+# extension on first use ECHOES THE COMMAND LINE to stdout, which lands in the
+# variable and makes the check compare a file path to "true".
+RULE=$(az monitor scheduled-query show -g "$RG" -n alert-daily-cap-reached-prod-scus-001          --subscription "$SUB" --only-show-errors          --query "{enabled:enabled,actions:length(actions.actionGroups)}"          -o tsv 2>/dev/null | tr -d '')
+# Two tab-separated fields. Azure returns "True" capitalised, so compare the
+# fields rather than pattern-matching the whole string.
+ENABLED=$(echo "$RULE" | cut -f1 | tr 'A-Z' 'a-z')
+NACTION=$(echo "$RULE" | cut -f2)
+note "rule enabled=${ENABLED:-<none>}  action groups attached=${NACTION:-0}"
+if [[ "$ENABLED" == "true" && "${NACTION:-0}" -ge 1 ]]; then
+  ok "a query rule is enabled AND wired to an action group"
 else
-  bad "no action group, so the cap would trip in silence"
+  bad "no enabled rule attached to an action group - the cap would trip in silence"
 fi
 echo ""
 
