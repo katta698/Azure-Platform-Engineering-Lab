@@ -1,0 +1,14 @@
+03-usage-and-cost.png — retired 2026-10-06.
+
+The portal deep link to the usage-and-costs blade did not navigate and landed
+back on Overview, so the capture duplicated figure 01. The same content was
+captured properly as figure 04 by clicking through from the Tables blade
+instead of deep-linking.
+
+01-workspace.png — retired 2026-10-09.
+
+The workspace Overview blade. Dropped after reading the post start to finish:
+it proved the workspace existed, which the Terraform run already proves, and
+the one fact it carried that mattered — the pricing tier — is on figure 04
+anyway. The rule is that a figure earns its place by showing the week's idea,
+not by showing that a resource was created.

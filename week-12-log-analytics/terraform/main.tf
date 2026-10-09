@@ -40,7 +40,8 @@ resource "azurerm_log_analytics_workspace" "platform" {
   # never reach the first tier, so claiming the discount would be dishonest.
   sku = "PerGB2018"
 
-  # 30 days of Analytics retention is included in the ingestion price. Paying
+  # 31 days of Analytics retention is included in the ingestion price - the
+  # docs say 31, not the 30 you would assume from the default. Paying
   # for more is a deliberate choice, not a default worth drifting into.
   retention_in_days = 30
 

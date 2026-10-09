@@ -1,0 +1,33 @@
+title: The Terraform behind this week
+subtitle: week-12-log-analytics — what each file does, and how big it actually is
+width: 1020
+---
+week-12-log-analytics/
+│
+├── terraform/
+│   ├── versions.tf          36   # azurerm + azapi, and the HCP backend
+│   ├── variables.tf         29   # subscription, location, daily cap, alert email
+│   ├── main.tf             145   # the workspace, and the two custom tables on
+│   │                             # deliberately different PLANS
+│   ├── ingestion.tf        164   # endpoint, collection rule, the TRANSFORM, the
+│   │                             # alert rule, and who may write into it
+│   └── outputs.tf           18   # workspace id and the ingestion URL
+│
+└── scripts/
+    ├── deploy.sh            52   # registers two providers, then applies
+    ├── validate.sh         162   # 5 checks. #4 sends 100 rows and counts what
+    │                             # survived - the only way to know a filter filters
+    └── cleanup.sh           46   # REFUSES without --force: this week stays up
+
+# 9 resources, and the split follows the two questions
+#
+# main.tf answers "where does the data land, and how is it priced" -- the
+# workspace, its cap, and the table plans.
+#
+# ingestion.tf answers "what gets in, and who is told when it stops" -- the
+# endpoint, the rule, the one line of KQL that drops rows before they are
+# billed, the alert on the cap, and a role assignment scoped to the rule
+# rather than the resource group.
+#
+# Changing what data costs is a main.tf change. Changing what arrives is an
+# ingestion.tf change. They are rarely the same decision.
