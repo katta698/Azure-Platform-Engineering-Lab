@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
-# Week 12 — deploy the platform workspace.
+# Week 08 — deploy the platform workspace.
 #
 #   ./scripts/deploy.sh
 #
 # The HCP workspace is NOT created here. It is created deliberately, before any
 # of this, with its execution mode set:
 #
-#   azure-week-12-dev, project "Azure Platform Lab", execution-mode local
+#   azure-week-08-dev, project "Azure Platform Lab", execution-mode local
 #
 # Letting `terraform init` create it as a side effect is how week 07 ended up on
 # REMOTE execution, where the plan ran on HCP's servers with no Azure CLI and no
@@ -17,7 +17,7 @@ set -euo pipefail
 export MSYS_NO_PATHCONV=1
 cd "$(dirname "$0")/.."
 
-: "${TF_DATA_DIR:=C:/tfd/w12}"
+: "${TF_DATA_DIR:=C:/tfd/w08}"
 export TF_DATA_DIR
 mkdir -p "$TF_DATA_DIR"
 

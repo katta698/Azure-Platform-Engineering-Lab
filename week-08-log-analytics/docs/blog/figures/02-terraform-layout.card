@@ -1,8 +1,8 @@
 title: The Terraform behind this week
-subtitle: week-12-log-analytics — what each file does, and how big it actually is
+subtitle: week-08-log-analytics — what each file does, and how big it actually is
 width: 1020
 ---
-week-12-log-analytics/
+week-08-log-analytics/
 │
 ├── terraform/
 │   ├── versions.tf          36   # azurerm + azapi, and the HCP backend

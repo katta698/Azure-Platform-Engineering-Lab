@@ -1,4 +1,4 @@
-# Week 12 — Log Analytics, designed around what it costs
+# Week 08 — Log Analytics, designed around what it costs
 
 The workspace every later week sends logs to. Ingestion is the largest surprise
 bill in Azure, so the design decisions here are cost decisions, made on purpose
@@ -28,7 +28,7 @@ here and the discount is not claimed.
 
 ## How it fits together
 
-![Week 12 architecture](docs/blog/diagrams/week-12-architecture.svg)
+![Week 08 architecture](docs/blog/diagrams/week-08-architecture.svg)
 
 ## The three decisions
 

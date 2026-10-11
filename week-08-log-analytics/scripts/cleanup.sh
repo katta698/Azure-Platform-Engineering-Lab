@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Week 12 — teardown.
+# Week 08 — teardown.
 #
 # NOTE: this week is one of the three the roadmap keeps running (05 hub, 12
 # Log Analytics, 47 FinOps hub). Weeks 13 to 16 all send data here, so the
@@ -13,7 +13,7 @@ set -euo pipefail
 export MSYS_NO_PATHCONV=1
 cd "$(dirname "$0")/.."
 
-: "${TF_DATA_DIR:=C:/tfd/w12}"
+: "${TF_DATA_DIR:=C:/tfd/w08}"
 export TF_DATA_DIR
 
 SUB=$(grep '^subscription_id' terraform/terraform.tfvars | cut -d'"' -f2)

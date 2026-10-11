@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Week 12 — prove the cost design actually works.
+# Week 08 — prove the cost design actually works.
 #
 #   1. the workspace exists, on pay-as-you-go, with a daily cap
 #   2. the table plans are what was asked for, not the defaults
@@ -15,7 +15,7 @@ set -uo pipefail
 export MSYS_NO_PATHCONV=1
 cd "$(dirname "$0")/.."
 
-: "${TF_DATA_DIR:=C:/tfd/w12}"
+: "${TF_DATA_DIR:=C:/tfd/w08}"
 export TF_DATA_DIR
 
 # `az monitor log-analytics query` lives in an EXTENSION. Without this, az

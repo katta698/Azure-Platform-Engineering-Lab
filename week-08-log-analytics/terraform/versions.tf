@@ -18,7 +18,7 @@ terraform {
     organization = "Katta"
 
     workspaces {
-      name    = "azure-week-12-dev"
+      name    = "azure-week-08-dev"
       project = "Azure Platform Lab"
     }
   }

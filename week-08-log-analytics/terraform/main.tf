@@ -1,5 +1,5 @@
 # ═══════════════════════════════════════════════════════════════════════════
-# Week 12 — the workspace every later week sends logs to
+# Week 08 — the workspace every later week sends logs to
 #
 # The design decisions are all cost decisions, and they are made here rather
 # than left at their defaults:
