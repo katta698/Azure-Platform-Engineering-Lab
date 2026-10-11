@@ -106,3 +106,19 @@ if [[ $fail -ne 0 ]]; then
 fi
 
 echo "Sweep clean."
+
+# ── Week numbering ──────────────────────────────────────────────────────────
+#
+# Runs here because this is the one script guaranteed to run before a push.
+#
+# Week 12 was published straight after week 07 - Log Analytics kept the slot
+# number ROADMAP.md gave it instead of taking the next sequential one. The cost
+# was a folder rename, an HCP workspace rename, a changed post slug, a redirect
+# for the old URL, and a live post with every image 404ing while the two repos
+# disagreed. All of it from one number nobody checked.
+echo ""
+if ! python "$(dirname "$0")/next_week.py" --check; then
+  echo ""
+  echo "WEEK NUMBERING IS OUT OF SEQUENCE — do not push."
+  exit 1
+fi
