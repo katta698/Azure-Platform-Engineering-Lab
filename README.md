@@ -79,64 +79,65 @@ before the things it governs.
 | **Foundation** | | |
 | 01 | The landing zone, deployed — policy that denies something | Complete |
 | 02 | Policy as code — initiatives and `deployIfNotExists` remediation | Complete |
-| 03 | A module factory on Azure Verified Modules | Planned |
-| 04 | Subscription vending through the MCA alias API | Planned |
-| 05 | Hub network — Azure Firewall and the private DNS estate | Planned |
-| 06 | Deployment Stacks and deny assignments | Planned |
-| **Identity** | | |
-| 07 | Workload identity end to end — zero secrets | Planned |
-| 08 | PIM, access reviews and break-glass | Planned |
-| 09 | Conditional Access as code, staged with report-only | Planned |
-| 10 | Access packages for self-service access | Planned |
-| 11 | Lifecycle workflows — joiner, mover, leaver | Planned |
+| 03 | A module factory on Azure Verified Modules | Complete |
+| 04 | Subscription vending through the MCA alias API | Complete |
+| 05 | Hub network — Azure Firewall and the private DNS estate | Complete |
+| 06 | Deployment Stacks and deny assignments | Complete |
+| 07 | Workload identity end to end — zero secrets | Complete |
 | **Observability** | | |
-| 12 | Log Analytics designed for cost — DCRs and table plans | Planned |
-| 13 | Managed Prometheus and Grafana, alerts as code | Planned |
-| 14 | OpenTelemetry tracing and sampling that keeps the signal | Planned |
-| 15 | Detections as code in Microsoft Sentinel | Planned |
-| 16 | Diagnostic settings enforced at scale | Planned |
+| 08 | Log Analytics designed for cost — DCRs and table plans | Complete |
+| 09 | Container Apps — a workload that scales to zero | Complete |
+| 10 | OpenTelemetry tracing and sampling that keeps the signal | Planned |
+| 11 | Managed Prometheus and Grafana, alerts as code | Planned |
+| 12 | Detections as code in Microsoft Sentinel | Planned |
+| 13 | Diagnostic settings enforced at scale | Planned |
+| **Identity** — blocked on an Entra ID P1/P2 licence | | |
+| 14 | PIM, access reviews and break-glass | Blocked |
+| 15 | Conditional Access as code, staged with report-only | Blocked |
+| 16 | Access packages for self-service access | Blocked |
+| 17 | Lifecycle workflows — joiner, mover, leaver | Blocked |
 | **Compute and containers** | | |
-| 17 | An internal developer platform — Deployment Environments and Dev Box | Planned |
-| 18 | Container Apps self-service — KEDA and scale to zero | Planned |
-| 19 | AKS Automatic with workload identity | Planned |
-| 20 | GitOps with Flux, guarded by Azure Policy for Kubernetes | Planned |
-| 21 | Gateway API ingress with Application Gateway for Containers | Planned |
-| 22 | The Istio add-on — mTLS, and what a mesh costs | Planned |
+| 18 | An internal developer platform — Deployment Environments and Dev Box | Planned |
+| 19 | Container Apps self-service — KEDA event-driven scaling, building on week 09 | Planned |
+| 20 | AKS Automatic with workload identity | Planned |
+| 21 | GitOps with Flux, guarded by Azure Policy for Kubernetes | Planned |
+| 22 | Gateway API ingress with Application Gateway for Containers | Planned |
+| 23 | The Istio add-on — mTLS, and what a mesh costs | Planned |
 | **Data** | | |
-| 23 | PostgreSQL Flexible Server — HA, private, Entra auth, no passwords | Planned |
-| 24 | Azure SQL Hyperscale and a failover actually performed | Planned |
-| 25 | Cosmos DB multi-region — consistency demonstrated, vector search | Planned |
-| 26 | Azure Managed Redis | Planned |
-| 27 | Storage that survives an auditor — immutability and replication | Planned |
-| 28 | Real-time analytics on Fabric | Planned |
+| 24 | PostgreSQL Flexible Server — HA, private, Entra auth, no passwords | Planned |
+| 25 | Azure SQL Hyperscale and a failover actually performed | Planned |
+| 26 | Cosmos DB multi-region — consistency demonstrated, vector search | Planned |
+| 27 | Azure Managed Redis | Planned |
+| 28 | Storage that survives an auditor — immutability and replication | Planned |
+| 29 | Real-time analytics on Fabric | Planned |
 | **AI platform** | | |
-| 29 | An AI landing zone — private, and governed like everything else | Planned |
-| 30 | RAG on the hub network — retrieval quality and private endpoints | Planned |
-| 31 | Agents with tools, under a managed identity | Planned |
-| 32 | Evaluation and content safety gating deploys | Planned |
-| 33 | An AI gateway — token quotas and per-team chargeback | Planned |
-| 34 | Model economics — provisioned throughput versus pay-as-you-go | Planned |
+| 30 | An AI landing zone — private, and governed like everything else | Planned |
+| 31 | RAG on the hub network — retrieval quality and private endpoints | Planned |
+| 32 | Agents with tools, under a managed identity | Planned |
+| 33 | Evaluation and content safety gating deploys | Planned |
+| 34 | An AI gateway — token quotas and per-team chargeback | Planned |
+| 35 | Model economics — provisioned throughput versus pay-as-you-go | Planned |
 | **Security** | | |
-| 35 | Defender for Cloud attack paths, closed | Planned |
-| 36 | Customer-managed keys and the rotation that breaks things | Planned |
-| 37 | Confidential computing and attestation | Planned |
-| 38 | Private Link at scale — DNS Private Resolver, and a broken zone link | Planned |
-| 39 | WAF tested with real payloads | Planned |
-| 40 | Supply chain — signed images and admission control that rejects | Planned |
+| 36 | Defender for Cloud attack paths, closed | Planned |
+| 37 | Customer-managed keys and the rotation that breaks things | Planned |
+| 38 | Confidential computing and attestation | Planned |
+| 39 | Private Link at scale — DNS Private Resolver, and a broken zone link | Planned |
+| 40 | WAF tested with real payloads | Planned |
+| 41 | Supply chain — signed images and admission control that rejects | Planned |
 | **Resilience** | | |
-| 41 | Zone redundancy, proven per service | Planned |
-| 42 | Chaos Studio experiments in CI | Planned |
-| 43 | Backup vaults, with a restore performed | Planned |
-| 44 | Multi-region failover — and failing back | Planned |
-| 45 | Load testing to the actual ceiling | Planned |
-| 46 | A DR game day with measured RTO and RPO | Planned |
+| 42 | Zone redundancy, proven per service | Planned |
+| 43 | Chaos Studio experiments in CI | Planned |
+| 44 | Backup vaults, with a restore performed | Planned |
+| 45 | Multi-region failover — and failing back | Planned |
+| 46 | Load testing to the actual ceiling | Planned |
+| 47 | A DR game day with measured RTO and RPO | Planned |
 | **FinOps and operations** | | |
-| 47 | FinOps toolkit — exports, anomaly alerts, real attribution | Planned |
-| 48 | Reservations and savings plans modelled on real usage | Planned |
-| 49 | Carbon optimization, with a workload changed because of it | Planned |
-| 50 | Arc and Update Manager — a non-Azure machine, same policy set | Planned |
-| 51 | Compute Fleet and spot, proven by forcing an eviction | Planned |
-| 52 | The whole platform — every measured number, and what to redo | Planned |
+| 48 | FinOps toolkit — exports, anomaly alerts, real attribution | Planned |
+| 49 | Reservations and savings plans modelled on real usage | Planned |
+| 50 | Carbon optimization, with a workload changed because of it | Planned |
+| 51 | Arc and Update Manager — a non-Azure machine, same policy set | Planned |
+| 52 | Compute Fleet and spot, proven by forcing an eviction | Planned |
+| 53 | The whole platform — every measured number, and what to redo | Planned |
 
 Service names are checked against current Azure documentation at the start of each
 week before any code is written. Azure moves; the commitment is to the problem,
