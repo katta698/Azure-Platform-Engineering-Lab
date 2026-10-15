@@ -1,0 +1,35 @@
+title: The app answers, and only over HTTPS
+subtitle: measured against the deployed app — real output, not a mock-up
+width: 1060
+---
+$ curl -i https://ca-hello-dev-scus-001.<env>.southcentralus.azurecontainerapps.io/
+
+HTTP/1.1 200 OK
+accept-ranges: bytes
+content-length: 4331
+content-type: text/html; charset=utf-8
+last-modified: Tue, 08 Sep 2026 02:58:42 GMT
+date: Thu, 15 Oct 2026 01:54:09 GMT
+
+<html lang="en">
+<head>
+    <title>Azure Container Apps</title>
+...
+<body data-artifact="Azure Default Service Page">
+
+# The same request on port 80, in the clear:
+
+$ curl -i http://ca-hello-dev-scus-001.<env>.southcentralus.azurecontainerapps.io/
+
+HTTP/1.1 301 Moved Permanently
+location: https://ca-hello-dev-scus-001.<env>.southcentralus.azurecontainerapps.io/
+content-length: 0
+
+# allow_insecure_connections = false is doing the work in that second
+# response. Left at its default, the ingress still serves HTTPS -- but it
+# ALSO answers port 80 with a 200, and a client that gets a 200 in the clear
+# has no reason to ever upgrade. The 301 is the difference between "HTTPS is
+# available" and "HTTPS is the only way in".
+#
+# The environment subdomain is elided here; it is generated per environment
+# and appears in full in the portal figures.

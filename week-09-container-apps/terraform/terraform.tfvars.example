@@ -1,0 +1,4 @@
+# Copy to terraform.tfvars and fill in. terraform.tfvars is gitignored.
+tenant_id                  = "00000000-0000-0000-0000-000000000000"
+subscription_id            = "00000000-0000-0000-0000-000000000000" # sub-lab-dev
+management_subscription_id = "00000000-0000-0000-0000-000000000000" # sub-management, holds week 08's workspace

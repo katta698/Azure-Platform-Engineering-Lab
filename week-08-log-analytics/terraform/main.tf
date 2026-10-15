@@ -12,7 +12,7 @@
 
 locals {
   common_tags = {
-    week        = "12"
+    week        = "08"
     env         = "prod" # platform telemetry outlives any one week
     managed-by  = "terraform"
     cost-center = "platform-lab"

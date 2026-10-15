@@ -71,3 +71,11 @@ scripts/screenshots/.session-cookie
 # about what /tmp means on Windows - one writes to AppData, the others read
 # C:\tmp, and the file is simply missing.
 .tmp-*
+
+
+# Scratch roots used to validate a config before it touches HCP, and the
+# per-week validation workspace. Regenerable, and neither is evidence.
+**/.probe/
+**/.validate/
+**/sch.json
+**/err.txt

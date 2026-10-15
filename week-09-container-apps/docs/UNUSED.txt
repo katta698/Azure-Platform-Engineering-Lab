@@ -1,0 +1,8 @@
+Week 09 — retired figure slots
+==============================
+
+Numbers are never recycled. A slot that is declared in FIGURE_PLAN.md and then
+not used gets a line here saying why, so the gap in the numbering has a reason
+attached to it rather than looking like a lost file.
+
+(none yet)

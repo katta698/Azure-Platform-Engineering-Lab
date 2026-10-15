@@ -1,0 +1,38 @@
+title: The Terraform behind this week
+subtitle: week-09-container-apps — what each file does, and how big it actually is
+width: 1020
+---
+week-09-container-apps/
+│
+├── terraform/
+│   ├── versions.tf          41   # azurerm, the HCP backend, and a SECOND
+│   │                             # provider aliased to sub-management
+│   ├── variables.tf         70   # image, replica floor and ceiling, and why
+│   │                             # each default is the default
+│   ├── main.tf             154   # resource group, identity, environment, app
+│   ├── logging.tf           78   # reads week 08's workspace across a
+│   │                             # subscription, routes two log categories
+│   └── outputs.tf           36   # the FQDN the tests call, and the workspace
+│
+└── scripts/
+    ├── deploy.sh            73   # registers Microsoft.App and WAITS for it
+    ├── validate.sh         282   # 6 checks. #3 polls until replicas hit 0,
+    │                             # #4 times the request that pays for it
+    └── cleanup.sh          103   # deletes the group, then verifies against
+                                  # Azure that week 08 is still standing
+
+# 5 resources, and the split follows the subscription boundary
+#
+# main.tf answers "what runs, and how little of it runs when nobody is
+# asking" -- the environment, the app, the replica floor of zero and the
+# ceiling that stops zero turning into a runaway bill.
+#
+# logging.tf answers "where does it report, and does that cross a boundary"
+# -- and it is a separate file because the answer lives in another
+# subscription. The workspace is READ, never owned: a data source cannot be
+# destroyed by this week's teardown, which is the property that makes one
+# shared workspace safe to depend on.
+#
+# versions.tf carries two provider blocks for the same reason. A provider is
+# pinned to one subscription, so reaching across is a declared relationship
+# rather than a pasted resource ID.
