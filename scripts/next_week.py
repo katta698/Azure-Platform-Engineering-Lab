@@ -79,6 +79,35 @@ def published_weeks():
     return sorted(found)
 
 
+README_ROW = re.compile(r"^\|\s*(\d{2})\s*\|[^|]*\|\s*([A-Za-z]+)\s*\|")
+
+
+def readme_status():
+    """What README.md's week tracker claims about each week.
+
+    WHY THIS IS CHECKED (2026-10-24)
+    --------------------------------
+    Jay, looking at the repo on his phone: "Why are we not updating readme?"
+    Week 10 was built, validated, torn down and PUBLISHED, and the tracker on
+    the repo's landing page still said Planned - the first thing any visitor
+    reads, contradicting the live post.
+
+    It had happened once already: on 2026-10-15 the tracker still showed weeks
+    03-09 as Planned, months after they shipped, alongside the pre-renumber
+    plan. Fixing it by hand twice is not a fix. A published week whose tracker
+    row says anything but Complete now fails the sweep.
+    """
+    f = os.path.join(REPO, "README.md")
+    if not os.path.isfile(f):
+        return None
+    out = {}
+    for line in open(f, encoding="utf-8").read().split("\n"):
+        m = README_ROW.match(line.strip())
+        if m:
+            out[int(m.group(1))] = m.group(2)
+    return out
+
+
 def main():
     check = "--check" in sys.argv
     folders = week_folders()
@@ -128,6 +157,19 @@ def main():
                     % ", ".join("%02d" % x for x in sorted(pubnums))
                 )
                 break
+
+    # 4. a published week must not still read "Planned" on the landing page
+    status = readme_status()
+    if status is not None and pub is not None:
+        for n, name in pub:
+            st = status.get(n)
+            if st is None:
+                problems.append(
+                    "week %02d is published but has no row in README.md's week tracker" % n)
+            elif st.lower() != "complete":
+                problems.append(
+                    "week %02d is PUBLISHED but README.md's tracker still says \"%s\" - "
+                    "that table is the first thing anyone reads" % (n, st))
 
     print("  built weeks     : %s" % ", ".join("%02d" % n for n, _ in folders))
     if pub is not None:

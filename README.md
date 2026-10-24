@@ -87,7 +87,7 @@ before the things it governs.
 | **Observability** | | |
 | 08 | Log Analytics designed for cost — DCRs and table plans | Complete |
 | 09 | Container Apps — a workload that scales to zero | Complete |
-| 10 | OpenTelemetry tracing and sampling that keeps the signal | Planned |
+| 10 | OpenTelemetry — one trace across two services, and sampling that keeps it whole | Complete |
 | 11 | Managed Prometheus and Grafana, alerts as code | Planned |
 | 12 | Detections as code in Microsoft Sentinel | Planned |
 | 13 | Diagnostic settings enforced at scale | Planned |
