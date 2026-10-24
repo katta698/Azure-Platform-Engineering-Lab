@@ -25,10 +25,14 @@ variable "deploy_firewall" {
   description = <<-EOT
     Whether to deploy Azure Firewall and its two public IPs.
 
-    **This is the only expensive thing in the week**, and it is the only thing
-    `cleanup.sh` destroys by default. Everything else — the hub, the subnets,
-    the spoke, the peerings, the route table and the whole private DNS estate —
-    costs approximately nothing and is what weeks 06 onward attach to.
+    **This is the most expensive thing in the week** by three orders of
+    magnitude, and it is the only thing `cleanup.sh` destroys by default. The
+    hub, the subnets, the spoke, the peerings and the route table genuinely do
+    cost nothing, and are what weeks 06 onward attach to.
+
+    The private DNS estate is NOT free, and this comment used to say it was.
+    Measured 2026-10-24: a private DNS zone is $0.50/month each, so six zones
+    are $3.00/month — see `deploy_private_dns` below.
 
     Defaulted false so that the cheap, permanent layer can be applied, re-applied
     and left alone without ever standing up a firewall by accident.
@@ -81,6 +85,36 @@ variable "spoke_address_space" {
 }
 
 # ── The private DNS estate ──────────────────────────────────────────────────
+
+variable "deploy_private_dns" {
+  description = <<-EOT
+    Whether to create the private DNS estate.
+
+    **Defaulted false, and that is a cost decision taken with real numbers.**
+
+    Measured 2026-10-24, after the zones had been up since week 05:
+
+      Private Zone        $0.50 each per month   (6 zones = $3.00/month)
+      Private Record Set  $0.00
+      Private Queries     $0.40 per million
+
+    So the estate was costing $0.0968/day — the single largest standing charge
+    in the lab, more than twice week 08's alert rule — while holding nothing.
+    Each zone contained exactly one record, the SOA that Azure creates by
+    itself, and there were ZERO private endpoints in any subscription. The
+    zones were pre-created for weeks that have not arrived yet.
+
+    Recreating them is this flag plus one apply, a few seconds, on the day a
+    week actually needs a private endpoint. Paying $36/year to save that is
+    not a trade worth making.
+
+    The reasoning for WHERE they live, when they do exist, is unchanged and
+    still worth reading — see `private_dns_zones` below.
+  EOT
+  type        = bool
+  default     = false
+}
+
 
 variable "private_dns_zones" {
   description = <<-EOT

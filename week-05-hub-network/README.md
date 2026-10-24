@@ -12,7 +12,8 @@ by the hour forever — so this one is split in two, and the split is the design
 
 | Layer | What is in it | Cost | Lifecycle |
 | --- | --- | --- | --- |
-| **Permanent** | hub VNet, both firewall subnets, spoke VNet, both peerings, route table, 6 private DNS zones and their 12 links | **~$0/hour** | stays up |
+| **Permanent** | hub VNet, both firewall subnets, spoke VNet, both peerings, route table | **~$0/hour** | stays up |
+| **Not free after all** | 6 private DNS zones and their 12 links | **$3.00/month** | removed 2026-10-24 — see below |
 | **Disposable** | Azure Firewall Basic, 2 public IPs, 2 firewall policies | **$0.405/hour** | deployed deliberately, destroyed the same day |
 
 Prices read from the Azure retail price API for `southcentralus` on 2026-09-19:
@@ -23,6 +24,23 @@ running. Standard would be `$1.325/hour`, about **$967/month**.
 `deploy_firewall` defaults to **false** and `scripts/cleanup.sh` removes **only**
 the firewall by default. That inverts the usual teardown on purpose: destroying
 the hub by reflex would break the next six weeks to save nothing.
+
+**Correction, 2026-10-24: the private DNS estate was never free.** This
+README and the Terraform both described the permanent layer as costing
+approximately nothing. Measured against the retail price list, a private DNS
+zone is **$0.50/month each** — so six zones were **$3.00/month**, or
+$0.0968/day, the largest standing charge in the lab and more than twice week
+08's alert rule.
+
+Worse, they were holding nothing: each zone contained only the SOA record
+Azure creates by itself, and there were zero private endpoints in any
+subscription. They had been pre-created for weeks that have not arrived.
+
+They are now gated behind `deploy_private_dns`, defaulted false, exactly as
+the firewall is. Recreating them is that flag plus one apply, on the day a
+week actually needs a private endpoint. The reasoning for where they live when
+they do exist is unchanged and still correct — per-spoke zones fail silently,
+so they belong in the hub.
 
 **What this week actually cost: $0.72.** The firewall ran 19:48–21:35 UTC,
 1 hour 47 minutes, against a planned ~1 hour. Both causes were process, not

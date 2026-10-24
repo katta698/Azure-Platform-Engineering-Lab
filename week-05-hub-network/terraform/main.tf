@@ -134,7 +134,7 @@ resource "azurerm_virtual_network_peering" "spoke_to_hub" {
 #
 # In the hub, linked to every VNet. One zone per service, shared by every spoke.
 resource "azurerm_private_dns_zone" "estate" {
-  for_each = var.private_dns_zones
+  for_each = var.deploy_private_dns ? var.private_dns_zones : {}
 
   name                = each.value
   resource_group_name = azurerm_resource_group.hub.name
@@ -142,7 +142,7 @@ resource "azurerm_private_dns_zone" "estate" {
 }
 
 resource "azurerm_private_dns_zone_virtual_network_link" "hub" {
-  for_each = var.private_dns_zones
+  for_each = var.deploy_private_dns ? var.private_dns_zones : {}
 
   name = "link-hub-${each.key}"
 
@@ -164,7 +164,7 @@ resource "azurerm_private_dns_zone_virtual_network_link" "hub" {
 # nothing for a workload sitting in the spoke — the endpoint would resolve to
 # its public IP, which fails closed later and looks like a firewall problem.
 resource "azurerm_private_dns_zone_virtual_network_link" "spoke" {
-  for_each = var.private_dns_zones
+  for_each = var.deploy_private_dns ? var.private_dns_zones : {}
 
   name                 = "link-spoke-lab-dev-${each.key}"
   private_dns_zone_id  = azurerm_private_dns_zone.estate[each.key].id
