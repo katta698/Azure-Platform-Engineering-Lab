@@ -16,8 +16,13 @@ and it only becomes interesting once more than one service is involved.
 | Billed while up | ACR **Basic at $0.1666/day**, measured from the retail price API |
 | OpenTelemetry agent | **$0.00** — Microsoft provisions 0.5 vCPU / 1.5 GB inside the environment at no compute cost |
 | Traces and logs | ingested into week 08's workspace at its Analytics rate; sampling is the control |
-| Measured for this week | `COST_PLACEHOLDER` |
+| Measured for this week | **$0.0142** — read from Cost Management on 2026-10-24, after teardown |
 | Teardown | `./scripts/cleanup.sh`. Deletes the registry **and the images in it** — rebuildable from `app/` with one command |
+
+**Measured: $0.0142**, read from Cost Management after teardown. All of it is
+Container Registry; the Container Apps sat inside the monthly free grant and
+the OpenTelemetry agent carries no compute charge. ACR Basic bills
+$0.1666/day, so about two hours of registry is what this week actually cost.
 
 Application Insights is **workspace-based**, pointing at week 08's workspace.
 Classic Application Insights kept its own store with its own retention and its
