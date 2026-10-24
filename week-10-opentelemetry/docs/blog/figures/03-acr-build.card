@@ -1,0 +1,41 @@
+title: The image is built in Azure, not on a laptop
+subtitle: az acr build — no Docker daemon here, and the run status is the truth
+width: 1080
+---
+$ az acr build --registry acrwk10devscus001 \
+      --image wk10/frontend:v2 --file frontend/Dockerfile --no-logs .
+
+Queued a build with ID: cd5
+Waiting for an agent...
+
+$ az acr task list-runs --registry acrwk10devscus001 --top 2 -o table
+
+Status     Started
+---------  --------------------------------
+Succeeded  2026-10-24T01:35:20.517408+00:00
+Succeeded  2026-10-24T01:33:59.097366+00:00
+
+$ az acr repository show-manifests --name acrwk10devscus001 \
+      --repository wk10/frontend --query "[0].{digest:digest,tags:tags}" -o tsv
+
+sha256:17796f11656ca19e92f9a3c1bb498f966215ec43cabec46d1a3c3654421db4ea   v2
+
+# WHY --no-logs, AND WHY THE STATUS IS CHECKED SEPARATELY
+#
+# Streaming the build log back CRASHES the Azure CLI on a Windows console.
+# colorama writes the agent's output straight to the terminal in cp1252, pip
+# emits a progress bar made of box-drawing characters, and the command dies:
+#
+#     UnicodeEncodeError: 'charmap' codec can't encode characters
+#         in position 1794-1833: character maps to <undefined>
+#
+# The build had ALREADY SUCCEEDED in Azure when that happened. Measured
+# 2026-10-23: `az acr task list-runs` reported Succeeded for a build whose
+# command had exited 1, and the image was in the registry.
+#
+# So the script queues without streaming and then asks Azure what happened.
+# The run status is the truth; the client exit code is not.
+#
+# Nothing is built on this machine. There is no Docker daemon in the loop,
+# which is also why the build does not depend on what a laptop happens to
+# have installed.

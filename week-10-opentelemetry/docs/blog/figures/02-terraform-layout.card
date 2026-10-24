@@ -1,0 +1,45 @@
+title: The code behind this week
+subtitle: week-10-opentelemetry — what each file does, and how big it actually is
+width: 1080
+---
+week-10-opentelemetry/
+│
+├── app/                          # the part that MAKES telemetry
+│   ├── otel_setup.py        67   # tracer, sampler, OTLP exporter - the only
+│   │                             # file that knows OpenTelemetry exists
+│   ├── requirements.txt      7   # flask, gunicorn, the otel SDK + 2 instruments
+│   ├── frontend/app.py      45   # calls the backend; does almost nothing else
+│   ├── frontend/Dockerfile  19   # mcr.microsoft.com/azurelinux/base/python
+│   ├── backend/app.py       48   # sleeps 250 ms on purpose, in a child span
+│   └── backend/Dockerfile   19   # same base, same build, different service
+│
+├── terraform/
+│   ├── versions.tf          48   # azurerm + azapi, HCP backend, 2nd provider
+│   ├── variables.tf         53   # image tag, sampler ratio, backend work ms
+│   ├── registry.tf          68   # ACR Basic, identity, AcrPull. No passwords
+│   ├── observability.tf    115   # App Insights + the managed OTel agent
+│   ├── apps.tf             173   # the two container apps, internal + external
+│   └── outputs.tf           36   # the FQDN, the registry, the workspace
+│
+└── scripts/
+    ├── deploy.sh           126   # registry FIRST, then az acr build, then the rest
+    ├── validate.sh         232   # 6 checks. #5 proves ONE operation spans TWO
+    │                             # services - the only test that means anything here
+    └── cleanup.sh           93   # deletes the group, then verifies week 08 survived
+
+# 10 resources, and the split is between making telemetry and routing it
+#
+# app/ is the only place that knows what a span is. The managed agent routes
+# data; it does not create it. Microsoft's own FAQ: "Do I need to reference
+# the OpenTelemetry SDK in my code? Yes." Enable the agent without an
+# instrumented app and you get a working pipeline carrying nothing.
+#
+# observability.tf is where the week's uncomfortable line lives:
+# local_authentication_enabled = true on Application Insights. Week 08 set
+# that same argument to FALSE on the workspace, and that is what forced week
+# 09's logging design. The agent authenticates with a connection string and
+# Microsoft documents no ARM-authenticated alternative, so here it must be on.
+#
+# deploy.sh is three passes because a container app cannot reference an image
+# tag that does not resolve yet: create the registry, build into it, then
+# apply everything else.

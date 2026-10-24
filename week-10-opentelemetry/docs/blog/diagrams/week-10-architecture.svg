@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 580" width="900" height="580" role="img" aria-label="Week 10 OpenTelemetry. A request reaches an externally exposed frontend container app, which calls an internal-only backend over HTTP inside the Container Apps environment. The requests library injects a W3C traceparent header and the backend reads it, so both services share one trace. Each app exports spans over OTLP gRPC to the managed OpenTelemetry agent that Azure runs inside the environment at no compute cost. The agent forwards traces and logs to Application Insights, which stores them in week 08's Log Analytics workspace in another subscription. Both images are pulled from a Basic container registry using a user-assigned managed identity holding AcrPull, with the registry admin user disabled. Measured: the frontend request takes 256.4 milliseconds of which the backend accounts for 250.8.">
+  <defs>
+    <style>
+      .t    { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+      .hdr  { font-size: 13px; font-weight: 700; fill: #1f2933; }
+      .lbl  { font-size: 12px; fill: #1f2933; }
+      .sm   { font-size: 11px; fill: #52606d; }
+      .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; fill: #1f2933; }
+      .box  { fill: #ffffff; stroke: #c3cbd5; stroke-width: 1.2; }
+      .svc  { fill: #f2f9f4; stroke: #8fbf9f; stroke-width: 1.3; }
+      .int  { fill: #f6f7f9; stroke: #b9c0c9; stroke-width: 1.3; }
+      .band { fill: #f5f7fa; stroke: #dbe1e8; stroke-width: 1; }
+      .own  { fill: #f7f5fb; stroke: #b3a8d1; stroke-width: 1.2; }
+      .agent{ fill: #fff8ec; stroke: #d9b36c; stroke-width: 1.3; }
+      .flow { stroke: #4a7fb5; stroke-width: 1.8; fill: none; }
+      .otlp { stroke: #b07d2b; stroke-width: 1.5; fill: none; stroke-dasharray: 5 3; }
+      .logs { stroke: #6b5b9a; stroke-width: 1.6; fill: none; }
+      .ok   { fill: #1b6e3c; font-weight: 700; }
+    </style>
+    <marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#4a7fb5"/>
+    </marker>
+    <marker id="o" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#b07d2b"/>
+    </marker>
+    <marker id="p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#6b5b9a"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="900" height="580" fill="#ffffff"/>
+  <text class="t hdr" x="24" y="26">A log says the request took 256 ms. A trace says which service spent it.</text>
+
+  <!-- request -->
+  <rect class="box" x="20" y="54" width="112" height="58" rx="6"/>
+  <text class="t hdr" x="32" y="76">A REQUEST</text>
+  <text class="t sm" x="32" y="94">HTTPS, external</text>
+  <path class="flow" d="M132,83 L176,83" marker-end="url(#b)"/>
+
+  <!-- environment band -->
+  <rect class="band" x="176" y="44" width="430" height="300" rx="8"/>
+  <text class="t hdr" x="190" y="64">CONTAINER APPS ENVIRONMENT — sub-lab-dev</text>
+
+  <!-- frontend -->
+  <rect class="svc" x="190" y="76" width="166" height="74" rx="5"/>
+  <text class="t hdr" x="202" y="97">frontend</text>
+  <text class="t sm" x="202" y="114">external ingress</text>
+  <text class="t mono ok" x="202" y="134">p50 256.4 ms</text>
+
+  <!-- hop -->
+  <path class="flow" d="M356,113 L418,113" marker-end="url(#b)"/>
+  <text class="t sm" x="360" y="106">traceparent</text>
+
+  <!-- backend -->
+  <rect class="int" x="418" y="76" width="166" height="74" rx="5"/>
+  <text class="t hdr" x="430" y="97">backend</text>
+  <text class="t sm" x="430" y="114">INTERNAL only — 404 from outside</text>
+  <text class="t mono ok" x="430" y="134">p50 250.8 ms</text>
+
+  <!-- agent -->
+  <path class="otlp" d="M273,150 L273,214" marker-end="url(#o)"/>
+  <path class="otlp" d="M501,150 L501,214" marker-end="url(#o)"/>
+  <text class="t sm" x="330" y="186">OTLP gRPC</text>
+  <text class="t sm" x="330" y="202">spans leave the app</text>
+
+  <rect class="agent" x="190" y="214" width="394" height="78" rx="6"/>
+  <text class="t hdr" x="204" y="236">MANAGED OPENTELEMETRY AGENT</text>
+  <text class="t sm" x="204" y="254">Azure runs it inside the environment: 0.5 vCPU, 1.5 GB, $0.00</text>
+  <text class="t sm" x="204" y="272">It ROUTES telemetry. It does not create any — the SDK does that.</text>
+
+  <text class="t sm" x="190" y="312">Preview. Its own health is not exposed in the portal or any monitoring API.</text>
+
+  <!-- to app insights -->
+  <path class="logs" d="M584,253 L646,253" marker-end="url(#p)"/>
+
+  <rect class="own" x="646" y="44" width="234" height="300" rx="8"/>
+  <text class="t hdr" x="660" y="64">sub-management</text>
+
+  <rect class="box" x="660" y="78" width="206" height="96" rx="6"/>
+  <text class="t hdr" x="672" y="100">APPLICATION INSIGHTS</text>
+  <text class="t sm" x="672" y="118">workspace-based, so week 08's</text>
+  <text class="t sm" x="672" y="134">table plans and cap still apply</text>
+  <text class="t mono" x="672" y="156">local auth MUST be ON</text>
+
+  <rect class="box" x="660" y="190" width="206" height="90" rx="6"/>
+  <text class="t hdr" x="672" y="212">WEEK 08's WORKSPACE</text>
+  <text class="t mono" x="672" y="232">AppRequests</text>
+  <text class="t mono" x="672" y="248">AppDependencies</text>
+  <text class="t sm" x="672" y="268">read, never owned by this week</text>
+
+  <!-- registry -->
+  <rect class="band" x="20" y="366" width="860" height="56" rx="8"/>
+  <text class="t hdr" x="34" y="388">WHERE THE IMAGES COME FROM</text>
+  <text class="t lbl" x="34" y="408">ACR Basic, admin user OFF. Both apps pull with a user-assigned managed identity holding AcrPull on the REGISTRY. No password exists.</text>
+
+  <text class="t sm" x="24" y="446">Week 08 set local_authentication_enabled = FALSE on the workspace. This week must set the same argument TRUE on Application</text>
+  <text class="t sm" x="24" y="462">Insights: the agent authenticates with a connection string and Microsoft documents no ARM-authenticated alternative.</text>
+  <text class="t sm" x="24" y="486">One header carries the trace across the process boundary: the backend's ParentId IS the frontend's outbound span id.</text>
+  <text class="t sm" x="24" y="510">Sampling measured: 100 requests at parentbased_traceidratio 0.2 kept 16 traces — and 0 half-traces. The decision is taken</text>
+  <text class="t sm" x="24" y="526">once at the frontend and respected downstream, so a kept trace is always a WHOLE trace.</text>
+</svg>

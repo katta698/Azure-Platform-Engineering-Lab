@@ -335,6 +335,24 @@ def screenshot_via_cdp(page, out: Path) -> None:
             pass
 
 
+
+def _refresh_hcp_session(path):
+    """Best-effort: pull a fresh cookie from a running signed-in Chrome.
+
+    HCP rotates _atlas_session_data as the live session is used, so a saved
+    snapshot goes stale within the hour. Refreshing costs one CDP call.
+    """
+    if not path:
+        return
+    try:
+        import sys as _sys, pathlib as _pl
+        _sys.path.insert(0, str(_pl.Path(__file__).parent))
+        from hcp_session import refresh_if_possible
+        refresh_if_possible(path)
+    except Exception:
+        pass
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("url", nargs="?")

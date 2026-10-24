@@ -18,16 +18,14 @@ willing to pay while nobody is using it.
 | Billed while serving | 0.25 vCPU-s and 0.5 GiB-s per second of running replica, plus requests |
 | Free each month, per subscription | 180,000 vCPU-seconds, 360,000 GiB-seconds, 2 million requests |
 | Fixed environment fee | **none** — a plan management charge applies only if you use a *Dedicated* workload profile |
-| Measured for this week | **no total yet** — see below |
+| Measured for this week | **$0.00** — read from Cost Management after teardown |
 | Teardown | `./scripts/cleanup.sh` removes everything in `sub-lab-dev`. Week 08's workspace is read, never owned, so it survives |
 
-**No total yet.** Azure charges post roughly a day in arrears, and the rule here
-is to read cost from the bill rather than from a rate card. The expectation is
-**$0.00**: the app ran about 40 minutes of a single 0.25-vCPU / 0.5-GiB replica,
-which is roughly **600 vCPU-seconds** and **1,200 GiB-seconds** against monthly
-free grants of 180,000 and 360,000 — under half a percent of either, on a
-handful of requests against a 2-million free allowance. This line gets updated
-from the bill, not from this estimate.
+**Measured: $0.00.** Read from Cost Management on 2026-10-15, after teardown —
+`sub-lab-dev` shows no charges at all for the days this ran. The app used roughly
+**600 vCPU-seconds** and **1,200 GiB-seconds** against monthly free grants of
+180,000 and 360,000, on a handful of requests against a 2-million allowance. The
+free grant absorbed the entire week.
 
 Rates measured from the Azure retail price API for `southcentralus`, not quoted
 from a marketing page:
