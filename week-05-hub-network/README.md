@@ -8,7 +8,14 @@ That makes the interesting decision the **lifecycle**, not the topology. A week
 described in the roadmap as "built once, kept" cannot also be a week that bills
 by the hour forever — so this one is split in two, and the split is the design.
 
-## Cost note
+---
+
+**Reproduce it:** [LAB.md](LAB.md) — prerequisites, variables, commands, expected outputs, validation and cleanup.
+**Write-up:** [jayanthkatta.com/blog/week-05-hub-network](https://jayanthkatta.com/blog/week-05-hub-network/)
+
+---
+
+## 1. Cost note
 
 | Layer | What is in it | Cost | Lifecycle |
 | --- | --- | --- | --- |
@@ -46,11 +53,15 @@ so they belong in the hub.
 1 hour 47 minutes, against a planned ~1 hour. Both causes were process, not
 Azure, and both are written up under *What this cost in surprises*.
 
-## How it fits together
+---
+
+## 2. How it fits together
 
 ![Week 5 architecture](docs/blog/diagrams/week-05-architecture.svg)
 
-## Built in this order
+---
+
+## 3. Built in this order
 
 ### 1. The hub, the spoke, and the peering between them
 
@@ -123,72 +134,3 @@ private IP shown on the firewall blade in step 3.
 The route is gated on the same variable as the firewall, deliberately. A
 `0.0.0.0/0` route to a next hop that no longer exists does not fail loudly; it
 blackholes the subnet.
-
-## What was measured
-
-`scripts/validate.sh`, with the firewall deployed: **5 passed, 0 failed.**
-
-| # | Check | Result |
-| --- | --- | --- |
-| 1 | Both peerings report `Connected` | hub → spoke and spoke → hub, both `Connected` |
-| 2 | Every zone linked to both VNets | 6 zones, 12 links |
-| 3 | Firewall subnets named and sized | `AzureFirewallSubnet 10.0.0.0/26`, `AzureFirewallManagementSubnet 10.0.0.64/26` |
-| 4 | Spoke default route points at the firewall | next hop `10.0.0.4` = firewall `10.0.0.4` |
-| 5 | Drift | none |
-
-Without the firewall the same script reports **4 passed, 0 failed** and skips
-check 4 — the absence of a `0.0.0.0/0` route is the correct state, not a gap.
-
-## Running it
-
-```bash
-./scripts/deploy.sh hub        # permanent layer. ~$0/hour. Safe to leave
-./scripts/validate.sh
-./scripts/deploy.sh firewall   # + firewall and route. $0.405/hour. Billing starts
-./scripts/validate.sh
-./scripts/cleanup.sh           # removes the firewall, keeps the hub
-./scripts/cleanup.sh --all     # removes everything, including the hub
-```
-
-## Teardown
-
-`cleanup.sh` removes the firewall, both public IPs and both policies by
-re-applying with `deploy_firewall=false` — not with `destroy -target`, which
-would leave the route pointing at an address that no longer answers. Both are
-gated on the same variable, so they go together in dependency order.
-
-The public IPs matter more than they look. A standard static IP left behind is
-`$0.005/hour` — trivial per hour and permanent if nobody checks — so the script
-verifies that zero firewalls **and** zero public IPs remain before it reports
-clean.
-
-## What this cost in surprises
-
-- **The teardown failed, and the script reported success.** The first
-  `cleanup.sh` run died with
-  `FirewallPolicyUpdateFailed — Put on Firewall Policy afwp-lz-dev... Failed
-  with 1 faulted referenced firewalls`: Terraform tried to update the child
-  policy while the firewall still referenced it. The firewall stayed up and kept
-  billing, and the script **still exited 0**. It now checks the apply's exit code
-  explicitly rather than trusting `set -e`.
-- **The safety check could not run at all.** `cleanup.sh` verified with
-  `az network firewall list`, which needs the `azure-firewall` extension and, in
-  a non-interactive shell, dies on the dynamic-install prompt with
-  `EOFError: EOF when reading a line`. So the check whose entire job was to catch
-  a surviving firewall was itself incapable of running. This lab had already
-  documented that failure mode for `az account subscription list` and it was
-  reintroduced anyway. Now uses `az resource list`, which needs no extension.
-  Recovery was `az resource delete --ids <firewall>`, 8 minutes, then a re-apply.
-- **`az network vnet subnet show --query addressPrefix` returns null.** The value
-  moved to `addressPrefixes[]`. Querying the old field returns empty, which is
-  indistinguishable from "the subnet does not exist" — so both firewall subnets
-  reported as missing when they existed and were correct. Read
-  `addressPrefixes[0] || addressPrefix`.
-- **azurerm 5.x changed the DNS link schema.**
-  `azurerm_private_dns_zone_virtual_network_link` takes `private_dns_zone_id`;
-  4.x took `resource_group_name` + `private_dns_zone_name`. Copying a link block
-  from almost any published example fails validate on both arguments.
-- **A billable resource left unattended is the real risk, not the hourly rate.**
-  An hour of Basic is about $0.41. This week ran 1h47m because nothing was
-  watching the meter between capture and teardown. The rate was never the
-  problem; the absence of a deadline was.
