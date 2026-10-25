@@ -17,7 +17,14 @@ The week's claim, stated so it can fail: **an Owner with full rights over the
 subscription cannot delete a resource a deployment stack is protecting, and can
 delete an otherwise identical resource beside it.**
 
-## Cost note
+---
+
+**Reproduce it:** [LAB.md](LAB.md) — prerequisites, variables, commands, expected outputs, validation and cleanup.
+**Write-up:** [jayanthkatta.com/blog/week-06-deployment-stacks](https://jayanthkatta.com/blog/week-06-deployment-stacks/)
+
+---
+
+## 1. Cost note
 
 | What runs | Cost |
 | --- | --- |
@@ -35,11 +42,15 @@ The interesting cost is not money. It is that a stack with deny settings on is
 harder to remove than what it protects, which is the point and also the trap —
 see *Teardown* below.
 
-## How it fits together
+---
+
+## 2. How it fits together
 
 ![Week 6 architecture](docs/blog/diagrams/week-06-architecture.svg)
 
-## The design
+---
+
+## 3. The design
 
 ### Two halves, two tools, and that split is deliberate
 
@@ -89,45 +100,9 @@ protected storage account whose network rules can still be rewritten, whose publ
 access can be re-enabled, and whose TLS floor can be dropped is not meaningfully
 protected — it just cannot be removed while being quietly ruined.
 
-## What was measured
+---
 
-`scripts/validate.sh`, run 2026-09-25 against the live deployment. Five checks,
-and check 3 genuinely deletes something:
-
-```
-control:   stwk06ctrl082142   (Terraform, unprotected)
-protected: stwk06prot345788   (deployment stack, denyWriteAndDelete)
-
-1. The stack exists at mg-lz-dev and reports its managed resources
-   managed resources: 2   denySettings.mode: denyWriteAndDelete
-   RESULT: the stack is managing resources with deny settings on
-
-2. The managed resources report a deny status
-   status=managed  denyStatus=denyWriteAndDelete
-   status=managed  denyStatus=denyWriteAndDelete
-   RESULT: 2 resource(s) carry denyWriteAndDelete
-
-3. Deleting the CONTROL storage account succeeds
-   RESULT: deleted - an ordinary account, deletable by an Owner
-
-4. Deleting the PROTECTED storage account is refused
-   RESULT: REFUSED by the stack's deny assignment
-     DenyAssignmentAuthorizationFailed) The client '<signed-in user>' with
-     object id '<oid>' has permission to perform action
-     'Microsoft.Storage/storageAccounts/delete' ...
-
-5. The refusal applied to an Owner, not a limited principal
-   caller roles on the subscription: Owner User Access Administrator
-   RESULT: the caller holds Owner and was still refused
-
-── 5 passed, 0 failed ──
-```
-
-Read check 4's error text again. Azure is not saying the caller lacks permission —
-it is saying the caller **has** it. The deny assignment is evaluated after the role
-grant and overrides it. That single sentence is the whole week.
-
-## Evidence
+## 4. Evidence
 
 ![The protected resource group](docs/blog/screenshots/01-protected-resource-group.png)
 
@@ -145,69 +120,3 @@ returns *"This feature isn't implemented at this time."* Stacks at subscription 
 resource group scope render; the management group blade does not, as of 2026-09-25.
 That is a real constraint on operating them, not a gap in this week's evidence: the
 deny assignment above and `az stack mg show` are the views that exist.
-
-## Running it
-
-```bash
-cp terraform/terraform.tfvars.example terraform/terraform.tfvars
-# fill in subscription_id, location, control_storage_account_name
-
-./scripts/deploy.sh      # Terraform for the control, az stack mg create for the protected
-./scripts/validate.sh    # tries both deletes and reports which one Azure refused
-./scripts/cleanup.sh     # removes the stack, then the Terraform half
-```
-
-`deploy.sh` runs `az stack mg validate` before `az stack mg create`, because a
-stack that fails midway still exists — and a half-failed stack *with deny settings*
-is harder to remove than one that never started.
-
-## Teardown
-
-The protected resources cannot be deleted directly. That is the entire point, and
-it means the teardown is not the usual one:
-
-```bash
-az stack mg delete --name stack-wk06-protected \
-  --management-group-id mg-lz-dev \
-  --action-on-unmanage deleteAll --yes
-```
-
-**`deleteAll` is not optional.** The documented default is *detach*: deployment
-stacks detach and do not delete unmanaged resources. A teardown that omits the flag
-deletes the stack, drops the deny assignment, and leaves every resource running —
-unowned, untracked, still billing — while the command exits 0 and says nothing. On
-this week that costs nothing. On a week with a firewall in it, that is the bill
-that arrives a month later.
-
-Three documented ways the delete can fail, all handled in `scripts/cleanup.sh`:
-
-- **Permission.** Updating or deleting a stack whose deny setting is anything other
-  than `none` needs rights at the stack's scope. *Deployment Stack Contributor*
-  cannot do it; Owner at the management group can.
-- **Stack out of sync.** The delete is refused rather than risk removing something
-  unexpected. The bypass flag is deliberately not used — it deletes whatever the
-  managed list happens to contain, which is exactly the situation the error exists
-  to stop.
-- **A resource group holding resources the stack does not manage** is not removed,
-  and neither are those resources.
-
-`cleanup.sh` therefore checks the delete's exit code explicitly and then **verifies
-against Azure** that both resource groups are gone, rather than trusting a zero
-exit. That is a direct correction from week 05, where a teardown reported success
-while an Azure Firewall kept billing.
-
-## What this cost in surprises
-
-- **ARM rejects a top-level `"//"` member.** The convention of using `"//"` as a
-  JSON comment key fails here with `InvalidRequestContent: Could not find member
-  '//' on object of type 'Template'`. Commentary has to live in `metadata`, which
-  is a real schema member.
-- **`az stack mg validate` does not accept `--yes`; `az stack mg create` does.**
-  Sibling commands, different argument sets, and the error is
-  `unrecognized arguments: --yes`.
-- **A marker file written by one script and read by another must agree on the
-  directory.** `deploy.sh` wrote `.protected-storage-account` at the week root while
-  `validate.sh` read `scripts/.protected-storage-account`, so validation reported
-  *"run deploy.sh first"* against a deploy that had just succeeded.
-- **Management-group-scoped stacks have no portal UI.** Plan to operate them
-  entirely from the CLI, and plan the evidence for a change review accordingly.
