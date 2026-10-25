@@ -183,7 +183,7 @@ def main():
         print("  %-26s %-12s %-10s %-9s %-7s %s"
               % (w,
                  ("%d/9" % post["n_present"]) if post else "-",
-                 ("%d/9" % guide["n_present"]) if guide else "-",
+                 ("%d/9?" % guide["n_present"]) if guide else "-",
                  ("%d/%d" % (post["imgs"], post["figs"])) if post else "-",
                  str(post["words"]) if post else "-",
                  ", ".join(notes) or "ok"))
@@ -197,12 +197,21 @@ def main():
                 print("     blog missing : %s"
                       % (", ".join(post["missing"]) or "nothing"))
             if guide:
-                print("     guide missing: %s"
-                      % (", ".join(guide["missing"]) or "nothing"))
+                # NOT "missing". This is a keyword scan, and a keyword scan
+                # establishes presence, never absence. Three times today it
+                # flagged a requirement that was covered in different words:
+                # "Verifying nothing survived" did not match `verify.*remov`,
+                # "Expect `0`" did not match `expect 0` because of a backtick.
+                print("     guide: READ to confirm -> %s"
+                      % (", ".join(guide["missing"]) or "nothing flagged"))
     print()
-    print("  Section and shape gaps are editable. A MEASUREMENT that was never")
-    print("  captured is not: every week here is torn down, and the standard")
-    print("  forbids inventing evidence. Those get named, not filled.")
+    print("  blog 9 sec and figs/cap compare literal headings and tags: trust them.")
+    print("  guide 9? is a KEYWORD SCAN and carries a question mark for a reason.")
+    print("  A flagged part means OPEN THE FILE, not that anything is missing.")
+    print()
+    print("  A measurement that was never captured cannot be fixed by editing:")
+    print("  these weeks are torn down, and the standard forbids inventing")
+    print("  evidence. Those get named, not filled.")
     print()
 
 
