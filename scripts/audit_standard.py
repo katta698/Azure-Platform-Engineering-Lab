@@ -116,7 +116,23 @@ def audit_post(path):
 
 
 def audit_guide(week_dir):
-    path = os.path.join(LAB, week_dir, "README.md")
+    """Score the runbook, which lives in LAB.md where one exists.
+
+    Jay, 2026-10-25, following GCP: the narrative and the runbook are
+    different documents for different readers. README.md keeps the cost note
+    and the design reasoning; LAB.md is how you rebuild it. Weeks not yet
+    split still have everything in README.md, so fall back to it.
+
+    CAUTION: the GUIDE_PARTS patterns below are KEYWORD matches, and keyword
+    matches establish presence, never absence. This exact method produced five
+    false "missing" findings against the AWS and GCP labs on 2026-10-25 --
+    "The outcome" did not match "expected outcome", "Production delta" did not
+    match "known limitation". Treat a missing part as a prompt to READ the
+    file, not as a finding.
+    """
+    path = os.path.join(LAB, week_dir, "LAB.md")
+    if not os.path.exists(path):
+        path = os.path.join(LAB, week_dir, "README.md")
     s = read(path)
     if s is None:
         return None

@@ -3,6 +3,12 @@
 # Add an exception deliberately if a doc is genuinely written for a reader.
 *.md
 !README.md
+# The reproducible lab guide is published, like the README. Adopted
+# 2026-10-25 following the GCP lab: README.md is the design note,
+# LAB.md is the runbook, and the blog deep-links into LAB.md by
+# section anchor. Without this exception the guides stay local and
+# every one of those links 404s.
+!LAB.md
 
 # Terraform
 **/.terraform/
