@@ -15,30 +15,7 @@ interesting once more than one service is involved.
 
 ---
 
-## 1. Cost note
-
-| | |
-| --- | --- |
-| Runs continuously | nothing — torn down at the end |
-| Billed while up | ACR **Basic at $0.1666/day**, read from the retail price API |
-| OpenTelemetry agent | **$0.00** — Microsoft provisions 0.5 vCPU / 1.5 GB inside the environment at no compute cost |
-| Traces and logs | ingested into week 08's workspace at its Analytics rate; sampling is the control |
-| Measured for this week | **$0.0142** — read from Cost Management on 2026-10-24, after teardown |
-| Teardown | `./scripts/cleanup.sh`. Deletes the registry **and the images in it** — rebuildable from `app/` with one command |
-
-**Measured: $0.0142**, read from Cost Management after teardown. All of it is
-Container Registry; the Container Apps sat inside the monthly free grant and
-the OpenTelemetry agent carries no compute charge. ACR Basic bills
-$0.1666/day, so about two hours of registry is what this week actually cost.
-
-Application Insights is **workspace-based**, pointing at week 08's workspace.
-Classic Application Insights kept its own store with its own retention and its
-own bill; workspace-based means every decision week 08 made — table plans,
-retention, the daily cap — applies to this data too.
-
----
-
-## 2. Prerequisites
+## 1. Prerequisites
 
 ### Accounts and permissions
 
@@ -89,7 +66,7 @@ profile inside the monthly free grant, and ACR Basic has no quota gate.
 
 ---
 
-## 3. Configuration
+## 2. Configuration
 
 Copy the example and fill it in. `terraform.tfvars` is gitignored.
 
@@ -114,7 +91,7 @@ workspace name.
 
 ---
 
-## 4. Deploy
+## 3. Deploy
 
 ```bash
 ./scripts/deploy.sh
@@ -154,7 +131,7 @@ terraform apply -var 'trace_sampler_arg=0.2' -var "image_tag=$TAG"
 
 ---
 
-## 5. What it deploys
+## 4. What it deploys
 
 | Resource | Count | Job |
 | --- | --- | --- |
@@ -183,7 +160,7 @@ terraform apply -var 'trace_sampler_arg=0.2' -var "image_tag=$TAG"
 
 ---
 
-## 6. Validation
+## 5. Validation
 
 ```bash
 ./scripts/validate.sh
@@ -242,7 +219,7 @@ they dominate the percentile.
 
 ---
 
-## 7. The agent routes; it does not instrument
+## 6. The agent routes; it does not instrument
 
 Container Apps has a **managed OpenTelemetry agent**. It costs nothing, runs
 inside the environment, and injects its own endpoint into every container:
@@ -265,7 +242,7 @@ agent's address and sends spans nowhere.
 
 ---
 
-## 8. Design decisions
+## 7. Design decisions
 
 | Choice | Taken | Why not the alternative |
 | --- | --- | --- |
@@ -298,7 +275,7 @@ apart, in the same lab. Recorded rather than smoothed over.
 
 ---
 
-## 9. Troubleshooting
+## 8. Troubleshooting
 
 ### A full table that read as empty
 
@@ -347,7 +324,7 @@ apart, in the same lab. Recorded rather than smoothed over.
 
 ---
 
-## 10. Cleanup
+## 9. Cleanup
 
 ```bash
 # teardown is the only irreversible step — check the figures first
@@ -380,7 +357,7 @@ hold something a teardown cannot reconstruct if the source is lost.
 
 ---
 
-## 11. Known limitations and what production adds
+## 10. Known limitations and what production adds
 
 - **The managed OpenTelemetry agent is in preview.** No health signal, no
   metrics path to Application Insights, limited regional availability.
@@ -395,6 +372,29 @@ hold something a teardown cannot reconstruct if the source is lost.
   measures both 1.0 and 0.2 so the behaviour is known before the decision.
 - **No alerting on the traces.** Week 08 built the alert machinery; wiring it
   to trace-derived metrics is its own week.
+
+---
+
+## 11. Cost note
+
+| | |
+| --- | --- |
+| Runs continuously | nothing — torn down at the end |
+| Billed while up | ACR **Basic at $0.1666/day**, read from the retail price API |
+| OpenTelemetry agent | **$0.00** — Microsoft provisions 0.5 vCPU / 1.5 GB inside the environment at no compute cost |
+| Traces and logs | ingested into week 08's workspace at its Analytics rate; sampling is the control |
+| Measured for this week | **$0.0142** — read from Cost Management on 2026-10-24, after teardown |
+| Teardown | `./scripts/cleanup.sh`. Deletes the registry **and the images in it** — rebuildable from `app/` with one command |
+
+**Measured: $0.0142**, read from Cost Management after teardown. All of it is
+Container Registry; the Container Apps sat inside the monthly free grant and
+the OpenTelemetry agent carries no compute charge. ACR Basic bills
+$0.1666/day, so about two hours of registry is what this week actually cost.
+
+Application Insights is **workspace-based**, pointing at week 08's workspace.
+Classic Application Insights kept its own store with its own retention and its
+own bill; workspace-based means every decision week 08 made — table plans,
+retention, the daily cap — applies to this data too.
 
 ---
 

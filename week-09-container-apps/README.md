@@ -16,41 +16,7 @@ willing to pay while nobody is using it.
 
 ---
 
-## 1. Cost note
-
-| | |
-| --- | --- |
-| Runs continuously | nothing. The app sits at **0 replicas** when idle |
-| Billed while idle | **$0.00** — "when a revision is scaled to zero replicas, no resource consumption charges are incurred" |
-| Billed while serving | 0.25 vCPU-s and 0.5 GiB-s per second of running replica, plus requests |
-| Free each month, per subscription | 180,000 vCPU-seconds, 360,000 GiB-seconds, 2 million requests |
-| Fixed environment fee | **none** — a plan management charge applies only if you use a *Dedicated* workload profile |
-| Measured for this week | **$0.00** — read from Cost Management after teardown |
-| Teardown | `./scripts/cleanup.sh` removes everything in `sub-lab-dev`. Week 08's workspace is read, never owned, so it survives |
-
-**Measured: $0.00.** Read from Cost Management on 2026-10-15, after teardown —
-`sub-lab-dev` shows no charges at all for the days this ran. The app used
-roughly **600 vCPU-seconds** and **1,200 GiB-seconds** against monthly free
-grants of 180,000 and 360,000, on a handful of requests against a 2-million
-allowance. The free grant absorbed the entire week.
-
-Rates measured from the Azure retail price API for `southcentralus`, not quoted
-from a marketing page:
-
-| Meter | Rate |
-| --- | --- |
-| vCPU, active | $0.000024 per vCPU-second |
-| vCPU, idle | $0.000003 per vCPU-second |
-| Memory, active and idle | $0.000003 per GiB-second |
-| Requests | $0.40 per million |
-
-The idle rate is eight times cheaper than active — and it is **unreachable from
-a floor of zero**, because at zero there is no replica to bill at either rate.
-It only applies to a replica that exists and is doing nothing.
-
----
-
-## 2. Prerequisites
+## 1. Prerequisites
 
 ### Accounts and permissions
 
@@ -105,7 +71,7 @@ app runs on the Consumption profile inside the monthly free grant.
 
 ---
 
-## 3. Configuration
+## 2. Configuration
 
 ```bash
 cp terraform/terraform.tfvars.example terraform/terraform.tfvars
@@ -130,7 +96,7 @@ and workspace name.
 
 ---
 
-## 4. Deploy
+## 3. Deploy
 
 ```bash
 ./scripts/deploy.sh
@@ -153,7 +119,7 @@ the data source that reads week 08's workspace alongside them.
 
 ---
 
-## 5. What it deploys
+## 4. What it deploys
 
 | Resource | Count | Job |
 | --- | --- | --- |
@@ -174,7 +140,7 @@ the data source that reads week 08's workspace alongside them.
 
 ---
 
-## 6. Validation
+## 5. Validation
 
 ```bash
 ./scripts/validate.sh
@@ -222,7 +188,7 @@ infrastructure one — and it is the number to put in front of whoever makes it.
 
 ---
 
-## 7. The decision that was forced
+## 6. The decision that was forced
 
 Container Apps offers three log destinations: `log-analytics`, `azure-monitor`
 and `none`. The default, `log-analytics`, wires the environment to a workspace
@@ -246,7 +212,7 @@ destination. Queries run against the workspace instead.
 
 ---
 
-## 8. Design decisions
+## 7. Design decisions
 
 | Choice | Taken | Why not the alternative |
 | --- | --- | --- |
@@ -262,7 +228,7 @@ destination. Queries run against the workspace instead.
 
 ---
 
-## 9. Troubleshooting
+## 8. Troubleshooting
 
 ### A test that concludes scale-to-zero is broken
 
@@ -295,7 +261,7 @@ destination. Queries run against the workspace instead.
 
 ---
 
-## 10. Cleanup
+## 9. Cleanup
 
 ```bash
 # teardown is the only irreversible step — check the figures first
@@ -330,7 +296,7 @@ ingested sit in week 08's workspace until its retention expires.
 
 ---
 
-## 11. Known limitations and what production adds
+## 10. Known limitations and what production adds
 
 - **A private registry.** This week pulls a Microsoft-published sample
   anonymously. Production builds its own image and pushes it to ACR, which adds
@@ -347,6 +313,40 @@ ingested sit in week 08's workspace until its retention expires.
 - **The cold start is not solved, it is accepted.** 16.8 s on one request is
   the trade this design makes. A floor of 1 replica removes it and removes the
   $0.00 idle bill with it.
+
+---
+
+## 11. Cost note
+
+| | |
+| --- | --- |
+| Runs continuously | nothing. The app sits at **0 replicas** when idle |
+| Billed while idle | **$0.00** — "when a revision is scaled to zero replicas, no resource consumption charges are incurred" |
+| Billed while serving | 0.25 vCPU-s and 0.5 GiB-s per second of running replica, plus requests |
+| Free each month, per subscription | 180,000 vCPU-seconds, 360,000 GiB-seconds, 2 million requests |
+| Fixed environment fee | **none** — a plan management charge applies only if you use a *Dedicated* workload profile |
+| Measured for this week | **$0.00** — read from Cost Management after teardown |
+| Teardown | `./scripts/cleanup.sh` removes everything in `sub-lab-dev`. Week 08's workspace is read, never owned, so it survives |
+
+**Measured: $0.00.** Read from Cost Management on 2026-10-15, after teardown —
+`sub-lab-dev` shows no charges at all for the days this ran. The app used
+roughly **600 vCPU-seconds** and **1,200 GiB-seconds** against monthly free
+grants of 180,000 and 360,000, on a handful of requests against a 2-million
+allowance. The free grant absorbed the entire week.
+
+Rates measured from the Azure retail price API for `southcentralus`, not quoted
+from a marketing page:
+
+| Meter | Rate |
+| --- | --- |
+| vCPU, active | $0.000024 per vCPU-second |
+| vCPU, idle | $0.000003 per vCPU-second |
+| Memory, active and idle | $0.000003 per GiB-second |
+| Requests | $0.40 per million |
+
+The idle rate is eight times cheaper than active — and it is **unreachable from
+a floor of zero**, because at zero there is no replica to bill at either rate.
+It only applies to a replica that exists and is doing nothing.
 
 ---
 

@@ -11,22 +11,7 @@ And the two levers compound. Dropping 80% of rows at ingest, then putting what
 survives on the right plan, is the difference between paying $2.76 a GB for
 everything and paying $2.76 for the fifth you actually query.
 
-## Cost note
-
-| What runs | Cost |
-| --- | --- |
-| The workspace itself, idle | **$0** — you pay for ingestion and retention, not existence |
-| Ingestion | pay-as-you-go per GB, by table plan |
-| This week's measured ingestion | **under 1 MB → $0.00** |
-
-**This week stays up.** Weeks 13–16 send their data here, and an idle workspace
-costs nothing. `cleanup.sh` refuses without `--force` for that reason.
-
-Commitment tiers start at **100 GB/day**, and the portal puts that first tier at
-**20% off** pay-as-you-go. A lab never reaches it, so pay-as-you-go is correct
-here and the discount is not claimed.
-
-## Prerequisites
+## 1. Prerequisites
 
 ### Accounts and permissions
 
@@ -60,7 +45,9 @@ Microsoft.OperationalInsights   Microsoft.Insights
 **None.** This is the week every later one depends on, not the other way
 round. Weeks 09 and 10 both send their telemetry to this workspace.
 
-## Configuration
+---
+
+## 2. Configuration
 
 ```bash
 cp terraform/terraform.tfvars.example terraform/terraform.tfvars
@@ -79,11 +66,111 @@ cp terraform/terraform.tfvars.example terraform/terraform.tfvars
 Point `versions.tf`'s `cloud {}` block at your own HCP organization, project
 and workspace name.
 
-## How it fits together
+---
+
+## 3. How it fits together
 
 ![Week 08 architecture](docs/blog/diagrams/week-08-architecture.svg)
 
-## The three decisions
+---
+
+## 4. Running it
+
+The HCP workspace is created **first, deliberately**, with its execution mode
+set — not left for `terraform init` to create as a side effect:
+
+```bash
+# 1. the HCP workspace, with execution-mode local
+#    (week 07 learned this the hard way - see below)
+
+cp terraform/terraform.tfvars.example terraform/terraform.tfvars
+# fill in tenant_id, subscription_id (sub-management), alert_email
+
+./scripts/deploy.sh      # registers two providers, then applies
+./scripts/validate.sh    # 5 checks; #4 sends 100 rows and counts survivors
+./scripts/cleanup.sh     # refuses - this week stays up. --force to mean it
+```
+
+**9 resources** on a clean apply. What `validate.sh` prints when it passes:
+
+```
+1. The workspace exists, pay-as-you-go, with a cap
+   RESULT: pay-as-you-go with a cap set
+2. The table plans are what was asked for
+   RESULT: both tables on their intended plans
+3. The collection rule and its endpoint are live
+   RESULT: endpoint and rule both resolved
+4. The transformation drops rows BEFORE they are billed
+   sending 100 rows, 20 of them Warning or above
+   ingestion API returned HTTP 204
+   rows stored: 20 of 100 sent
+   RESULT: 20 stored, 80 dropped at ingest and never billed
+5. The cap has an alarm that actually fires
+   RESULT: a query rule is enabled AND wired to an action group
+
+── 5 passed, 0 failed ──
+```
+
+**Check 4 is the one that matters, and it needs patience.** Posting to the
+ingestion endpoint returns **403 until the role assignment propagates** —
+measured at ten attempts over five minutes before the first 204. The script
+retries; a single attempt would report a correct deployment as broken.
+
+---
+
+## 5. What was measured
+
+`scripts/validate.sh`, run 2026-10-05 against the live deployment:
+
+```
+1. The workspace exists, pay-as-you-go, with a cap
+   sku=PerGB2018  daily cap=1.0GB  retention=30d
+   RESULT: pay-as-you-go with a cap set
+
+2. The table plans are what was asked for
+   PlatformLogs_CL -> Analytics (wanted Analytics)
+   PlatformVerbose_CL -> Basic (wanted Basic)
+   RESULT: both tables on their intended plans
+
+3. The collection rule and its endpoint are live
+   RESULT: endpoint and rule both resolved
+
+4. The transformation drops rows BEFORE they are billed
+   sending 100 rows, 20 of them Warning or above
+   ingestion API returned HTTP 204
+   rows stored: 20 of 100 sent
+   RESULT: 20 stored, 80 dropped at ingest and never billed
+
+5. The cap has an alarm on it
+   RESULT: an alert path exists
+
+── 5 passed, 0 failed ──
+```
+
+Check 4 is the week. A transformation that filters nothing looks identical in
+the portal to one that filters everything — the only way to know is to send
+known data and count what survived.
+
+---
+
+## 6. Evidence
+
+![The workspace](docs/blog/screenshots/01-workspace.png)
+
+![Table plans](docs/blog/screenshots/02-table-plans.png)
+
+![Pricing tiers and the daily cap](docs/blog/screenshots/04-daily-cap.png)
+
+Azure's own numbers, from this workspace: Analytics $2.76/GB, Basic $0.60/GB,
+Auxiliary $0.06/GB, and a note confirming the daily cap is configured.
+
+The Tables blade is the clearest view of the design: two custom tables on
+deliberately different plans, next to every built-in table sitting on the
+Analytics default.
+
+---
+
+## 7. The three decisions
 
 ### 1. Table plans follow how data is USED, not how big it is
 
@@ -132,7 +219,9 @@ source | where Level in ('Warning','Error','Critical')
 Rows below Warning are never written, never stored, never billed — the cap never
 has to count them, because as far as the bill is concerned they never arrived.
 
-## Security
+---
+
+## 8. Security
 
 - **Resource-only permissions.** Reading a resource's logs needs no grant on the
   workspace. The alternative, workspace Reader, hands over every log from every
@@ -144,97 +233,9 @@ has to count them, because as far as the bill is concerned they never arrived.
   The role permits writing telemetry; getting it wrong means someone forging
   logs, so it is granted exactly where it is used.
 
-## Running it
+---
 
-The HCP workspace is created **first, deliberately**, with its execution mode
-set — not left for `terraform init` to create as a side effect:
-
-```bash
-# 1. the HCP workspace, with execution-mode local
-#    (week 07 learned this the hard way - see below)
-
-cp terraform/terraform.tfvars.example terraform/terraform.tfvars
-# fill in tenant_id, subscription_id (sub-management), alert_email
-
-./scripts/deploy.sh      # registers two providers, then applies
-./scripts/validate.sh    # 5 checks; #4 sends 100 rows and counts survivors
-./scripts/cleanup.sh     # refuses - this week stays up. --force to mean it
-```
-
-**9 resources** on a clean apply. What `validate.sh` prints when it passes:
-
-```
-1. The workspace exists, pay-as-you-go, with a cap
-   RESULT: pay-as-you-go with a cap set
-2. The table plans are what was asked for
-   RESULT: both tables on their intended plans
-3. The collection rule and its endpoint are live
-   RESULT: endpoint and rule both resolved
-4. The transformation drops rows BEFORE they are billed
-   sending 100 rows, 20 of them Warning or above
-   ingestion API returned HTTP 204
-   rows stored: 20 of 100 sent
-   RESULT: 20 stored, 80 dropped at ingest and never billed
-5. The cap has an alarm that actually fires
-   RESULT: a query rule is enabled AND wired to an action group
-
-── 5 passed, 0 failed ──
-```
-
-**Check 4 is the one that matters, and it needs patience.** Posting to the
-ingestion endpoint returns **403 until the role assignment propagates** —
-measured at ten attempts over five minutes before the first 204. The script
-retries; a single attempt would report a correct deployment as broken.
-
-## What was measured
-
-`scripts/validate.sh`, run 2026-10-05 against the live deployment:
-
-```
-1. The workspace exists, pay-as-you-go, with a cap
-   sku=PerGB2018  daily cap=1.0GB  retention=30d
-   RESULT: pay-as-you-go with a cap set
-
-2. The table plans are what was asked for
-   PlatformLogs_CL -> Analytics (wanted Analytics)
-   PlatformVerbose_CL -> Basic (wanted Basic)
-   RESULT: both tables on their intended plans
-
-3. The collection rule and its endpoint are live
-   RESULT: endpoint and rule both resolved
-
-4. The transformation drops rows BEFORE they are billed
-   sending 100 rows, 20 of them Warning or above
-   ingestion API returned HTTP 204
-   rows stored: 20 of 100 sent
-   RESULT: 20 stored, 80 dropped at ingest and never billed
-
-5. The cap has an alarm on it
-   RESULT: an alert path exists
-
-── 5 passed, 0 failed ──
-```
-
-Check 4 is the week. A transformation that filters nothing looks identical in
-the portal to one that filters everything — the only way to know is to send
-known data and count what survived.
-
-## Evidence
-
-![The workspace](docs/blog/screenshots/01-workspace.png)
-
-![Table plans](docs/blog/screenshots/02-table-plans.png)
-
-![Pricing tiers and the daily cap](docs/blog/screenshots/04-daily-cap.png)
-
-Azure's own numbers, from this workspace: Analytics $2.76/GB, Basic $0.60/GB,
-Auxiliary $0.06/GB, and a note confirming the daily cap is configured.
-
-The Tables blade is the clearest view of the design: two custom tables on
-deliberately different plans, next to every built-in table sitting on the
-Analytics default.
-
-## What this cost in surprises
+## 9. What this cost in surprises
 
 **A plan cannot be set on a table that does not exist.** Setting
 `AzureDiagnostics` to Basic failed with `ResourceNotFound`. A new workspace has
@@ -257,7 +258,9 @@ lives in an extension; without it, az asks "Do you want to install it now?" and
 in a non-interactive shell the *prompt text* lands in the variable. Week 05 lost
 a teardown to the identical trap with `az network firewall list`.
 
-## Teardown
+---
+
+## 10. Teardown
 
 ```bash
 ./scripts/cleanup.sh --force
@@ -290,7 +293,9 @@ az monitor data-collection rule list --subscription "$SUB" \
 this is the base of the chain. **What breaks if you tear it down:** weeks 09
 and 10 both write here, and their validation queries this workspace by name.
 
-## Known limitations and what production adds
+---
+
+## 11. Known limitations and what production adds
 
 - **A 1 GB daily cap is a lab number.** It is a backstop against a runaway
   pipeline, not a capacity plan, and a cap that trips drops data for the rest
@@ -305,3 +310,20 @@ and 10 both write here, and their validation queries this workspace by name.
   the correct choice here and would not be at scale.
 - **Local execution.** State is in HCP but runs happen on a workstation.
   Production runs in CI under week 07's federated credential.
+
+---
+
+## 12. Cost note
+
+| What runs | Cost |
+| --- | --- |
+| The workspace itself, idle | **$0** — you pay for ingestion and retention, not existence |
+| Ingestion | pay-as-you-go per GB, by table plan |
+| This week's measured ingestion | **under 1 MB → $0.00** |
+
+**This week stays up.** Weeks 13–16 send their data here, and an idle workspace
+costs nothing. `cleanup.sh` refuses without `--force` for that reason.
+
+Commitment tiers start at **100 GB/day**, and the portal puts that first tier at
+**20% off** pay-as-you-go. A lab never reaches it, so pay-as-you-go is correct
+here and the discount is not claimed.
