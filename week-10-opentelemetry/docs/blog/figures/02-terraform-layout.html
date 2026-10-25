@@ -5,7 +5,7 @@
 <style>
   * { box-sizing: border-box }
   html, body { margin: 0; padding: 0; background: #fff }
-  body { width: 1080px; color: #16191f;
+  body { width: 820px; color: #16191f;
          font-family: "Segoe UI", -apple-system, "Helvetica Neue", Arial, sans-serif;
          -webkit-font-smoothing: antialiased }
   .wrap { padding: 26px 30px 28px }
@@ -21,47 +21,25 @@
   .br { color: #ffc46b }
 </style>
 <div class="wrap">
-  <h1>The code behind this week</h1>
-  <div class="sub">week-10-opentelemetry — what each file does, and how big it actually is</div>
+  <h1>How the repository is organised</h1>
+  <div class="sub">week-10-opentelemetry — the important parts; full source on GitHub</div>
   <pre>week-10-opentelemetry/
 │
-├── app/                          # the part that MAKES telemetry
-│   ├── otel_setup.py        67   # tracer, sampler, OTLP exporter - the only
-│   │                             # file that knows OpenTelemetry exists
-│   ├── requirements.txt      7   # flask, gunicorn, the otel SDK + 2 instruments
-│   ├── frontend/app.py      45   # calls the backend; does almost nothing else
-│   ├── frontend/Dockerfile  19   # mcr.microsoft.com/azurelinux/base/python
-│   ├── backend/app.py       48   # sleeps 250 ms on purpose, in a child span
-│   └── backend/Dockerfile   19   # same base, same build, different service
+├── app/            the only code that KNOWS about OpenTelemetry
+│   ├── otel_setup.py     tracer, sampler, OTLP exporter
+│   ├── frontend/         public; calls the backend
+│   └── backend/          internal; deliberately slow
 │
-├── terraform/
-│   ├── versions.tf          48   # azurerm + azapi, HCP backend, 2nd provider
-│   ├── variables.tf         53   # image tag, sampler ratio, backend work ms
-│   ├── registry.tf          68   # ACR Basic, identity, AcrPull. No passwords
-│   ├── observability.tf    115   # App Insights + the managed OTel agent
-│   ├── apps.tf             173   # the two container apps, internal + external
-│   └── outputs.tf           36   # the FQDN, the registry, the workspace
+├── terraform/      the infrastructure, split by decision
+│   ├── registry.tf       ACR + identity + AcrPull (no passwords)
+│   ├── observability.tf  App Insights + the managed agent
+│   └── apps.tf           the two container apps
 │
-└── scripts/
-    ├── deploy.sh           126   # registry FIRST, then az acr build, then the rest
-    ├── validate.sh         232   # 6 checks. #5 proves ONE operation spans TWO
-    │                             # services - the only test that means anything here
-    └── cleanup.sh           93   # deletes the group, then verifies week 08 survived
+└── scripts/        deploy, validate, destroy — each runs end to end
 
-<span class="c"># 10 resources, and the split is between making telemetry and routing it</span>
+<span class="c"># app/ is separate from terraform/ for a reason: the agent ROUTES</span>
+<span class="c"># telemetry, it does not create it. Only the application can do that.</span>
 <span class="c">#</span>
-<span class="c"># app/ is the only place that knows what a span is. The managed agent routes</span>
-<span class="c"># data; it does not create it. Microsoft&#x27;s own FAQ: &quot;Do I need to reference</span>
-<span class="c"># the OpenTelemetry SDK in my code? Yes.&quot; Enable the agent without an</span>
-<span class="c"># instrumented app and you get a working pipeline carrying nothing.</span>
-<span class="c">#</span>
-<span class="c"># observability.tf is where the week&#x27;s uncomfortable line lives:</span>
-<span class="c"># local_authentication_enabled = true on Application Insights. Week 08 set</span>
-<span class="c"># that same argument to FALSE on the workspace, and that is what forced week</span>
-<span class="c"># 09&#x27;s logging design. The agent authenticates with a connection string and</span>
-<span class="c"># Microsoft documents no ARM-authenticated alternative, so here it must be on.</span>
-<span class="c">#</span>
-<span class="c"># deploy.sh is three passes because a container app cannot reference an image</span>
-<span class="c"># tag that does not resolve yet: create the registry, build into it, then</span>
-<span class="c"># apply everything else.</span></pre>
+<span class="c"># Full source, including variables, Dockerfiles and the scripts:</span>
+<span class="c"># github.com/katta698/Azure-Platform-Engineering-Lab</span></pre>
 </div>

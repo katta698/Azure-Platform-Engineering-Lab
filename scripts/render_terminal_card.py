@@ -146,10 +146,21 @@ def main():
                           device_scale_factor=args.scale)
         page.goto(tmp.as_uri())
         page.wait_for_timeout(400)
-        # full_page so the frame is never clipped: these cards vary in height
-        # with their content, and a fixed viewport would silently cut the last
-        # lines off the longest ones.
-        page.screenshot(path=str(out), full_page=True)
+        # Capture the CARD, not the page.
+        #
+        # full_page still honours the viewport as a MINIMUM height, so a short
+        # card came out padded with a third of its image in empty space -
+        # which reads as a bug on a phone, where the figure is already small.
+        # Clipping to .wrap gives an image whose height is the content's
+        # height. Falls back to full_page if the element is ever missing.
+        #
+        # Jay, 2026-10-25: "Keep the figure readable on both mobile and
+        # desktop."
+        el = page.query_selector(".wrap")
+        if el:
+            el.screenshot(path=str(out))
+        else:
+            page.screenshot(path=str(out), full_page=True)
         b.close()
 
     try:
