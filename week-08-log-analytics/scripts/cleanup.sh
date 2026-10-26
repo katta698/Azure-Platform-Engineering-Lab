@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Week 08 — teardown.
 #
-# NOTE: this week is one of the three the roadmap keeps running (05 hub, 12
-# Log Analytics, 47 FinOps hub). Weeks 13 to 16 all send data here, so the
+# NOTE: this week is one of the three the roadmap keeps running (05 hub, 08
+# Log Analytics, 47 FinOps hub). Weeks 09 and 10 send data here, so the
 # default is to KEEP it. The script exists so the week can be torn down and
 # rebuilt, and so "it was never run" is not an excuse.
 #
@@ -20,7 +20,7 @@ SUB=$(grep '^subscription_id' terraform/terraform.tfvars | cut -d'"' -f2)
 RG="rg-observability-prod-scus-001"
 
 if [[ "${1:-}" != "--force" ]]; then
-  echo "This week is designed to STAY UP. Weeks 13-16 send their data here, and"
+  echo "This week is designed to STAY UP. Weeks 09 and 10 send their data here,"
   echo "the workspace costs nothing while idle - ingestion is what bills."
   echo ""
   echo "Pass --force if you really mean it."

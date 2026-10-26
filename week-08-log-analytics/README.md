@@ -26,7 +26,7 @@ everything and paying $2.76 for the fifth you actually query.
 | Ingestion | pay-as-you-go per GB, by table plan |
 | This week's measured ingestion | **under 1 MB → $0.00** |
 
-**This week stays up.** Weeks 13–16 send their data here, and an idle workspace
+**This week stays up.** Weeks 09 and 10 send their data here, and an idle workspace
 costs nothing. `cleanup.sh` refuses without `--force` for that reason.
 
 Commitment tiers start at **100 GB/day**, and the portal puts that first tier at
