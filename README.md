@@ -73,21 +73,26 @@ then torn down. Ordered by dependency, not by difficulty: the hub network and it
 private DNS estate come early because most later weeks need them, and policy comes
 before the things it governs.
 
+**Each finished week links to its code.** The week number opens the
+folder &mdash; `README.md` for the design and the cost note,
+`LAB.md` for the runbook that reproduces it. *Complete* opens the
+write-up.
+
 | Week | Pattern | Status |
 | --- | --- | --- |
 | Bootstrap | Management group tree, OIDC identity, subscriptions | Complete |
 | **Foundation** | | |
-| 01 | The landing zone, deployed — policy that denies something | Complete |
-| 02 | Policy as code — initiatives and `deployIfNotExists` remediation | Complete |
-| 03 | A module factory on Azure Verified Modules | Complete |
-| 04 | Subscription vending through the MCA alias API | Complete |
-| 05 | Hub network — Azure Firewall and the private DNS estate | Complete |
-| 06 | Deployment Stacks and deny assignments | Complete |
-| 07 | Workload identity end to end — zero secrets | Complete |
+| [01](week-01-landing-zone) | The landing zone, deployed — policy that denies something | [Complete](https://jayanthkatta.com/blog/week-01-azure-landing-zone/) |
+| [02](week-02-policy-as-code) | Policy as code — initiatives and `deployIfNotExists` remediation | [Complete](https://jayanthkatta.com/blog/week-02-policy-as-code/) |
+| [03](week-03-module-factory) | A module factory on Azure Verified Modules | [Complete](https://jayanthkatta.com/blog/week-03-module-factory/) |
+| [04](week-04-subscription-vending) | Subscription vending through the MCA alias API | [Complete](https://jayanthkatta.com/blog/week-04-subscription-vending/) |
+| [05](week-05-hub-network) | Hub network — Azure Firewall and the private DNS estate | [Complete](https://jayanthkatta.com/blog/week-05-hub-network/) |
+| [06](week-06-deployment-stacks) | Deployment Stacks and deny assignments | [Complete](https://jayanthkatta.com/blog/week-06-deployment-stacks/) |
+| [07](week-07-workload-identity) | Workload identity end to end — zero secrets | [Complete](https://jayanthkatta.com/blog/week-07-workload-identity/) |
 | **Observability** | | |
-| 08 | Log Analytics designed for cost — DCRs and table plans | Complete |
-| 09 | Container Apps — a workload that scales to zero | Complete |
-| 10 | OpenTelemetry — one trace across two services, and sampling that keeps it whole | Complete |
+| [08](week-08-log-analytics) | Log Analytics designed for cost — DCRs and table plans | [Complete](https://jayanthkatta.com/blog/week-08-log-analytics/) |
+| [09](week-09-container-apps) | Container Apps — a workload that scales to zero | [Complete](https://jayanthkatta.com/blog/week-09-container-apps/) |
+| [10](week-10-opentelemetry) | OpenTelemetry — one trace across two services, and sampling that keeps it whole | [Complete](https://jayanthkatta.com/blog/week-10-opentelemetry/) |
 | 11 | Managed Prometheus and Grafana, alerts as code | Planned |
 | 12 | Detections as code in Microsoft Sentinel | Planned |
 | 13 | Diagnostic settings enforced at scale | Planned |
