@@ -79,7 +79,15 @@ def published_weeks():
     return sorted(found)
 
 
-README_ROW = re.compile(r"^\|\s*(\d{2})\s*\|[^|]*\|\s*([A-Za-z]+)\s*\|")
+# The week cell may be a bare number or a link to the week folder, and
+# the status cell may be a bare word or a link to the published post.
+# Both became links on 2026-10-27 so the tracker could reach the labs,
+# and this check promptly stopped finding any row at all -- it reported
+# "week 10 is published but has no row", which is exactly the failure it
+# exists to catch, against a tracker that was correct.
+README_ROW = re.compile(
+    r"^\|\s*(?:\[)?(\d{2})(?:\][^|]*)?\s*\|[^|]*\|"
+    r"\s*(?:\[)?([A-Za-z]+)(?:\][^|]*)?\s*\|")
 
 
 def readme_status():
