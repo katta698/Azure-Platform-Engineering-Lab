@@ -38,9 +38,11 @@
 
 <span class="c"># WHY cloud-init IS A TEMPLATE AND NOT A STATIC FILE</span>
 <span class="c">#</span>
-<span class="c"># The remote_write URL is assembled from the workspace&#x27;s own data collection</span>
-<span class="c"># rule — its metrics ingestion endpoint plus its immutable id. Both are known</span>
-<span class="c"># only after apply. Rendering the config means a rebuild in another</span>
+<span class="c"># The remote_write URL is assembled from two objects the workspace creates</span>
+<span class="c"># for itself: the data collection ENDPOINT supplies the host, the data</span>
+<span class="c"># collection RULE supplies its immutable id for the path. Both are known</span>
+<span class="c"># only after apply, and reading the host off the RULE returns an empty</span>
+<span class="c"># string — see the post&#x27;s troubleshooting. Rendering the config means a rebuild in another</span>
 <span class="c"># subscription produces a correct prometheus.yml with nothing to hand-edit,</span>
 <span class="c"># and means there is no placeholder anyone can forget to replace.</span>
 <span class="c">#</span>
