@@ -33,7 +33,7 @@
 
   <rect class="svc" x="34" y="80" width="300" height="104" rx="6"/>
   <text class="t hdr" x="48" y="101">VM — self-managed Prometheus</text>
-  <text class="t sm"  x="48" y="119">Ubuntu 24.04, B2s, installed by cloud-init</text>
+  <text class="t sm"  x="48" y="119">Ubuntu 24.04, D2als_v7, installed by cloud-init</text>
   <text class="t sm no" x="48" y="137">NO inbound port open — not even SSH</text>
   <text class="t sm"  x="48" y="155">public IP is egress only; default outbound is retired</text>
   <text class="t mono" x="48" y="174">scrape_interval: 30s</text>

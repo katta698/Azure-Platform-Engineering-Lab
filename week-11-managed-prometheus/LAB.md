@@ -394,10 +394,10 @@ source as to be missing data.
 
 ## 9. References
 
-- [Azure Monitor workspace overview](https://learn.microsoft.com/azure/azure-monitor/essentials/azure-monitor-workspace-overview)
-- [Send Prometheus data to Azure Monitor using remote write](https://learn.microsoft.com/azure/azure-monitor/containers/prometheus-remote-write)
-- [Prometheus rule groups in Azure Monitor](https://learn.microsoft.com/azure/azure-monitor/essentials/prometheus-rule-groups)
-- [Azure Managed Grafana — Grafana roles](https://learn.microsoft.com/azure/managed-grafana/how-to-share-grafana-workspace)
+- [Azure Monitor workspace overview](https://learn.microsoft.com/en-us/azure/azure-monitor/metrics/azure-monitor-workspace-overview)
+- [Send Prometheus data to Azure Monitor using remote write](https://learn.microsoft.com/en-us/azure/azure-monitor/metrics/prometheus-remote-write)
+- [Prometheus rule groups in Azure Monitor](https://learn.microsoft.com/en-us/azure/azure-monitor/essentials/prometheus-rule-groups)
+- [Azure Managed Grafana — Grafana roles](https://learn.microsoft.com/en-us/azure/managed-grafana/how-to-share-grafana-workspace)
 - [Prometheus `remote_write` configuration](https://prometheus.io/docs/prometheus/latest/configuration/configuration/#remote_write)
 - [`azurerm_monitor_workspace`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_workspace)
 - [`azurerm_monitor_alert_prometheus_rule_group`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_alert_prometheus_rule_group)
