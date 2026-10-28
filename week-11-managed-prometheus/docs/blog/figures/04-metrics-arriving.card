@@ -1,0 +1,45 @@
+title: The metric made it. Queried back out with PromQL.
+subtitle: against the Azure Monitor workspace's own query endpoint — no portal, no Grafana
+width: 1120
+---
+$ TOKEN=$(az account get-access-token \
+      --resource https://prometheus.monitor.azure.com --query accessToken -o tsv)
+
+$ curl -H "Authorization: Bearer $TOKEN" \
+      --get "$QUERY_ENDPOINT/api/v1/query" \
+      --data-urlencode 'query=up{job="prometheus"}'
+
+  status: success   series: 1
+  {"__name__": "up", "instance": "localhost:9090", "job": "prometheus",
+   "source": "self-managed-vm", "week": "11",
+   "microsoft.amwresourceid": "/subscriptions/<masked>/.../amw-wk11-dev-scus-001"}
+  value: 1
+
+$ ... --data-urlencode 'query=scrape_duration_seconds'
+
+  value: 0.003117542
+
+$ ... --data-urlencode 'query=prometheus_remote_storage_samples_total'
+
+  value: 780487
+
+# WHAT THIS PROVES THAT AN APPLY DOES NOT
+#
+# `instance: localhost:9090` is the VM talking about itself. That series was
+# produced by a Prometheus scraping its own /metrics on a box in Azure, sent
+# over remote_write, accepted by the data collection rule, stored in the
+# workspace, and read back through a completely separate query endpoint.
+#
+# Nothing in that path used a password. The write authenticated with a token
+# the VM fetched from its instance metadata service because a user-assigned
+# managed identity is attached to it and holds Monitoring Metrics Publisher
+# on the rule.
+#
+# `source: self-managed-vm` is an external_label set in prometheus.yml, so it
+# survives the whole journey and marks where the data came from.
+#
+# `microsoft.amwresourceid` is NOT ours. Azure stamps the workspace resource
+# id onto every series it ingests.
+#
+# 780,487 samples. That is the number the ingestion bill is computed from -
+# and it accrued while nobody was watching, which is this week's other lesson.

@@ -1,0 +1,46 @@
+title: The whole claim, in one config block
+subtitle: read off the running host — nothing in it is a credential
+width: 1080
+---
+$ sed -n '/^remote_write:/,$p' /etc/prometheus/prometheus.yml
+
+remote_write:
+  - url: "https://amw-wk11-dev-scus-001-x4on.southcentralus-1.metrics.ingest
+           .monitor.azure.com/dataCollectionRules/dcr-<masked>/streams
+           /Microsoft-PrometheusMetrics/api/v1/write?api-version=2023-04-24"
+    azuread:
+      cloud: AzurePublic
+      managed_identity:
+        client_id: "8a9821e7-...-dcaa8b1baae1"
+
+$ promtool check config /etc/prometheus/prometheus.yml
+
+Checking /etc/prometheus/prometheus.yml
+ SUCCESS: /etc/prometheus/prometheus.yml is valid prometheus config file syntax
+
+$ grep -ciE 'password|client_secret|BEGIN .*PRIVATE' /etc/prometheus/prometheus.yml
+0
+
+# WHAT IS NOT IN THIS FILE
+#
+# No password. No client secret. No certificate. No connection string.
+# `managed_identity` names a client id, and a client id is an identifier -
+# it grants nothing. The VM holds the identity, so Prometheus asks the
+# instance metadata service for a token and never stores one.
+#
+# The Entra ID auth option Microsoft also documents DOES need a client
+# secret. This lab forbids those outright, which is why the managed identity
+# path is the only one here.
+#
+# THE URL IS ASSEMBLED, NOT PASTED
+#
+# Host comes from the data collection ENDPOINT. Path names the data
+# collection RULE by its IMMUTABLE id. Both are read back from the
+# workspace after apply, so a rebuild in another subscription renders a
+# correct file with nothing to hand-edit.
+#
+# Reading the host from the data collection RULE instead returns an EMPTY
+# STRING. That renders a URL of "/dataCollectionRules/..." which applies
+# cleanly, boots cleanly, and fails at runtime with
+# `unsupported protocol scheme ""`. An empty string is a valid string, so
+# nothing warns. main.tf now has a check block that fails the PLAN instead.

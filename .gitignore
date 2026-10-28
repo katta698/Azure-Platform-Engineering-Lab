@@ -85,3 +85,7 @@ scripts/screenshots/.session-cookie
 **/.validate/
 **/sch.json
 **/err.txt
+# Generated audit dumps. Local working notes, never published — the
+# markdown under docs/ is already covered by the *.md rule above, but these
+# are .txt and would otherwise ride along on a `git add .`.
+docs/audit/

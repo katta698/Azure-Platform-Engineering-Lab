@@ -1,0 +1,31 @@
+title: How the repository is organised
+subtitle: week-11-managed-prometheus — the important parts; full source on GitHub
+width: 880
+---
+week-11-managed-prometheus/
+│
+├── terraform/      split by the decision each file makes
+│   ├── main.tf           the workspace, the identity, the grant on the DCR
+│   ├── vm.tf             the Prometheus host — and its egress
+│   ├── grafana.tf        the instance, and the read it needs
+│   ├── alerts.tf         one recording rule, one alert rule, no cluster
+│   └── cloud-init.yaml.tftpl
+│                         rendered by Terraform: the only file that
+│                         names the ingestion URL and the client id
+│
+└── scripts/        deploy, validate, cleanup — each runs end to end
+
+# WHY cloud-init IS A TEMPLATE AND NOT A STATIC FILE
+#
+# The remote_write URL is assembled from the workspace's own data collection
+# rule — its metrics ingestion endpoint plus its immutable id. Both are known
+# only after apply. Rendering the config means a rebuild in another
+# subscription produces a correct prometheus.yml with nothing to hand-edit,
+# and means there is no placeholder anyone can forget to replace.
+#
+# There is also nothing in it to redact before publishing. The `azuread`
+# block names a managed identity by client id; a client id is an identifier,
+# not a credential.
+#
+# Full source, including variables and the scripts:
+# github.com/katta698/Azure-Platform-Engineering-Lab

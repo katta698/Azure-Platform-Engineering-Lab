@@ -1,0 +1,116 @@
+#cloud-config
+# Week 11 — bring up a self-managed Prometheus that remote-writes to Azure.
+#
+# Everything here is rendered by Terraform. The ingestion URL and the client id
+# come from deployed resources, so this file never needs hand-editing, and
+# there is no secret in it to redact before publishing.
+
+package_update: true
+
+write_files:
+  # The whole week, in one file. Note what is NOT here: no password, no client
+  # secret, no certificate, no connection string. The `azuread` block names a
+  # managed identity by client id, and the VM gets a token from the instance
+  # metadata service because the identity is assigned to it.
+  - path: /etc/prometheus/prometheus.yml
+    permissions: "0644"
+    content: |
+      global:
+        scrape_interval: 30s
+        evaluation_interval: 30s
+        external_labels:
+          source: self-managed-vm
+          week: "11"
+
+      scrape_configs:
+        - job_name: prometheus
+          static_configs:
+            - targets: ["localhost:9090"]
+
+      remote_write:
+        - url: "${remote_write_url}"
+          azuread:
+            cloud: AzurePublic
+            managed_identity:
+              client_id: "${identity_client_id}"
+
+  - path: /etc/systemd/system/prometheus.service
+    permissions: "0644"
+    content: |
+      [Unit]
+      Description=Prometheus ${prometheus_version}
+      Wants=network-online.target
+      After=network-online.target
+
+      [Service]
+      User=prometheus
+      Group=prometheus
+      Type=simple
+      ExecStart=/usr/local/bin/prometheus \
+        --config.file=/etc/prometheus/prometheus.yml \
+        --storage.tsdb.path=/var/lib/prometheus \
+        --storage.tsdb.retention.time=2h \
+        --web.listen-address=127.0.0.1:9090
+      Restart=on-failure
+      RestartSec=10
+
+      [Install]
+      WantedBy=multi-user.target
+
+  # Installed as a script rather than inline so the wait-for-network logic is
+  # readable on the host and its output lands in cloud-init-output.log.
+  - path: /usr/local/sbin/wk11-install-prometheus.sh
+    permissions: "0755"
+    content: |
+      #!/bin/bash
+      set -eux
+
+      # WAIT FOR EGRESS BEFORE TRYING TO USE IT.
+      #
+      # Measured 2026-10-27: on the first build, cloud-init reached the
+      # download before the VM had outbound connectivity and curl failed after
+      # 132 seconds with "Failed to connect to github.com port 443". apt
+      # fetched nothing either. The network came up shortly afterwards and
+      # worked fine, so the VM was healthy and the install was simply early.
+      #
+      # cloud-init's runcmd is documented as running late in boot, and on
+      # Azure that is still not late enough to assume egress.
+      for i in $(seq 1 40); do
+        if curl -fsS --max-time 10 -o /dev/null https://github.com; then
+          echo "wk11: egress available after $i attempt(s)"
+          break
+        fi
+        echo "wk11: waiting for outbound network ($i/40)"
+        sleep 15
+      done
+
+      useradd --no-create-home --shell /usr/sbin/nologin prometheus || true
+      mkdir -p /var/lib/prometheus /etc/prometheus
+
+      # Pinned version, downloaded from the project rather than the distro:
+      # the version is load-bearing. Microsoft documents 2.45+ for
+      # user-assigned managed identity remote-write, 3.5.0+ for
+      # system-assigned. --retry on top of the wait, because one successful
+      # probe does not promise the next request succeeds.
+      curl -fsSL --retry 8 --retry-delay 15 --retry-connrefused \
+        -o /tmp/prom.tar.gz \
+        "https://github.com/prometheus/prometheus/releases/download/v${prometheus_version}/prometheus-${prometheus_version}.linux-amd64.tar.gz"
+
+      tar -xzf /tmp/prom.tar.gz -C /tmp
+      install -m 0755 /tmp/prometheus-${prometheus_version}.linux-amd64/prometheus /usr/local/bin/prometheus
+      install -m 0755 /tmp/prometheus-${prometheus_version}.linux-amd64/promtool  /usr/local/bin/promtool
+      chown -R prometheus:prometheus /var/lib/prometheus /etc/prometheus
+
+      # Fail loudly if the config does not parse, rather than starting a
+      # Prometheus that silently never writes anywhere.
+      /usr/local/bin/promtool check config /etc/prometheus/prometheus.yml
+
+      systemctl daemon-reload
+      systemctl enable --now prometheus
+
+      # A marker validate.sh can read through `az vm run-command`, so the
+      # check does not depend on SSH - no inbound port is open on this VM.
+      echo "wk11 ready $(date -Is)" > /var/log/wk11-ready
+
+runcmd:
+  - /usr/local/sbin/wk11-install-prometheus.sh
