@@ -128,4 +128,29 @@ resource "azurerm_linux_virtual_machine" "prometheus" {
   # remove the ~30 minute propagation wait, but it does mean the wait starts
   # as early as possible.
   depends_on = [azurerm_role_assignment.prometheus_publisher]
+
+  # THE GUARD THAT ACTUALLY STOPS A BROKEN BUILD.
+  #
+  # custom_data above bakes local.remote_write_url into this VM's cloud-init.
+  # If the DCE's metrics_ingestion_endpoint came back empty, that URL has no
+  # scheme, the VM boots happily, and Prometheus fails at runtime with
+  # `unsupported protocol scheme ""`. An empty string is a valid string, so
+  # nothing else complains.
+  #
+  # A precondition is the right instrument because HashiCorp documents it as
+  # throwing "an error with the error_message argument" and stopping the
+  # current operation, evaluated "after generating a plan but before creating
+  # the resource". So the VM is never created carrying a config that cannot
+  # work.
+  #
+  # Timing, stated precisely: on a FIRST apply the workspace does not exist
+  # yet, so the endpoint is unknown at plan time and Terraform defers this
+  # check to the apply phase - still before this VM is created. On any later
+  # plan, with the workspace in state, it fails at PLAN.
+  lifecycle {
+    precondition {
+      condition     = startswith(local.remote_write_url, "https://")
+      error_message = "The assembled remote_write URL has no scheme, so this VM would boot a Prometheus that can never write anywhere. The data collection endpoint's metrics_ingestion_endpoint came back empty - read the host from the DCE, not the DCR."
+    }
+  }
 }

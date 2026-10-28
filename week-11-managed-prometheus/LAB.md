@@ -24,7 +24,7 @@ needed.
 
 | Tool | Version used | Note |
 | --- | --- | --- |
-| Terraform | **>= 1.10.0** | pinned in `terraform/versions.tf`; the `check` block needs 1.5+ |
+| Terraform | **>= 1.10.0** | pinned in `terraform/versions.tf`; the `precondition` block needs 1.2+ |
 | `hashicorp/azurerm` | **~> 5.2** | 5.x needs an explicit `subscription_id` on the provider block |
 | Azure CLI | 2.60+ | provider registration, `az vm run-command`, validation |
 | Prometheus | **3.5.0** | installed on the VM by cloud-init, pinned in `variables.tf` |
@@ -157,8 +157,9 @@ locals {
 The host comes from the **endpoint**. The DCR data source *also* exposes a
 `metrics_ingestion_endpoint`, and for a workspace-managed rule it returns an
 **empty string** — which joins into a URL with no scheme, applies cleanly,
-boots cleanly, and fails hours later on the host. The `check` block in
-`main.tf` fails the **plan** instead.
+boots cleanly, and fails hours later on the host. The **precondition** on
+`azurerm_linux_virtual_machine.prometheus` in `vm.tf` blocks that instead —
+see Troubleshooting for why it is not a `check` block.
 
 Note the path uses the DCR's **immutable id**, not its resource name.
 
@@ -286,13 +287,41 @@ produced `/dataCollectionRules/...` — a path with no scheme and no host.
 Nothing warned, because an empty string is a valid string.
 
 **Resolution.** Read the host from the data collection **endpoint** data
-source, and add a `check` block asserting the assembled URL starts with
-`https://` so it fails at plan time.
+source, and guard it with a **`precondition`** on the VM — the resource that
+bakes the URL into its cloud-init:
+
+```hcl
+lifecycle {
+  precondition {
+    condition     = startswith(local.remote_write_url, "https://")
+    error_message = "The assembled remote_write URL has no scheme, ..."
+  }
+}
+```
+
+**The first version used a `check` block, and that was wrong.** HashiCorp
+documents that a failed `check` assertion makes Terraform *"report a warning
+and continue executing the current operation"*, and that the block runs *"as
+the last step of plan or apply operation, after Terraform has planned or
+provisioned your infrastructure"*. It would have warned once the broken VM
+already existed. Verified locally against an empty host:
+
+| Mechanism | Result | Exit code |
+| --- | --- | --- |
+| `check` block | `Warning: Check block assertion failed`, `Plan: 1 to add` | **0** |
+| `precondition` | `Error: Resource precondition failed`, `Planning failed` | **1** |
+| `precondition`, valid URL | `Plan: 1 to add` | 0 |
+
+**When it fires.** A precondition is evaluated *"after generating a plan but
+before creating the resource"*. Against existing state the endpoint is known,
+so it fails at **plan**. On a first apply the workspace does not exist yet, the
+value is unknown at plan time, and Terraform *"delays checking that validation
+until the apply phase"* — still before the VM is created.
 
 **Lesson learned.** An attribute existing on a data source does not mean it is
-populated for your resource. Where a value is composed from several lookups,
-assert the shape of the result — a `check` block costs four lines and moves a
-runtime failure to plan time.
+populated for your resource — and the instrument you reach for to assert that
+has to be one that actually blocks. `check` is for continuous health
+reporting, not for stopping a bad build.
 
 ### HTTP 403 from the ingestion endpoint for half an hour
 
@@ -401,5 +430,6 @@ source as to be missing data.
 - [Prometheus `remote_write` configuration](https://prometheus.io/docs/prometheus/latest/configuration/configuration/#remote_write)
 - [`azurerm_monitor_workspace`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_workspace)
 - [`azurerm_monitor_alert_prometheus_rule_group`](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_alert_prometheus_rule_group)
-- [Terraform `check` blocks](https://developer.hashicorp.com/terraform/language/checks)
+- [Terraform custom conditions — preconditions and postconditions](https://developer.hashicorp.com/terraform/language/expressions/custom-conditions)
+- [Terraform `check` blocks](https://developer.hashicorp.com/terraform/language/checks) — and why they do not block
 - Source: [`week-11-managed-prometheus/`](https://github.com/katta698/Azure-Platform-Engineering-Lab/tree/main/week-11-managed-prometheus)

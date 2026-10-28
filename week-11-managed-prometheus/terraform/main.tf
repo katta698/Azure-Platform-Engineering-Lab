@@ -79,13 +79,20 @@ locals {
 }
 
 # A URL with no scheme is a configuration that applies cleanly and fails on
-# the host hours later. Fail at plan time instead.
-check "remote_write_url_is_absolute" {
-  assert {
-    condition     = startswith(local.remote_write_url, "https://")
-    error_message = "The assembled remote_write URL has no scheme - the DCE's metrics_ingestion_endpoint came back empty."
-  }
-}
+# the host hours later. The guard against it is a PRECONDITION on the VM, in
+# vm.tf - the resource that embeds this URL in its cloud-init.
+#
+# It is not a `check` block, and that correction is worth recording. A check
+# block was the first attempt, and it cannot do this job: HashiCorp documents
+# that "when a check block's assertion fails, Terraform reports a warning and
+# continues executing the current operation", and that the block "executes as
+# the last step of plan or apply operation, AFTER Terraform has planned or
+# provisioned your infrastructure". So it would have warned about a broken
+# URL once the VM carrying it already existed - the exact failure it was
+# written to prevent.
+#
+# A precondition throws an error and stops the operation, before the resource
+# it guards is created. See vm.tf.
 
 # ─────────────────────────────────────────────────────────────────────────────
 # The identity Prometheus authenticates as.

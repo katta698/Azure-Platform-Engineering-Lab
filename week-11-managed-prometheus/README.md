@@ -109,16 +109,34 @@ cleanly, and Prometheus fails hours later with
 `unsupported protocol scheme ""`. An empty string is a valid string, so
 nothing warns.
 
-`main.tf` now fails at **plan** time instead:
+The guard is a **precondition on the VM** — the resource that bakes this URL
+into its cloud-init — so the VM is never created carrying a config that
+cannot work:
 
 ```hcl
-check "remote_write_url_is_absolute" {
-  assert {
+lifecycle {
+  precondition {
     condition     = startswith(local.remote_write_url, "https://")
-    error_message = "The assembled remote_write URL has no scheme - the DCE's metrics_ingestion_endpoint came back empty."
+    error_message = "The assembled remote_write URL has no scheme, ..."
   }
 }
 ```
+
+**It is deliberately not a `check` block, and the first version of this week
+got that wrong.** HashiCorp documents that a failed `check` assertion makes
+Terraform *"report a warning and continue executing the current operation"*,
+and that the block runs *"as the last step of plan or apply operation, after
+Terraform has planned or provisioned your infrastructure"*. So a check would
+have warned about the broken URL once the VM carrying it already existed —
+the precise failure it was written to prevent. Measured: with an empty host,
+a `check` plans `1 to add` and exits **0**; the precondition errors and exits
+**1**.
+
+A precondition *"throws an error ... and stops the current operation"*. When
+the endpoint is already known — any run against existing state — it fails at
+**plan**. On a first apply the workspace does not exist yet, so the value is
+unknown at plan time and Terraform defers the check to the **apply** phase,
+still before the VM is created. Either way the broken VM is never built.
 
 ### Deploying Grafana grants you no access to Grafana
 

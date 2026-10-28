@@ -64,5 +64,8 @@ $ grep -ciE &#x27;password|client_secret|BEGIN .*PRIVATE&#x27; /etc/prometheus/p
 <span class="c"># STRING. That renders a URL of &quot;/dataCollectionRules/...&quot; which applies</span>
 <span class="c"># cleanly, boots cleanly, and fails at runtime with</span>
 <span class="c"># `unsupported protocol scheme &quot;&quot;`. An empty string is a valid string, so</span>
-<span class="c"># nothing warns. main.tf now has a check block that fails the PLAN instead.</span></pre>
+<span class="c"># nothing warns. vm.tf now carries a PRECONDITION on the VM that consumes</span>
+<span class="c"># this URL, so the VM is never created with a config that cannot work.</span>
+<span class="c"># Not a `check` block - a failed check is only a WARNING, and it runs</span>
+<span class="c"># after Terraform has already provisioned.</span></pre>
 </div>
