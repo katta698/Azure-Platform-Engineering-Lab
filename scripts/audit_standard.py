@@ -9,6 +9,25 @@ It reports, it does not fix, and it never guesses. A missing section is a fact
 about the file; a missing MEASUREMENT is a gap that cannot be closed by editing,
 because the week is torn down and the standard forbids inventing evidence.
 Those two are listed separately on purpose.
+
+WHY THE "9/9" COLUMN WAS REPLACED (2026-10-30)
+----------------------------------------------
+This script used to print a headline score counting HEADINGS that matched. It
+reported all eleven Azure weeks at 9/9 for days while nine of them did not
+follow the standard at all -- their section 2 was a bulleted list rather than
+the compact table it asks for, and three still carried the retired file-tree
+card. The score was true and useless: a heading is not its content.
+
+Worse, it was the number being quoted as evidence of quality. An instrument
+that answers a question nobody asked, in the shape of the question they did,
+is more dangerous than no instrument.
+
+The form check now DELEGATES to the blog repo's check_lab_post_shape.py rather
+than re-implementing it here. Two checkers scoring the same posts by different
+rules is exactly how the gap survived: this one said 9/9, that one said twelve
+deviations, and only one of them was gated on push. If the blog checker cannot
+be imported, this prints FORM NOT CHECKED and exits non-zero. It does not fall
+back to counting headings and calling it a score.
 """
 import argparse
 import html
@@ -72,6 +91,46 @@ def post_path(week_dir):
             if "Azure Platform Engineering Lab" in body or "- Azure\n" in body:
                 return os.path.join(BLOG_POSTS, name)
     return None
+
+
+BLOG_CHECK = r"C:\Projects\Engineering\katta698.github.io\scripts\check_lab_post_shape.py"
+
+# The ids the Azure series uses. Declared in the blog checker too; if the two
+# ever disagree this will under-report, so it is read from there when possible.
+AZURE_IDS = ["overview", "services", "architecture", "prereqs", "build",
+             "validation", "seccost", "troubleshooting", "cleanup"]
+
+
+def _load_blog_checker():
+    """Import the gated form-checker, or return None with the reason."""
+    import importlib.util
+    if not os.path.exists(BLOG_CHECK):
+        return None, "not found at %s" % BLOG_CHECK
+    try:
+        spec = importlib.util.spec_from_file_location("blogcheck", BLOG_CHECK)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        return mod, None
+    except Exception as exc:                       # noqa: BLE001 - report, do not hide
+        return None, "%s: %s" % (type(exc).__name__, exc)
+
+
+def form_problems(checker, path):
+    """What the gated checker says about this post's FORM, not its headings."""
+    if checker is None:
+        return None
+    text = read(path)
+    if text is None:
+        return None
+    required = getattr(checker, "SERIES", {}).get("Azure Weekly Lab") or AZURE_IDS
+    report = []
+    n = checker.check_text(text, os.path.basename(path), report, required=required)
+    cleaned = []
+    for line in report:
+        line = line.strip()
+        line = re.sub(r"^\[FAIL\]\s*\S+?:\s*", "", line)
+        cleaned.append(line)
+    return n, cleaned
 
 
 def audit_post(path):
@@ -154,15 +213,25 @@ def main():
                    os.path.isdir(os.path.join(LAB, d)))
 
     print()
+    checker, why = _load_blog_checker()
+    if checker is None:
+        print("  FORM NOT CHECKED: could not load the gated checker -- %s" % why)
+        print("  Refusing to print a heading count in its place. Fix the path,")
+        print("  or run check_lab_post_shape.py in the blog repo directly.")
+        return 2
+
     print("  AZURE LAB vs THE MASTER STANDARD")
-    print("  %-26s %-12s %-10s %-9s %-7s %s"
-          % ("week", "blog 9 sec", "guide 9", "figs/cap", "words", "notes"))
-    print("  " + "-" * 92)
+    print("  form verdict comes from check_lab_post_shape.py, the gated checker")
+    print("  %-26s %-14s %-10s %-9s %-7s %s"
+          % ("week", "blog FORM", "guide 9", "figs/cap", "words", "notes"))
+    print("  " + "-" * 94)
 
     rows = []
+    bad_form = 0
     for w in weeks:
         pp = post_path(w)
         post = audit_post(pp) if pp else None
+        form = form_problems(checker, pp) if pp else None
         guide = audit_guide(w)
         notes = []
         if post:
@@ -180,17 +249,30 @@ def main():
                 notes.append("long")
         else:
             notes.append("POST NOT FOUND")
-        print("  %-26s %-12s %-10s %-9s %-7s %s"
-              % (w,
-                 ("%d/9" % post["n_present"]) if post else "-",
+        if form is None:
+            verdict = "-"
+        elif form[0] == 0:
+            verdict = "ok"
+        else:
+            verdict = "%d PROBLEM%s" % (form[0], "" if form[0] == 1 else "S")
+            bad_form += 1
+        print("  %-26s %-14s %-10s %-9s %-7s %s"
+              % (w, verdict,
                  ("%d/9?" % guide["n_present"]) if guide else "-",
                  ("%d/%d" % (post["imgs"], post["figs"])) if post else "-",
                  str(post["words"]) if post else "-",
                  ", ".join(notes) or "ok"))
-        rows.append((w, post, guide))
+        rows.append((w, post, guide, form))
 
     if args.detail:
-        for w, post, guide in rows:
+        for w, post, guide, form in rows:
+            if form and form[0]:
+                print()
+                print("  == %s -- FORM" % w)
+                for line in form[1]:
+                    print("     %s" % line)
+    if args.detail:
+        for w, post, guide, form in rows:
             print()
             print("  == %s" % w)
             if post:
@@ -205,9 +287,16 @@ def main():
                 print("     guide: READ to confirm -> %s"
                       % (", ".join(guide["missing"]) or "nothing flagged"))
     print()
-    print("  blog 9 sec and figs/cap compare literal headings and tags: trust them.")
+    print("  blog FORM is the gated checker's verdict on CONTENT, not on")
+    print("  headings -- it reads what sits under each heading.")
+    print("  figs/cap counts literal tags.")
     print("  guide 9? is a KEYWORD SCAN and carries a question mark for a reason.")
     print("  A flagged part means OPEN THE FILE, not that anything is missing.")
+    print()
+    print("  FORM ignores the blog checker's MIGRATION_PENDING list on purpose.")
+    print("  That list is what the PUSH GATE agrees to wave through; this audit")
+    print("  shows what is actually true. Weeks 01-09 are parked there and")
+    print("  still appear here.")
     print()
     print("  A measurement that was never captured cannot be fixed by editing:")
     print("  these weeks are torn down, and the standard forbids inventing")
@@ -216,4 +305,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    # The return value is the exit code. It used to be discarded, so the
+    # FORM NOT CHECKED path printed a refusal and still exited 0 -- a refusal
+    # nothing could act on, which is the same defect in miniature as the score
+    # this script used to print.
+    raise SystemExit(main())
