@@ -55,7 +55,7 @@ check() {
          | grep -vE '0{8}-0{4}-0{4}-0{4}-0{12}' \
          | grep -vE 'XXXX-XXXX-XXX-XXX' \
          | grep -vE 'your-email@example\.com' \
-         | grep -vE '/providers/Microsoft\.Authorization/(policy(Set)?Definitions|roleDefinitions)/'          | grep -vE "$PUBLIC_BUILTIN_GUIDS")
+         | grep -vE '/providers/Microsoft\.Authorization/(policy(Set)?Definitions|roleDefinitions)/'          | grep -vE "$PUBLIC_BUILTIN_GUIDS"          | grep -vE '^scripts/diagram-icons/[^:]+\.svg:[0-9]+:.*(id="|url\(#|href="#)(uuid-)?[0-9a-fA-F]{8}-')
   if [[ -n "$hits" ]]; then
     echo ""
     echo "FAIL  $label"
@@ -68,6 +68,19 @@ check() {
 
 echo "Sweeping ${#FILES[@]} files..."
 echo ""
+
+# Microsoft's official Azure architecture icons carry uuid-shaped element ids
+# in their own <defs> -- 37 of them across the set in scripts/diagram-icons/.
+# They are vendor artwork, copied byte-for-byte and never edited, so those are
+# gradient names and not account identifiers. The filter above is deliberately
+# narrow: it requires BOTH the vendor icon path AND that the GUID sits in an
+# SVG id/url/href position. A real tenant ID written as plain text in one of
+# those files still fails the sweep.
+#
+# The renderer does NOT get the same exemption. It used to emit prefixed copies
+# of these ids, which are still uuid-shaped, and failed this check on every
+# diagram. It now rewrites them to short tokens instead. Fixing the generator
+# was the right move; widening the gate would have been the wrong one.
 
 # A bare GUID is almost always a tenant, subscription, client or object ID.
 # Two exceptions are filtered above: the all-zero placeholder, and Azure BUILT-IN

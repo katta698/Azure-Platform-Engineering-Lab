@@ -1,90 +1,45 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" width="900" height="600" role="img" aria-label="Week 11 managed Prometheus. A self-managed Prometheus runs on an Ubuntu virtual machine in sub-lab-dev, with no inbound port open and a public IP used only for egress. A user-assigned managed identity is attached to the virtual machine, so Prometheus obtains a token from the instance metadata service and holds no credential of its own. Prometheus remote-writes over HTTPS to the metrics ingestion endpoint, whose host comes from the data collection endpoint and whose path names the data collection rule by its immutable id, both created by the Azure Monitor workspace for itself. The identity holds Monitoring Metrics Publisher on that data collection rule and nothing wider, a grant that takes about thirty minutes to take effect, during which writes are refused with HTTP 403. The Azure Monitor workspace stores Prometheus time series, is queried with PromQL, and retains data for eighteen months at no storage cost. An Azure Managed Grafana instance reads the workspace through its own system-assigned identity holding Monitoring Data Reader. A Prometheus rule group deployed by Terraform evaluates one recording rule and one alert rule against the workspace, with no Kubernetes cluster named anywhere.">
-  <defs>
-    <style>
-      .t    { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-      .hdr  { font-size: 13px; font-weight: 700; fill: #1f2933; }
-      .lbl  { font-size: 12px; fill: #1f2933; }
-      .sm   { font-size: 11px; fill: #52606d; }
-      .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; fill: #1f2933; }
-      .box  { fill: #ffffff; stroke: #c3cbd5; stroke-width: 1.2; }
-      .svc  { fill: #f2f9f4; stroke: #8fbf9f; stroke-width: 1.3; }
-      .store{ fill: #f7f5fb; stroke: #b3a8d1; stroke-width: 1.3; }
-      .band { fill: #f5f7fa; stroke: #dbe1e8; stroke-width: 1; }
-      .warn { fill: #fff8ec; stroke: #d9b36c; stroke-width: 1.3; }
-      .flow { stroke: #4a7fb5; stroke-width: 1.8; fill: none; }
-      .read { stroke: #6b5b9a; stroke-width: 1.6; fill: none; stroke-dasharray: 5 3; }
-      .ok   { fill: #1b6e3c; font-weight: 700; }
-      .no   { fill: #a3382c; font-weight: 700; }
-    </style>
-    <marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M0,0 L10,5 L0,10 z" fill="#4a7fb5"/>
-    </marker>
-    <marker id="p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M0,0 L10,5 L0,10 z" fill="#6b5b9a"/>
-    </marker>
-  </defs>
-
-  <rect x="0" y="0" width="900" height="600" fill="#ffffff"/>
-  <text class="t hdr" x="24" y="26">No cluster anywhere. A Prometheus on a VM, writing to Azure with no secret.</text>
-
-  <!-- compute side -->
-  <rect class="band" x="20" y="48" width="330" height="236" rx="8"/>
-  <text class="t hdr" x="34" y="68">sub-lab-dev</text>
-
-  <rect class="svc" x="34" y="80" width="300" height="104" rx="6"/>
-  <text class="t hdr" x="48" y="101">VM — self-managed Prometheus</text>
-  <text class="t sm"  x="48" y="119">Ubuntu 24.04, D2als_v7, installed by cloud-init</text>
-  <text class="t sm no" x="48" y="137">NO inbound port open — not even SSH</text>
-  <text class="t sm"  x="48" y="155">public IP is egress only; default outbound is retired</text>
-  <text class="t mono" x="48" y="174">scrape_interval: 30s</text>
-
-  <rect class="box" x="34" y="196" width="300" height="74" rx="6"/>
-  <text class="t hdr" x="48" y="217">User-assigned managed identity</text>
-  <text class="t sm"  x="48" y="235">attached to the VM, so Prometheus asks the</text>
-  <text class="t sm"  x="48" y="251">instance metadata service for a token</text>
-  <text class="t sm ok" x="48" y="267">no password, no certificate, no client secret</text>
-
-  <!-- the write -->
-  <path class="flow" d="M350,132 L470,132" marker-end="url(#b)"/>
-  <text class="t sm" x="356" y="124">remote_write, HTTPS</text>
-  <text class="t mono" x="356" y="150">azuread: managed_identity</text>
-
-  <!-- ingestion -->
-  <rect class="warn" x="470" y="80" width="408" height="104" rx="6"/>
-  <text class="t hdr" x="484" y="101">Data collection rule — created BY the workspace</text>
-  <text class="t sm"  x="484" y="119">it accepts the write — the paired ENDPOINT supplies the host</text>
-  <text class="t sm"  x="484" y="137">the identity holds <tspan class="mono">Monitoring Metrics Publisher</tspan> here —</text>
-  <text class="t sm"  x="484" y="153">on the rule, not the workspace, not the subscription</text>
-  <text class="t sm no" x="484" y="173">~30 MINUTES to take effect. Until then: HTTP 403</text>
-
-  <!-- store -->
-  <path class="flow" d="M674,184 L674,228" marker-end="url(#b)"/>
-  <rect class="store" x="470" y="228" width="408" height="92" rx="6"/>
-  <text class="t hdr" x="484" y="249">Azure Monitor workspace</text>
-  <text class="t sm"  x="484" y="267">NOT a Log Analytics workspace. Prometheus time series,</text>
-  <text class="t sm"  x="484" y="283">queried with PromQL, billed on ingestion and query</text>
-  <text class="t sm ok" x="484" y="303">18 months retention at no storage cost</text>
-
-  <!-- grafana -->
-  <path class="read" d="M560,320 L560,370" marker-end="url(#p)"/>
-  <rect class="box" x="470" y="370" width="196" height="88" rx="6"/>
-  <text class="t hdr" x="484" y="391">Managed Grafana</text>
-  <text class="t sm"  x="484" y="409">Standard — the only SKU</text>
-  <text class="t sm"  x="484" y="425">azurerm can express</text>
-  <text class="t sm"  x="484" y="443">reads via its own identity</text>
-
-  <!-- rules -->
-  <path class="read" d="M790,320 L790,370" marker-end="url(#p)"/>
-  <rect class="box" x="690" y="370" width="188" height="88" rx="6"/>
-  <text class="t hdr" x="704" y="391">Prometheus rule group</text>
-  <text class="t sm"  x="704" y="409">1 recording rule</text>
-  <text class="t sm"  x="704" y="425">1 alert rule</text>
-  <text class="t sm ok" x="704" y="443">clusterName: empty</text>
-
-  <text class="t sm" x="24" y="492">The grant is the week's trap. Monitoring Metrics Publisher on the data collection rule takes roughly thirty minutes to</text>
-  <text class="t sm" x="24" y="508">propagate — six times the same role in week 08. The apply finishes long before the pipeline works, and an empty query</text>
-  <text class="t sm" x="24" y="524">in between is indistinguishable from a broken one. So the validation polls rather than asking once.</text>
-
-  <text class="t sm" x="24" y="552">Managed Prometheus SCRAPES only AKS and Arc-enabled Kubernetes. remote_write accepts a VM, which is why there is no</text>
-  <text class="t sm" x="24" y="568">cluster here — and why the rule group's clusterName is empty while its scope is the workspace itself.</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 560" width="1280" height="560" role="img" aria-label="Architecture diagram. Inside a virtual network with no inbound rules, a virtual machine runs self-managed Prometheus 3.5.0, and a public IP address provides egress only. A user-assigned managed identity below the virtual network supplies Prometheus with a token from the instance metadata service, so no credential is stored. Prometheus remote-writes over HTTPS into Azure Monitor managed service for Prometheus: the data collection endpoint supplies the URL host and the data collection rule is named in its path and accepts the write. The samples are stored in an Azure Monitor workspace, which holds Prometheus time series queried with PromQL. Azure Managed Grafana reads that workspace with PromQL, and a Prometheus rule group evaluates one alert rule and one recording rule against the same workspace, with no Kubernetes cluster named anywhere.">
+<!-- Generated by scripts/render_azure_diagram.py from the committed JSON spec beside this file. Do not hand-edit: regenerate.
+     Azure icons are official, used unmodified under Microsoft's icon terms, which permit use in architectural diagrams and documentation. -->
+<defs><marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2b3137"/></marker></defs>
+<rect x="0" y="0" width="1280" height="560" fill="#ffffff"/>
+<text x="28" y="34" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1f2933">Week 11 — a self-managed Prometheus writes to Azure Monitor. No cluster, no secret.</text>
+<rect x="40" y="95" width="440" height="200" rx="8" fill="none" stroke="#0078d4" stroke-width="1.6" stroke-dasharray="7 5"/>
+<text x="468" y="283" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12" fill="#0078d4" text-anchor="end">Virtual network · no inbound rules</text>
+<rect x="60" y="115" width="250" height="150" rx="4" fill="#ffffff" stroke="#b9c2cc" stroke-width="1.2"/>
+<text x="185.0" y="135" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#1f2933" text-anchor="middle">Virtual machine</text>
+<rect x="560" y="95" width="560" height="200" rx="4" fill="#ffffff" stroke="#b9c2cc" stroke-width="1.2"/>
+<text x="840.0" y="115" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#1f2933" text-anchor="middle">Azure Monitor managed service for Prometheus</text>
+<path d="M185.0,371.0 L185.0,252.0" fill="none" stroke="#2b3137" stroke-width="1.8" marker-end="url(#arw)"/>
+<text x="268" y="320" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="11" fill="#5b6670" text-anchor="middle">Token from IMDS</text>
+<path d="M214.0,205.0 L383.0,205.0" fill="none" stroke="#2b3137" stroke-width="1.8" marker-end="url(#arw)"/>
+<path d="M441.0,205.0 L661.0,205.0" fill="none" stroke="#2b3137" stroke-width="1.8" marker-end="url(#arw)"/>
+<text x="551" y="196" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="11" fill="#5b6670" text-anchor="middle">remote_write · HTTPS</text>
+<path d="M719.0,205.0 L951.0,205.0" fill="none" stroke="#2b3137" stroke-width="1.8" marker-end="url(#arw)"/>
+<path d="M943.9,254.2 L817.2,426.6" fill="none" stroke="#2b3137" stroke-width="1.8" stroke-dasharray="6 4" marker-end="url(#arw)"/>
+<text x="798" y="336" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="11" fill="#5b6670" text-anchor="middle">PromQL</text>
+<path d="M1004.0,261.1 L1073.6,423.3" fill="none" stroke="#2b3137" stroke-width="1.8" stroke-dasharray="6 4" marker-end="url(#arw)"/>
+<text x="1162" y="336" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="11" fill="#5b6670" text-anchor="middle">Alert + recording</text>
+<text x="1162" y="348" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="11" fill="#5b6670" text-anchor="middle">rules</text>
+<g transform="translate(162.0,182.0) scale(2.555556)"><path d="M9,0C4.03,0,0,4.029,0,9s4.03,9,9,9,9-4.03,9-9S13.97,0,9,0ZM8.999,16.845c-1.414,0-2.56-.945-2.56-2.11h5.121c0,1.165-1.147,2.11-2.561,2.11ZM13.229,14.036H4.77v-1.534h8.459v1.534ZM13.199,11.712h0v.002H4.793c-.028-.032-.057-.064-.084-.097-.866-1.052-1.07-1.601-1.268-2.16-.003-.019,1.05.215,1.797.383,0,0,.384.089.946.191-.54-.632-.86-1.436-.86-2.258,0-1.804,1.384-3.381.885-4.655.486.04,1.006,1.026,1.041,2.567.517-.713.733-2.017.733-2.816,0-.828.546-1.789,1.091-1.822-.486.801.126,1.488.67,3.192.205.64.178,1.717.336,2.4.052-1.419.296-3.489,1.196-4.204-.397.9.059,2.027.371,2.568.503.873.808,1.535.808,2.787,0,.839-.31,1.629-.833,2.247.595-.111,1.005-.212,1.005-.212l1.93-.377s-.28,1.153-1.358,2.264Z" fill="#e6522c" /></g>
+<text x="185" y="244.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">Prometheus 3.5.0</text>
+<g transform="translate(389.0,182.0) scale(2.555556)"><defs><linearGradient id="n1i0" x1="9" y1="15.83" x2="9" y2="5.79" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#32bedd" /><stop offset="0.18" stop-color="#32caea" /><stop offset="0.41" stop-color="#32d2f2" /><stop offset="0.78" stop-color="#32d4f5" /></linearGradient></defs><title>Icon-networking-69</title><path d="M.5,5.79h17a0,0,0,0,1,0,0v9.48a.57.57,0,0,1-.57.57H1.07a.57.57,0,0,1-.57-.57V5.79A0,0,0,0,1,.5,5.79Z" fill="url(#n1i0)" /><path d="M1.07,2.17H16.93a.57.57,0,0,1,.57.57V5.79a0,0,0,0,1,0,0H.5a0,0,0,0,1,0,0V2.73A.57.57,0,0,1,1.07,2.17Z" fill="#767676" /><circle cx="12.82" cy="10.19" r="1.38" fill="#f2f2f2" /><circle cx="9.06" cy="10.19" r="1.38" fill="#f2f2f2" /><circle cx="5.18" cy="10.19" r="1.38" fill="#f2f2f2" /><rect x="2.79" y="3.25" width="12.43" height="1.46" rx="0.28" fill="#f2f2f2" /></g>
+<text x="412" y="244.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">Public IP · egress</text>
+<text x="412" y="258.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">only</text>
+<g transform="translate(162.0,377.0) scale(2.555556)"><defs><linearGradient id="n2i3" x1="13.18" y1="13.01" x2="8.63" y2="4.38" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#1988d9" /><stop offset="0.9" stop-color="#54aef0" /></linearGradient><linearGradient id="n2i0" x1="11.22" y1="10.5" x2="14.37" y2="15.93" gradientUnits="userSpaceOnUse"><stop offset="0.1" stop-color="#54aef0" /><stop offset="0.29" stop-color="#4fabee" /><stop offset="0.51" stop-color="#41a2e9" /><stop offset="0.74" stop-color="#2a93e0" /><stop offset="0.88" stop-color="#1988d9" /></linearGradient></defs><title>Icon-identity-227</title><g><polygon points="1.15 10.22 8.93 15.27 16.85 10.21 17.85 11.36 8.93 17.11 0.15 11.37 1.15 10.22" fill="#50e6ff" /><polygon points="1.73 9.58 8.93 1 16.28 9.59 8.93 14.23 1.73 9.58" fill="#fff" /><polygon points="8.93 1 8.93 14.23 1.73 9.58 8.93 1" fill="#50e6ff" /><polygon points="8.93 1 8.93 14.23 16.28 9.59 8.93 1" fill="url(#n2i3)" /><polygon points="8.93 7.83 16.28 9.59 8.93 14.23 8.93 7.83" fill="#53b1e0" /><polygon points="8.93 14.23 1.73 9.58 8.93 7.83 8.93 14.23" fill="#9cebff" /><polygon points="8.93 17.11 17.85 11.36 16.85 10.21 8.93 15.27 8.93 17.11" fill="url(#n2i0)" /><g><path id="n2i4" d="M16.32,11.88a1.16,1.16,0,0,0,0-1.65h0l-2-2a1.16,1.16,0,0,0-1.64,0h0l-2,2a1.18,1.18,0,0,0,0,1.65l1.67,1.67a.32.32,0,0,1,.09.23v3.1a.36.36,0,0,0,.12.28l.76.76a.25.25,0,0,0,.37,0l.73-.73h0l.44-.44a.15.15,0,0,0,0-.21l-.31-.31a.16.16,0,0,1,0-.24l.31-.31a.16.16,0,0,0,0-.22l-.31-.31a.15.15,0,0,1,0-.23l.31-.32a.15.15,0,0,0,0-.21l-.44-.44v-.16ZM13.5,8.71a.66.66,0,1,1-.66.66.66.66,0,0,1,.66-.66Z" fill="#ffca00" /><path id="n2i5" d="M13,17h0a.14.14,0,0,0,.24-.11V14.33a.16.16,0,0,0-.06-.13h0a.14.14,0,0,0-.22.13v2.51A.15.15,0,0,0,13,17Z" fill="#ff9300" opacity="0.75" /><rect id="n2i1" x="11.9" y="10.9" width="3.29" height="0.39" rx="0.18" fill="#ff9300" opacity="0.75" /><rect id="n2i2" x="11.9" y="11.53" width="3.29" height="0.39" rx="0.18" fill="#ff9300" opacity="0.75" /></g></g></g>
+<text x="185" y="439.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">User-assigned</text>
+<text x="185" y="453.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">managed identity</text>
+<g transform="translate(667.0,182.0) scale(2.555556)"><defs><linearGradient id="n3i1" x1="10.463" y1="15.888" x2="10.463" y2="-2.112" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#0078d4" /><stop offset="1" stop-color="#5ea0ef" /></linearGradient><linearGradient id="n3i0" x1="7.179" y1="0.537" x2="7.179" y2="12.51" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#50e6ff" /><stop offset="1" stop-color="#32bedd" /></linearGradient></defs><rect x="3.113" width="14.7" height="18" rx="0.6" fill="url(#n3i1)" /><rect x="0.187" y="1.867" width="13.985" height="7.291" rx="0.541" fill="url(#n3i0)" /><path d="M11.887,4.423H5.069a.122.122,0,0,1-.124-.12V3.9a.123.123,0,0,1,.123-.123h6.818a.124.124,0,0,1,.124.123v.4a.122.122,0,0,1-.122.123Zm-7.9.291V3.488a.212.212,0,0,0-.212-.212H2.547a.212.212,0,0,0-.212.211h0V4.714a.211.211,0,0,0,.211.211H3.773a.211.211,0,0,0,.212-.211Z" fill="#fff" /><path d="M11.886,7.023H5.069A.124.124,0,0,1,4.945,6.9h0V6.494a.124.124,0,0,1,.124-.124h6.816a.125.125,0,0,1,.124.124v.4a.125.125,0,0,1-.123.125ZM3.68,6.194H2.657v1.02H3.68V6.194m.107-.321A.216.216,0,0,1,4,6.087V7.32a.214.214,0,0,1-.214.213H2.55a.213.213,0,0,1-.213-.213V6.083A.213.213,0,0,1,2.55,5.87Z" fill="#fff" opacity="0.8" /><path d="M13.382,11.108a.121.121,0,0,0-.084-.035.118.118,0,0,0-.117.119v1.365h0v.122H3.113v1.773H13.181v1.385a.118.118,0,0,0,.2.084L15.705,13.6l0,0a.117.117,0,0,0,0-.166Z" fill="#83b9f9" />​
+</g>
+<text x="690" y="244.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">Data collection</text>
+<text x="690" y="258.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">endpoint + rule</text>
+<g transform="translate(957.0,182.0) scale(2.555556)"><defs><radialGradient id="n4i1" cx="5.72" cy="7.45" r="8.42" gradientTransform="translate(3.23 1.51) scale(1.01 1.01)" gradientUnits="userSpaceOnUse"><stop offset="0.18" stop-color="#5ea0ef" /><stop offset="0.56" stop-color="#5c9fee" /><stop offset="0.69" stop-color="#559ced" /><stop offset="0.78" stop-color="#4a97e9" /><stop offset="0.86" stop-color="#3990e4" /><stop offset="0.93" stop-color="#2387de" /><stop offset="0.99" stop-color="#087bd6" /><stop offset="1" stop-color="#0078d4" /></radialGradient><radialGradient id="n4i0" cx="28.18" cy="202.29" r="2.7" gradientTransform="translate(-17.77 -185.01) scale(0.95)" gradientUnits="userSpaceOnUse"><stop offset="0.19" stop-color="#8c8e90" /><stop offset="0.35" stop-color="#848688" /><stop offset="0.6" stop-color="#6e7071" /><stop offset="0.91" stop-color="#4a4b4c" /><stop offset="1" stop-color="#3e3f3f" /></radialGradient></defs><title>Icon-manage-317</title><ellipse cx="9" cy="9" rx="8.5" ry="8.47" fill="url(#n4i1)" /><ellipse cx="9" cy="9" rx="7.4" ry="7.37" fill="#fff" /><path d="M2.72,9.44a6.24,6.24,0,0,0,1.82,4l2-2a3.53,3.53,0,0,1-1-2Z" fill="#9cebff" /><path d="M13.13,4.27A6.25,6.25,0,0,0,9.44,2.74V5.53a3.41,3.41,0,0,1,1.71.7Z" fill="#32bedd" /><path d="M4.87,4.27l2,2a3.41,3.41,0,0,1,1.71-.7V2.74A6.25,6.25,0,0,0,4.87,4.27Z" fill="#32bedd" /><path d="M11.78,6.85a3.6,3.6,0,0,1,.71,1.71h2.79a6.16,6.16,0,0,0-1.53-3.67Z" fill="#32bedd" /><path d="M6.22,6.85l-2-2A6.16,6.16,0,0,0,2.72,8.56H5.51A3.6,3.6,0,0,1,6.22,6.85Z" fill="#50e6ff" /><path d="M14.14,7a.45.45,0,0,0-.57-.25L9.45,8.41l.32.81,4.12-1.63A.44.44,0,0,0,14.14,7Z" fill="#f04049" /><ellipse cx="9" cy="9" rx="1.2" ry="1.2" fill="url(#n4i0)" /></g>
+<text x="980" y="244.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">Azure Monitor</text>
+<text x="980" y="258.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">workspace</text>
+<g transform="translate(777.0,427.0) scale(2.555556)"><defs><linearGradient id="n5i0" x1="9" y1="2" x2="9" y2="16" gradientUnits="userSpaceOnUse"><stop offset="0.18" stop-color="#5ea0ef" /><stop offset="1" stop-color="#0078d4" /></linearGradient></defs><g id="n5i1"><g><rect y="2" width="18" height="14" rx="0.76" fill="url(#n5i0)" /><path d="M8.3178,4.81s-.0039.0158-.0088.0425a3.9705,3.9705,0,0,0-1.213.573A2.8294,2.8294,0,0,0,4.9338,5.5a3.0919,3.0919,0,0,0,.5588,2.0973A5.2491,5.2491,0,0,0,5.2178,8.789a2.7967,2.7967,0,0,0-1.3537,1.5729,2.9791,2.9791,0,0,0,1.888,1.0647l.0027-.0021a4.4086,4.4086,0,0,0,.6684.9033,2.3478,2.3478,0,0,0,.0447,1.665,2.7075,2.7075,0,0,0,1.7419-.531,4.3848,4.3848,0,0,0,1.5871.2225,1.9523,1.9523,0,0,0,1.2621.7458,2.0114,2.0114,0,0,0,.6046-1.33h0l-.0006-.0267h0l-.0016-.0278a3.5138,3.5138,0,0,0,.9835-1.0413,1.6,1.6,0,0,0,1.1035-.4007,1.6822,1.6822,0,0,0-.5719-1.0653h0l-.0158-.0115h0l-.0142-.0092a2.8079,2.8079,0,0,0-2.8519-3.1529c-2.8346-.103-2.5312,4.8885.2838,3.5118.1731-.4159-.4839.0239-.6621-.0694A1.1684,1.1684,0,0,1,8.8341,9.58a1.47,1.47,0,0,1,2.2554-1.1c1.8829,1.0529.5374,3.9916-1.4289,3.8272.0136,0-.0022,0-.0017-.0006a3.0673,3.0673,0,0,1-2.99-3.0487A3.3064,3.3064,0,0,1,9.8666,5.8439C11.7835,5.6625,13.24,7.22,13.7853,8.8311a3.4406,3.4406,0,0,0-1.1344-2.95,1.581,1.581,0,0,0-.1859-1.134,1.68,1.68,0,0,0-1.0942.2813,4.253,4.253,0,0,0-1.0947-.3036A2.0325,2.0325,0,0,0,9.29,3.57a2.1574,2.1574,0,0,0-.972,1.24" fill="#f2f2f2" /></g></g></g>
+<text x="800" y="489.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">Azure Managed</text>
+<text x="800" y="503.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">Grafana</text>
+<g transform="translate(1062.0,427.0) scale(2.555556)"><defs><linearGradient id="n6i0" x1="9" y1="17.2" x2="9" y2="-3.28" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#5e9624" /><stop offset="0.18" stop-color="#629c25" /><stop offset="0.44" stop-color="#6dae2a" /><stop offset="0.73" stop-color="#7fcb30" /><stop offset="0.82" stop-color="#86d633" /></linearGradient></defs><g><path d="M17.5,2.5V13.33a.58.58,0,0,1-.58.58H12.4a.15.15,0,0,0-.15.14V15.8a.28.28,0,0,1-.45.23L9.08,13.94l-.09,0H1.08a.58.58,0,0,1-.58-.58V2.5a.58.58,0,0,1,.58-.59H16.92A.58.58,0,0,1,17.5,2.5Z" fill="url(#n6i0)" /><path d="M9.54,9.63H8.38A.36.36,0,0,1,8,9.29L7.8,3.43a.35.35,0,0,1,.35-.36h1.7a.35.35,0,0,1,.35.37L9.89,9.3A.35.35,0,0,1,9.54,9.63Z" fill="#fff" /><rect x="8.13" y="10.62" width="1.69" height="1.69" rx="0.61" fill="#fff" /></g></g>
+<text x="1085" y="489.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">Prometheus rule</text>
+<text x="1085" y="503.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">group</text>
 </svg>

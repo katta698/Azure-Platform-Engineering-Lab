@@ -1,0 +1,134 @@
+{
+  "title": "Week 11 — a self-managed Prometheus writes to Azure Monitor. No cluster, no secret.",
+  "alt": "Architecture diagram. Inside a virtual network with no inbound rules, a virtual machine runs self-managed Prometheus 3.5.0, and a public IP address provides egress only. A user-assigned managed identity below the virtual network supplies Prometheus with a token from the instance metadata service, so no credential is stored. Prometheus remote-writes over HTTPS into Azure Monitor managed service for Prometheus: the data collection endpoint supplies the URL host and the data collection rule is named in its path and accepts the write. The samples are stored in an Azure Monitor workspace, which holds Prometheus time series queried with PromQL. Azure Managed Grafana reads that workspace with PromQL, and a Prometheus rule group evaluates one alert rule and one recording rule against the same workspace, with no Kubernetes cluster named anywhere.",
+  "width": 1280,
+  "height": 560,
+  "groups": [
+    {
+      "id": "vnet",
+      "style": "vnet",
+      "label": "Virtual network · no inbound rules",
+      "x": 40,
+      "y": 95,
+      "w": 440,
+      "h": 200
+    },
+    {
+      "id": "vm",
+      "style": "logical",
+      "label": "Virtual machine",
+      "x": 60,
+      "y": 115,
+      "w": 250,
+      "h": 150
+    },
+    {
+      "id": "amp",
+      "style": "logical",
+      "label": "Azure Monitor managed service for Prometheus",
+      "x": 560,
+      "y": 95,
+      "w": 560,
+      "h": 200
+    }
+  ],
+  "nodes": [
+    {
+      "id": "prom",
+      "icon": "prometheus.svg",
+      "label": "Prometheus 3.5.0",
+      "x": 185,
+      "y": 205
+    },
+    {
+      "id": "pip",
+      "icon": "public-ip.svg",
+      "label": "Public IP · egress only",
+      "x": 412,
+      "y": 205
+    },
+    {
+      "id": "identity",
+      "icon": "managed-identity.svg",
+      "label": "User-assigned managed identity",
+      "x": 185,
+      "y": 400
+    },
+    {
+      "id": "dcr",
+      "icon": "data-collection-rule.svg",
+      "label": "Data collection endpoint + rule",
+      "x": 690,
+      "y": 205
+    },
+    {
+      "id": "amw",
+      "icon": "azure-monitor.svg",
+      "label": "Azure Monitor workspace",
+      "x": 980,
+      "y": 205
+    },
+    {
+      "id": "grafana",
+      "icon": "managed-grafana.svg",
+      "label": "Azure Managed Grafana",
+      "x": 800,
+      "y": 450
+    },
+    {
+      "id": "rules",
+      "icon": "alerts.svg",
+      "label": "Prometheus rule group",
+      "x": 1085,
+      "y": 450
+    }
+  ],
+  "edges": [
+    {
+      "from": "identity",
+      "to": "prom",
+      "label": "Token from IMDS",
+      "label_at": [
+        268,
+        320
+      ]
+    },
+    {
+      "from": "prom",
+      "to": "pip"
+    },
+    {
+      "from": "pip",
+      "to": "dcr",
+      "label": "remote_write · HTTPS",
+      "label_at": [
+        551,
+        196
+      ]
+    },
+    {
+      "from": "dcr",
+      "to": "amw"
+    },
+    {
+      "from": "amw",
+      "to": "grafana",
+      "style": "dashed",
+      "label": "PromQL",
+      "label_at": [
+        798,
+        336
+      ]
+    },
+    {
+      "from": "amw",
+      "to": "rules",
+      "style": "dashed",
+      "label": "Alert + recording rules",
+      "label_at": [
+        1162,
+        336
+      ]
+    }
+  ]
+}

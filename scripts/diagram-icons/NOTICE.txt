@@ -1,0 +1,61 @@
+Azure architecture icons — official set, used unmodified
+========================================================
+
+Source:   https://learn.microsoft.com/en-us/azure/architecture/icons/
+Package:  Azure_Public_Service_Icons_V24.zip
+Fetched:  2026-10-30
+
+Terms, quoted from that page:
+
+    "Microsoft permits the use of these icons in architectural diagrams,
+    training materials, or documentation. You can copy, distribute, and
+    display the icons only for the permitted use unless granted explicit
+    permission by Microsoft. Microsoft reserves all other rights."
+
+Microsoft's stated do's and don'ts, and how this repo honours them:
+
+    "Use the icon to illustrate how products can work together."
+        -> that is the only use here: weekly architecture diagrams.
+
+    "In diagrams, we recommend including the product name somewhere close
+    to the icon."
+        -> render_azure_diagram.py treats a node without a label as a hard
+           error, not a warning.
+
+    "Use the icons as they would appear within Azure."
+    "Don't crop, flip, or rotate icons."
+    "Don't distort or change icon shape in any way."
+        -> the renderer only ever applies a uniform scale derived from the
+           icon's own viewBox. There is no code path that writes a
+           non-uniform scale, and none should be added.
+
+    "Don't use Microsoft product icons to represent your product or
+    service."
+        -> every icon here is used for the Azure service it depicts. Where
+           no official icon exists for a resource, the diagram merges it
+           into a correctly-named neighbour rather than borrowing another
+           product's icon. Week 11 does this for the data collection
+           endpoint, which has no icon in the set: the node is labelled
+           "Data collection endpoint + rule" rather than drawn with an
+           unrelated endpoint glyph.
+
+Files are copied byte-for-byte from the official package and renamed only
+for legibility. Original names:
+
+    prometheus.svg           033112809-icon-service-promethus.svg
+    managed-grafana.svg      02905-icon-service-Azure-Managed-Grafana.svg
+    virtual-machine.svg      10021-icon-service-Virtual-Machine.svg
+    managed-identity.svg     10227-icon-service-Managed-Identities.svg
+    data-collection-rule.svg 01857-icon-service-Data-Collection-Rules.svg
+    azure-monitor.svg        00001-icon-service-Monitor.svg
+    metrics.svg              00020-icon-service-Metrics.svg
+    alerts.svg               00002-icon-service-Alerts.svg
+    virtual-network.svg      10061-icon-service-Virtual-Networks.svg
+    public-ip.svg            10069-icon-service-Public-IP-Addresses.svg
+    resource-group.svg       10007-icon-service-Resource-Groups.svg
+    subscription.svg         10002-icon-service-Subscriptions.svg
+
+(The Prometheus filename misspelling is Microsoft's, in the shipped package.)
+
+To add an icon: take it from the official download, copy it unmodified, add
+the mapping above. Do not edit the SVG.
