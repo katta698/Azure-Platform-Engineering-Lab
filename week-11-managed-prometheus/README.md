@@ -24,41 +24,54 @@ rule and an identity, not AKS.
 | --- | --- |
 | Runs continuously | nothing — torn down at the end |
 | VM `Standard_D2als_v7` | **$0.0962/hour** (Linux), retail price API, southcentralus |
-| Managed Grafana Standard | **$0.0411 per node-hour × 2 nodes = $0.0822/hour** — *unless* the 30-day free trial applies |
+| Managed Grafana Standard — nodes | $0.0411 per node-hour × 2 nodes = $0.0822/hour. **Covered by the 30-day trial; it never appeared on the bill** |
+| Managed Grafana Standard — **users** | **$6.00 per active user per MONTH, flat.** Not prorated, not covered by the trial. This is the meter the first version of this note omitted |
 | Standard static public IP | **$0.005/hour** |
 | Metrics ingestion | **$0.16 per 10M samples** |
 | PromQL queries | **$0.001 per 10M samples** |
 | Workspace storage | **$0.00** — 18 months retention at no storage charge |
-| Measured for this week | **not yet posted** — read from Cost Management once the charges land, see below |
+| **Measured for this week** | **$7.19** — read from Cost Management 2026-10-30, after the charges posted |
 | Teardown | `./scripts/cleanup.sh`, run 2026-10-28. Resource group confirmed gone |
 
-All rates above were read from the **Azure retail price API** for
-`southcentralus` on 2026-10-28, not quoted from a pricing page. The measured
-total is deliberately absent: Azure posts usage on a delay, and a number
-invented before the bill arrives is not a measurement.
+Rates were read from the **Azure retail price API** for `southcentralus`;
+totals below from **Cost Management and the Consumption API on 2026-10-30**,
+after the charges posted.
 
-### What this week actually cost is not what it is about
+### The bill, per meter
 
-Prometheus shipped **796,849 samples** over the life of the deployment —
-counted from `prometheus_remote_storage_samples_total`, not estimated. At
-$0.16 per 10M samples that is about **$0.013**. One and a third cents.
+| Meter | Quantity | Cost |
+| --- | --- | --- |
+| Azure Grafana Service — **Standard User** | 1 user | **$6.0000** |
+| Virtual Machines — D2als v7 | 11.27 hr | $1.0839 |
+| Virtual Network — Standard IPv4 Static Public IP | 12.36 hr | $0.0618 |
+| Storage — S4 LRS disk + operations | — | $0.0346 |
+| Azure Monitor — samples ingested + processed | 757,000 | $0.0121 |
+| Azure Monitor — PromQL queries | 2,000 | $0.0000 |
+| Bandwidth — data transfer out | — | $0.0000 |
+| **Total** | | **$7.1923** |
 
-The two machines that produced and displayed those samples bill at
-**$0.1784/hour** combined.
+### Three things that matter more than the total
 
-So the metrics pipeline — the entire subject of the week — costs on the order
-of **one percent** of the compute standing around it. That inverts the
-intuition this lab started with. The expensive part of observability here is
-not the observability.
+**The 30-day trial covered the wrong half.** There is no `Standard Node` line
+on the bill at all — the trial absorbed the node hours, about **$0.93**. It
+did not touch `Standard User`, which is flat, **per month**, and does not
+prorate: the instance lived ~12 hours and billed a full month. **Teardown
+speed is no defence against a monthly meter.** It saved real money on the VM
+and saved nothing here. Signing in to capture the dashboard figure is what
+created the active user.
 
-The caveat that makes it honest: this is **one** Prometheus scraping **itself**
-every 30 seconds. A real fleet multiplies the sample count and not the VM
-count, and the ratio moves. The lesson is to measure where the money is before
-optimising, not that ingestion is free.
+**The metrics were almost free, which inverts this week's own framing.**
+Azure metered 757,000 samples for **$0.0121** across two meters — 0.17% of
+the bill. Compute was $1.17. The largest single line, **83% of the total**,
+was a per-seat licence that is neither metrics nor compute.
 
-**Grafana's 30-day free trial** is one instance per subscription and this
-subscription had not used it. Whether it applied here is a question for the
-bill, and the cost figure states it rather than assuming either way.
+**Prometheus and Azure disagree on the volume.** Prometheus counted
+**796,849** samples sent; Azure metered **757,000**. A ~5% gap, stated rather
+than smoothed over — the number you are billed on is Azure's.
+
+The caveat that keeps the ratio honest: this is **one** Prometheus scraping
+**itself** every 30 seconds. A real fleet multiplies samples without
+multiplying VMs, and the ratio moves.
 
 ---
 
