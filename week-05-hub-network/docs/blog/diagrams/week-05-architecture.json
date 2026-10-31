@@ -1,0 +1,24 @@
+{
+  "title": "Week 05 — two layers, split by what they cost",
+  "alt": "Architecture diagram in two bands. The permanent band costs about nothing per hour and stays up: a hub virtual network at 10.0.0.0/16 in the connectivity subscription, peered in both directions with a spoke virtual network at 10.1.0.0/16 in the lab subscription, and six private DNS zones linked to BOTH networks rather than to the hub alone. The billable band is deployed deliberately and destroyed the same day: an Azure Firewall Basic at about 40 cents an hour, a two-tier firewall policy where the child inherits the parent's rules and cannot remove them, and a spoke route table whose default route to the firewall is added only when the firewall exists.",
+  "width": 1280,
+  "height": 600,
+  "groups": [
+    { "id": "free", "style": "logical", "label": "PERMANENT — about $0/hour, and later weeks attach to it", "x": 40, "y": 90, "w": 1200, "h": 200 },
+    { "id": "bill", "style": "logical", "label": "BILLABLE — $0.405/hour on Basic, deployed deliberately and destroyed the same day", "x": 40, "y": 330, "w": 1200, "h": 200 }
+  ],
+  "nodes": [
+    { "id": "hub",   "icon": "virtual-network.svg", "label": "vnet-hub 10.0.0.0/16", "x": 260, "y": 185 },
+    { "id": "spoke", "icon": "virtual-network.svg", "label": "vnet-spoke 10.1.0.0/16", "x": 660, "y": 185 },
+    { "id": "dns",   "icon": "dns-zone.svg",        "label": "6 private DNS zones", "x": 1050, "y": 185 },
+    { "id": "fw",    "icon": "firewall.svg",        "label": "Azure Firewall Basic", "x": 260, "y": 425 },
+    { "id": "pol",   "icon": "firewall-policy.svg", "label": "Policy parent and child", "x": 660, "y": 425 },
+    { "id": "rt",    "icon": "route-table.svg",     "label": "rt-spoke default route", "x": 1050, "y": 425 }
+  ],
+  "edges": [
+    { "from": "hub",   "to": "spoke", "label": "peering, one resource per side", "label_at": [460, 160] },
+    { "from": "spoke", "to": "dns",   "label": "linked to BOTH, not the hub alone", "label_at": [855, 160] },
+    { "from": "pol",   "to": "fw",    "label": "child cannot remove the parent's rules", "label_at": [460, 400] },
+    { "from": "pol",   "to": "rt",    "label": "0.0.0.0/0 added only with the firewall", "label_at": [855, 400] }
+  ]
+}

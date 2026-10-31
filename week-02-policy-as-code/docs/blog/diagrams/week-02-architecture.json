@@ -1,0 +1,121 @@
+{
+  "title": "Week 02 — a policy that fixes things needs an identity, and the identity has to exist first",
+  "alt": "Architecture diagram. At the mg-katta management group, two policy definitions — a deployIfNotExists rule and a modify rule — are bundled into one initiative. The initiative is assigned at the mg-lz-dev management group, and that assignment carries a user-assigned managed identity which holds three role assignments at mg-lz-dev. Acting through that identity, remediation reaches the test bed resource group, where two deliberately non-compliant storage accounts have diagnostic settings deployed pointing at a Log Analytics workspace, and inherit a cost-center tag from their resource group.",
+  "width": 1280,
+  "height": 395,
+  "groups": [
+    {
+      "id": "root",
+      "style": "logical",
+      "label": "mg-katta — where the rules are defined",
+      "x": 40,
+      "y": 95,
+      "w": 300,
+      "h": 260
+    },
+    {
+      "id": "lz",
+      "style": "logical",
+      "label": "mg-lz-dev — where they are enforced",
+      "x": 470,
+      "y": 95,
+      "w": 300,
+      "h": 260
+    },
+    {
+      "id": "bed",
+      "style": "logical",
+      "label": "rg-wk02 — the deliberately broken test bed",
+      "x": 900,
+      "y": 95,
+      "w": 340,
+      "h": 260
+    }
+  ],
+  "nodes": [
+    {
+      "id": "defs",
+      "icon": "policy.svg",
+      "label": "2 policy definitions",
+      "x": 120,
+      "y": 175
+    },
+    {
+      "id": "init",
+      "icon": "policy.svg",
+      "label": "One initiative",
+      "x": 260,
+      "y": 175
+    },
+    {
+      "id": "assign",
+      "icon": "policy.svg",
+      "label": "Assignment",
+      "x": 620,
+      "y": 175
+    },
+    {
+      "id": "identity",
+      "icon": "managed-identity.svg",
+      "label": "User-assigned identity",
+      "x": 620,
+      "y": 290
+    },
+    {
+      "id": "storage",
+      "icon": "storage-account.svg",
+      "label": "2 storage accounts",
+      "x": 990,
+      "y": 175
+    },
+    {
+      "id": "law",
+      "icon": "log-analytics.svg",
+      "label": "Log Analytics workspace",
+      "x": 1160,
+      "y": 175
+    }
+  ],
+  "edges": [
+    {
+      "from": "defs",
+      "to": "init"
+    },
+    {
+      "from": "init",
+      "to": "assign",
+      "label": "assigned at mg-lz-dev",
+      "label_at": [
+        405,
+        161
+      ]
+    },
+    {
+      "from": "identity",
+      "to": "assign",
+      "label": "3 roles, granted first",
+      "label_at": [
+        706,
+        243
+      ]
+    },
+    {
+      "from": "assign",
+      "to": "storage",
+      "label": "remediates",
+      "label_at": [
+        835,
+        161
+      ]
+    },
+    {
+      "from": "storage",
+      "to": "law",
+      "label": "diagnostics",
+      "label_at": [
+        1075,
+        161
+      ]
+    }
+  ]
+}

@@ -1,101 +1,37 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 580" width="900" height="580" role="img" aria-label="Week 10 OpenTelemetry. A request reaches an externally exposed frontend container app, which calls an internal-only backend over HTTP inside the Container Apps environment. The requests library injects a W3C traceparent header and the backend reads it, so both services share one trace. Each app exports spans over OTLP gRPC to the managed OpenTelemetry agent that Azure runs inside the environment at no compute cost. The agent forwards traces and logs to Application Insights, which stores them in week 08's Log Analytics workspace in another subscription. Both images are pulled from a Basic container registry using a user-assigned managed identity holding AcrPull, with the registry admin user disabled. Measured: the frontend request takes 256.4 milliseconds of which the backend accounts for 250.8.">
-  <defs>
-    <style>
-      .t    { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-      .hdr  { font-size: 13px; font-weight: 700; fill: #1f2933; }
-      .lbl  { font-size: 12px; fill: #1f2933; }
-      .sm   { font-size: 11px; fill: #52606d; }
-      .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; fill: #1f2933; }
-      .box  { fill: #ffffff; stroke: #c3cbd5; stroke-width: 1.2; }
-      .svc  { fill: #f2f9f4; stroke: #8fbf9f; stroke-width: 1.3; }
-      .int  { fill: #f6f7f9; stroke: #b9c0c9; stroke-width: 1.3; }
-      .band { fill: #f5f7fa; stroke: #dbe1e8; stroke-width: 1; }
-      .own  { fill: #f7f5fb; stroke: #b3a8d1; stroke-width: 1.2; }
-      .agent{ fill: #fff8ec; stroke: #d9b36c; stroke-width: 1.3; }
-      .flow { stroke: #4a7fb5; stroke-width: 1.8; fill: none; }
-      .otlp { stroke: #b07d2b; stroke-width: 1.5; fill: none; stroke-dasharray: 5 3; }
-      .logs { stroke: #6b5b9a; stroke-width: 1.6; fill: none; }
-      .ok   { fill: #1b6e3c; font-weight: 700; }
-    </style>
-    <marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M0,0 L10,5 L0,10 z" fill="#4a7fb5"/>
-    </marker>
-    <marker id="o" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M0,0 L10,5 L0,10 z" fill="#b07d2b"/>
-    </marker>
-    <marker id="p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M0,0 L10,5 L0,10 z" fill="#6b5b9a"/>
-    </marker>
-  </defs>
-
-  <rect x="0" y="0" width="900" height="580" fill="#ffffff"/>
-  <text class="t hdr" x="24" y="26">A log says the request took 256 ms. A trace says which service spent it.</text>
-
-  <!-- request -->
-  <rect class="box" x="20" y="54" width="112" height="58" rx="6"/>
-  <text class="t hdr" x="32" y="76">A REQUEST</text>
-  <text class="t sm" x="32" y="94">HTTPS, external</text>
-  <path class="flow" d="M132,83 L176,83" marker-end="url(#b)"/>
-
-  <!-- environment band -->
-  <rect class="band" x="176" y="44" width="430" height="300" rx="8"/>
-  <text class="t hdr" x="190" y="64">CONTAINER APPS ENVIRONMENT — sub-lab-dev</text>
-
-  <!-- frontend -->
-  <rect class="svc" x="190" y="76" width="166" height="74" rx="5"/>
-  <text class="t hdr" x="202" y="97">frontend</text>
-  <text class="t sm" x="202" y="114">external ingress</text>
-  <text class="t mono ok" x="202" y="134">p50 256.4 ms</text>
-
-  <!-- hop -->
-  <path class="flow" d="M356,113 L418,113" marker-end="url(#b)"/>
-  <text class="t sm" x="360" y="106">traceparent</text>
-
-  <!-- backend -->
-  <rect class="int" x="418" y="76" width="166" height="74" rx="5"/>
-  <text class="t hdr" x="430" y="97">backend</text>
-  <text class="t sm" x="430" y="114">INTERNAL only — 404 outside</text>
-  <text class="t mono ok" x="430" y="134">p50 250.8 ms</text>
-
-  <!-- agent -->
-  <path class="otlp" d="M273,150 L273,214" marker-end="url(#o)"/>
-  <path class="otlp" d="M501,150 L501,214" marker-end="url(#o)"/>
-  <text class="t sm" x="330" y="186">OTLP gRPC</text>
-  <text class="t sm" x="330" y="202">spans leave the app</text>
-
-  <rect class="agent" x="190" y="214" width="394" height="78" rx="6"/>
-  <text class="t hdr" x="204" y="236">MANAGED OPENTELEMETRY AGENT</text>
-  <text class="t sm" x="204" y="254">Azure runs it inside the environment: 0.5 vCPU, 1.5 GB, $0.00</text>
-  <text class="t sm" x="204" y="272">It ROUTES telemetry. It does not create any — the SDK does that.</text>
-
-  <text class="t sm" x="190" y="312">Preview. Its own health is not exposed in the portal or any monitoring API.</text>
-
-  <!-- to app insights -->
-  <path class="logs" d="M584,253 L646,253" marker-end="url(#p)"/>
-
-  <rect class="own" x="646" y="44" width="234" height="300" rx="8"/>
-  <text class="t hdr" x="660" y="64">sub-management</text>
-
-  <rect class="box" x="660" y="78" width="206" height="96" rx="6"/>
-  <text class="t hdr" x="672" y="100">APPLICATION INSIGHTS</text>
-  <text class="t sm" x="672" y="118">workspace-based, so week 08's</text>
-  <text class="t sm" x="672" y="134">table plans and cap still apply</text>
-  <text class="t mono" x="672" y="156">local auth MUST be ON</text>
-
-  <rect class="box" x="660" y="190" width="206" height="90" rx="6"/>
-  <text class="t hdr" x="672" y="212">WEEK 08's WORKSPACE</text>
-  <text class="t mono" x="672" y="232">AppRequests</text>
-  <text class="t mono" x="672" y="248">AppDependencies</text>
-  <text class="t sm" x="672" y="268">read, never owned by this week</text>
-
-  <!-- registry -->
-  <rect class="band" x="20" y="366" width="860" height="56" rx="8"/>
-  <text class="t hdr" x="34" y="388">WHERE THE IMAGES COME FROM</text>
-  <text class="t lbl" x="34" y="408">ACR Basic, admin user OFF. Both apps pull with a user-assigned managed identity holding AcrPull on the REGISTRY. No password exists.</text>
-
-  <text class="t sm" x="24" y="446">Week 08 set local_authentication_enabled = FALSE on the workspace. This week must set the same argument TRUE on Application</text>
-  <text class="t sm" x="24" y="462">Insights: the agent authenticates with a connection string and Microsoft documents no ARM-authenticated alternative.</text>
-  <text class="t sm" x="24" y="486">One header carries the trace across the process boundary: the backend's ParentId IS the frontend's outbound span id.</text>
-  <text class="t sm" x="24" y="510">Sampling measured: 100 requests at parentbased_traceidratio 0.2 kept 16 traces — and 0 half-traces. The decision is taken</text>
-  <text class="t sm" x="24" y="526">once at the frontend and respected downstream, so a kept trace is always a WHOLE trace.</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 490" width="1280" height="490" role="img" aria-label="Architecture diagram. Both container images are pulled from a Basic container registry using a user-assigned managed identity holding AcrPull, with the registry admin user disabled, so no password exists in the pull path. Inside the Container Apps environment a public frontend calls an internal-only backend, passing a traceparent header so the two spans belong to one trace. Both apps export spans over OTLP gRPC to the managed OpenTelemetry agent that Azure runs inside the environment at no compute cost. The agent forwards traces and logs to Application Insights, which is workspace-based and stores them in week 08's Log Analytics workspace. Measured: frontend p50 256.4 ms, backend p50 250.8 ms.">
+<!-- Generated by scripts/render_azure_diagram.py from the committed JSON spec beside this file. Do not hand-edit: regenerate.
+     Azure icons are official, used unmodified under Microsoft's icon terms, which permit use in architectural diagrams and documentation. -->
+<defs><marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2b3137"/></marker></defs>
+<rect x="0" y="0" width="1280" height="490" fill="#ffffff"/>
+<text x="28" y="34" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1f2933">Week 10 — a log says 256 ms. A trace says where it went.</text>
+<rect x="330" y="90" width="470" height="210" rx="4" fill="#ffffff" stroke="#b9c2cc" stroke-width="1.2"/>
+<text x="565.0" y="110" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#1f2933" text-anchor="middle">Container Apps environment</text>
+<path d="M179.0,190.0 L421.0,190.0" fill="none" stroke="#2b3137" stroke-width="1.8" marker-end="url(#arw)"/>
+<text x="250" y="150" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="11" fill="#5b6670" text-anchor="middle">both images · AcrPull,</text>
+<text x="250" y="162" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="11" fill="#5b6670" text-anchor="middle">no password</text>
+<path d="M479.0,190.0 L661.0,190.0" fill="none" stroke="#2b3137" stroke-width="1.8" marker-end="url(#arw)"/>
+<text x="570" y="166" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="11" fill="#5b6670" text-anchor="middle">traceparent</text>
+<path d="M523.9,237.0 L669.5,329.7" fill="none" stroke="#2b3137" stroke-width="1.8" marker-end="url(#arw)"/>
+<text x="612" y="330" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="11" fill="#5b6670" text-anchor="middle">OTLP gRPC</text>
+<path d="M716.1,251.0 L765.8,366.9" fill="none" stroke="#2b3137" stroke-width="1.8" marker-end="url(#arw)"/>
+<path d="M800.9,370.7 L886.4,251.0" fill="none" stroke="#2b3137" stroke-width="1.8" marker-end="url(#arw)"/>
+<text x="962" y="330" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="11" fill="#5b6670" text-anchor="middle">agent forwards</text>
+<path d="M959.0,190.0 L1121.0,190.0" fill="none" stroke="#2b3137" stroke-width="1.8" marker-end="url(#arw)"/>
+<text x="1040" y="166" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="11" fill="#5b6670" text-anchor="middle">workspace-based</text>
+<g transform="translate(127.0,167.0) scale(2.555556)"><defs><linearGradient id="n0i1" x1="8.637" y1="-1.991" x2="8.637" y2="16.739" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#5ea0ef" /><stop offset="1" stop-color="#0078d4" /></linearGradient><linearGradient id="n0i4" x1="12.96" y1="8.561" x2="12.96" y2="6.141" gradientTransform="matrix(1, 0, 0, -1, 0, 20)" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#333132" /><stop offset="1" stop-color="#5b5a5c" /></linearGradient></defs><path d="M7.43,8.178l2.589-1.573,7.255,2.731A3.664,3.664,0,0,0,16.23,7.49l-.01-.05A4.194,4.194,0,0,0,14,6.32a4.91,4.91,0,0,0-5.1-4.7A5.071,5.071,0,0,0,4.06,4.91,4.621,4.621,0,0,0,0,9.39a4.73,4.73,0,0,0,4.89,4.54H7.43Z" fill="url(#n0i1)" /><polygon points="10.07 7.159 10.08 11.439 17.99 13.119 17.99 10.139 10.07 7.159" fill="#767676" /><polyline points="10.07 7.159 7.93 8.459 7.93 12.439 10.08 11.439" fill="#999" /><polygon points="13.68 11.499 14.4 11.699 14.4 9.369 13.68 9.119 13.68 11.499" fill="#a3a3a3" /><polygon points="12.96 8.889 12.24 8.629 12.24 11.119 12.96 11.319 12.96 8.889" fill="#a3a3a3" /><polygon points="15.12 11.889 15.82 12.079 15.84 9.859 15.12 9.619 15.12 11.889" fill="#a3a3a3" /><polygon points="10.81 10.749 11.53 10.929 11.53 8.399 10.81 8.159 10.81 10.749" fill="#a3a3a3" /><polygon points="17.27 10.349 16.55 10.099 16.55 12.269 17.27 12.469 17.27 10.349" fill="#a3a3a3" /><path id="n0i3" d="M8.66,11.369l-.36.21V8.749l.36-.19Zm.71-3.22L9,8.389v2.75l.37-.2Z" fill="#b3b3b3" /><polygon points="17.99 13.119 15.83 13.859 7.93 12.439 10.08 11.439 17.99 13.119" fill="url(#n0i4)" /><polygon points="17.99 16.169 10.04 17.679 10.08 12.089 17.99 13.559 17.99 16.169" fill="#767676" /><polygon points="10.81 16.759 10.81 13.209 11.53 13.299 11.53 16.639 10.81 16.759" fill="#a3a3a3" /><polygon points="12.96 16.399 12.24 16.529 12.24 13.389 12.96 13.499 12.96 16.399 12.96 16.399" fill="#a3a3a3" /><polygon points="13.68 16.289 13.68 13.569 14.4 13.659 14.4 16.159 13.68 16.289" fill="#a3a3a3" /><polygon points="15.83 15.909 15.12 16.039 15.12 13.749 15.83 13.859 15.83 15.909" fill="#a3a3a3" /><polygon points="17.29 15.679 16.55 15.809 16.55 13.929 17.24 14.019 17.29 15.679" fill="#a3a3a3" /><path id="n0i0" d="M7.93,16.4v-3.26l2.16-1v5.6Z" fill="#999" /><path id="n0i2" d="M8.61,16.389l-.32-.16v-2.76l.32-.15Zm.77-3.45-.38.19v3.48l.37.19v-3.86Z" fill="#b3b3b3" /></g>
+<text x="150" y="229.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">ACR Basic — admin</text>
+<text x="150" y="243.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">user off</text>
+<g transform="translate(427.0,167.0) scale(2.555556)"><defs><linearGradient id="n1i1" x1="8.798" y1="8.703" x2="14.683" y2="8.703" gradientUnits="userSpaceOnUse"><stop offset="0.001" stop-color="#773adc" /><stop offset="1" stop-color="#552f99" /></linearGradient><linearGradient id="n1i2" x1="5.764" y1="3.777" x2="5.764" y2="13.78" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#a67af4" /><stop offset="0.999" stop-color="#773adc" /></linearGradient></defs><g id="n1i3"><g><g><g><path d="M16.932,11.578a8.448,8.448,0,0,1-7.95,5.59,8.15,8.15,0,0,1-2.33-.33,2.133,2.133,0,0,0,.18-.83c.01,0,.03.01.04.01a7.422,7.422,0,0,0,2.11.3,7.646,7.646,0,0,0,6.85-4.28l.01-.01Z" fill="#32bedd" /><path d="M3.582,14.068a2.025,2.025,0,0,0-.64.56,8.6,8.6,0,0,1-1.67-2.44l1.04.23v.26a.6.6,0,0,0,.47.59l.14.03a6.136,6.136,0,0,0,.62.73Z" fill="#32bedd" /><path d="M12.352.958a2.28,2.28,0,0,0-.27.81c-.02-.01-.05-.02-.07-.03a7.479,7.479,0,0,0-3.03-.63,7.643,7.643,0,0,0-5.9,2.8l-.29.06a.6.6,0,0,0-.48.58v.46l-1.02.19A8.454,8.454,0,0,1,8.982.268,8.6,8.6,0,0,1,12.352.958Z" fill="#32bedd" /><path d="M16.872,5.7l-1.09-.38a6.6,6.6,0,0,0-.72-1.16c-.02-.03-.04-.05-.05-.07a2.083,2.083,0,0,0,.72-.45A7.81,7.81,0,0,1,16.872,5.7Z" fill="#32bedd" /><path d="M10.072,11.908l2.54.56L8.672,14.1c-.02,0-.03.01-.05.01a.154.154,0,0,1-.15-.15V3.448a.154.154,0,0,1,.15-.15.09.09,0,0,1,.05.01l4.46,1.56-3.05.57a.565.565,0,0,0-.44.54v5.4A.537.537,0,0,0,10.072,11.908Z" fill="#fff" /><g><g id="n1i4"><path d="M1.1,5.668l1.21-.23v6.55l-1.23-.27-.99-.22a.111.111,0,0,1-.09-.12v-5.4a.12.12,0,0,1,.09-.12Z" fill="#a67af4" /></g><g><g id="n1i0"><g><path d="M10.072,11.908l2.54.56L8.672,14.1c-.02,0-.03.01-.05.01a.154.154,0,0,1-.15-.15V3.448a.154.154,0,0,1,.15-.15.09.09,0,0,1,.05.01l4.46,1.56-3.05.57a.565.565,0,0,0-.44.54v5.4A.537.537,0,0,0,10.072,11.908Z" fill="url(#n1i1)" /><path d="M8.586,3.3,2.878,4.378a.177.177,0,0,0-.14.175V12.68a.177.177,0,0,0,.137.174L8.581,14.1a.176.176,0,0,0,.21-.174V3.478A.175.175,0,0,0,8.619,3.3Z" fill="url(#n1i2)" /></g></g><polygon points="5.948 4.921 5.948 12.483 7.934 12.814 7.934 4.564 5.948 4.921" fill="#b796f9" opacity="0.5" /><polygon points="3.509 5.329 3.509 11.954 5.238 12.317 5.238 5.031 3.509 5.329" fill="#b796f9" opacity="0.5" /></g></g></g><path d="M16,2.048a1.755,1.755,0,1,1-1.76-1.76A1.756,1.756,0,0,1,16,2.048Z" fill="#32bedd" /><circle cx="4.65" cy="15.973" r="1.759" fill="#32bedd" /></g><path d="M18,6.689v3.844a.222.222,0,0,1-.133.2l-.766.316-3.07,1.268-.011,0a.126.126,0,0,1-.038,0,.1.1,0,0,1-.1-.1V5.234a.1.1,0,0,1,.054-.088l0,0,.019,0a.031.031,0,0,1,.019,0,.055.055,0,0,1,.034.008l.011,0,.012,0L17.05,6.2l.8.282A.213.213,0,0,1,18,6.689Z" fill="#773adc" /><path d="M13.959,5.14l-3.8.715a.118.118,0,0,0-.093.117v5.409a.118.118,0,0,0,.091.116l3.8.831a.115.115,0,0,0,.137-.09.109.109,0,0,0,0-.026V5.256a.117.117,0,0,0-.115-.118A.082.082,0,0,0,13.959,5.14Z" fill="#a67af4" /></g></g></g>
+<text x="450" y="229.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">frontend — public</text>
+<g transform="translate(667.0,167.0) scale(2.555556)"><defs><linearGradient id="n2i1" x1="8.798" y1="8.703" x2="14.683" y2="8.703" gradientUnits="userSpaceOnUse"><stop offset="0.001" stop-color="#773adc" /><stop offset="1" stop-color="#552f99" /></linearGradient><linearGradient id="n2i2" x1="5.764" y1="3.777" x2="5.764" y2="13.78" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#a67af4" /><stop offset="0.999" stop-color="#773adc" /></linearGradient></defs><g id="n2i3"><g><g><g><path d="M16.932,11.578a8.448,8.448,0,0,1-7.95,5.59,8.15,8.15,0,0,1-2.33-.33,2.133,2.133,0,0,0,.18-.83c.01,0,.03.01.04.01a7.422,7.422,0,0,0,2.11.3,7.646,7.646,0,0,0,6.85-4.28l.01-.01Z" fill="#32bedd" /><path d="M3.582,14.068a2.025,2.025,0,0,0-.64.56,8.6,8.6,0,0,1-1.67-2.44l1.04.23v.26a.6.6,0,0,0,.47.59l.14.03a6.136,6.136,0,0,0,.62.73Z" fill="#32bedd" /><path d="M12.352.958a2.28,2.28,0,0,0-.27.81c-.02-.01-.05-.02-.07-.03a7.479,7.479,0,0,0-3.03-.63,7.643,7.643,0,0,0-5.9,2.8l-.29.06a.6.6,0,0,0-.48.58v.46l-1.02.19A8.454,8.454,0,0,1,8.982.268,8.6,8.6,0,0,1,12.352.958Z" fill="#32bedd" /><path d="M16.872,5.7l-1.09-.38a6.6,6.6,0,0,0-.72-1.16c-.02-.03-.04-.05-.05-.07a2.083,2.083,0,0,0,.72-.45A7.81,7.81,0,0,1,16.872,5.7Z" fill="#32bedd" /><path d="M10.072,11.908l2.54.56L8.672,14.1c-.02,0-.03.01-.05.01a.154.154,0,0,1-.15-.15V3.448a.154.154,0,0,1,.15-.15.09.09,0,0,1,.05.01l4.46,1.56-3.05.57a.565.565,0,0,0-.44.54v5.4A.537.537,0,0,0,10.072,11.908Z" fill="#fff" /><g><g id="n2i4"><path d="M1.1,5.668l1.21-.23v6.55l-1.23-.27-.99-.22a.111.111,0,0,1-.09-.12v-5.4a.12.12,0,0,1,.09-.12Z" fill="#a67af4" /></g><g><g id="n2i0"><g><path d="M10.072,11.908l2.54.56L8.672,14.1c-.02,0-.03.01-.05.01a.154.154,0,0,1-.15-.15V3.448a.154.154,0,0,1,.15-.15.09.09,0,0,1,.05.01l4.46,1.56-3.05.57a.565.565,0,0,0-.44.54v5.4A.537.537,0,0,0,10.072,11.908Z" fill="url(#n2i1)" /><path d="M8.586,3.3,2.878,4.378a.177.177,0,0,0-.14.175V12.68a.177.177,0,0,0,.137.174L8.581,14.1a.176.176,0,0,0,.21-.174V3.478A.175.175,0,0,0,8.619,3.3Z" fill="url(#n2i2)" /></g></g><polygon points="5.948 4.921 5.948 12.483 7.934 12.814 7.934 4.564 5.948 4.921" fill="#b796f9" opacity="0.5" /><polygon points="3.509 5.329 3.509 11.954 5.238 12.317 5.238 5.031 3.509 5.329" fill="#b796f9" opacity="0.5" /></g></g></g><path d="M16,2.048a1.755,1.755,0,1,1-1.76-1.76A1.756,1.756,0,0,1,16,2.048Z" fill="#32bedd" /><circle cx="4.65" cy="15.973" r="1.759" fill="#32bedd" /></g><path d="M18,6.689v3.844a.222.222,0,0,1-.133.2l-.766.316-3.07,1.268-.011,0a.126.126,0,0,1-.038,0,.1.1,0,0,1-.1-.1V5.234a.1.1,0,0,1,.054-.088l0,0,.019,0a.031.031,0,0,1,.019,0,.055.055,0,0,1,.034.008l.011,0,.012,0L17.05,6.2l.8.282A.213.213,0,0,1,18,6.689Z" fill="#773adc" /><path d="M13.959,5.14l-3.8.715a.118.118,0,0,0-.093.117v5.409a.118.118,0,0,0,.091.116l3.8.831a.115.115,0,0,0,.137-.09.109.109,0,0,0,0-.026V5.256a.117.117,0,0,0-.115-.118A.082.082,0,0,0,13.959,5.14Z" fill="#a67af4" /></g></g></g>
+<text x="690" y="229.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">backend — internal</text>
+<text x="690" y="243.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">only</text>
+<rect x="655.0" y="370.0" width="250" height="60" rx="5" fill="#ffffff" stroke="#b9c2cc" stroke-width="1.3"/>
+<text x="780" y="392.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">managed OpenTelemetry</text>
+<text x="780" y="409.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">agent — $0 compute</text>
+<g transform="translate(907.0,167.0) scale(2.555556)"><defs><radialGradient id="n4i0" cx="9" cy="7.35" r="6.42" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#b77af4" /><stop offset="0.21" stop-color="#b378f2" /><stop offset="0.43" stop-color="#a672ed" /><stop offset="0.65" stop-color="#9267e4" /><stop offset="0.88" stop-color="#7559d8" /><stop offset="1" stop-color="#624fd0" /></radialGradient><linearGradient id="n4i1" x1="9.02" y1="3.91" x2="9.08" y2="11.49" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#f2f2f2" /><stop offset="0.23" stop-color="#f1f1f2" stop-opacity="0.99" /><stop offset="0.37" stop-color="#ededf1" stop-opacity="0.95" /><stop offset="0.48" stop-color="#e7e5f0" stop-opacity="0.89" /><stop offset="0.58" stop-color="#dedbee" stop-opacity="0.81" /><stop offset="0.67" stop-color="#d3ceeb" stop-opacity="0.7" /><stop offset="0.76" stop-color="#c4bee8" stop-opacity="0.57" /><stop offset="0.84" stop-color="#b4abe5" stop-opacity="0.41" /><stop offset="0.92" stop-color="#a095e1" stop-opacity="0.22" /><stop offset="0.99" stop-color="#8b7ddc" stop-opacity="0.02" /><stop offset="1" stop-color="#897bdc" stop-opacity="0" /></linearGradient></defs><title>Icon-manage-310</title><path d="M10.23,17.39l.81-.87V14.2H7v2.32l.81.87A.32.32,0,0,0,8,17.5h2A.32.32,0,0,0,10.23,17.39Z" fill="#cecece" /><path d="M9,.5A5.89,5.89,0,0,0,3.09,7.07c.27,2.47,2.62,3.62,3.29,6.75a.49.49,0,0,0,.47.38h4.3a.49.49,0,0,0,.47-.38c.67-3.13,3-4.28,3.29-6.75A5.89,5.89,0,0,0,9,.5ZM7,14.2" fill="url(#n4i0)" /><path d="M11.46,3.79a1.4,1.4,0,0,0-1.35,1.44V6H8V5.23A1.41,1.41,0,0,0,6.59,3.79,1.4,1.4,0,0,0,5.24,5.23,1.41,1.41,0,0,0,6.59,6.68h.64v6a.36.36,0,0,0,.72,0v-6h2.16v6a.36.36,0,1,0,.72,0v-6h.63a1.4,1.4,0,0,0,1.35-1.45A1.4,1.4,0,0,0,11.46,3.79ZM7.23,6H6.55a.74.74,0,0,1-.68-.77.74.74,0,0,1,.68-.77.74.74,0,0,1,.68.77Zm4.28,0h-.68V5.19a.68.68,0,1,1,1.35,0A.73.73,0,0,1,11.51,6Z" fill="url(#n4i1)" /><polygon points="6.96 15.8 11.04 15.01 11.04 14.56 6.96 15.36 6.96 15.8" fill="#999" /><polygon points="11.04 16.11 11.04 15.67 6.96 16.48 6.96 16.52 7.27 16.86 11.04 16.11" fill="#999" /></g>
+<text x="930" y="229.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">Application</text>
+<text x="930" y="243.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">Insights</text>
+<g transform="translate(1127.0,167.0) scale(2.555556)"><defs><linearGradient id="n5i0" x1="5.23" y1="17.45" x2="5.23" y2="8.09" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#1988d9" /><stop offset="0.9" stop-color="#54aef0" /></linearGradient><linearGradient id="n5i1" x1="11.5" y1="12.45" x2="11.5" y2="0.55" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#198ab3" /><stop offset="0.01" stop-color="#198bb4" /><stop offset="0.44" stop-color="#27b2d7" /><stop offset="0.79" stop-color="#2fcbed" /><stop offset="1" stop-color="#32d4f5" /></linearGradient></defs><title>Icon-manage-307</title><path d="M5.59,13.13H9.91v4.32H5.59ZM1.15,17.45H4.87V13.13H.55v3.72A.6.6,0,0,0,1.15,17.45Zm-.6-5H4.87V8.09H.55Z" fill="url(#n5i0)" /><path d="M11.5.55a5.89,5.89,0,0,1,5.95,6,5.89,5.89,0,0,1-5.95,5.95H5.55V6.5A5.89,5.89,0,0,1,11.5.55Z" fill-rule="evenodd" fill="url(#n5i1)" /><rect x="7.59" y="5.65" width="1.36" height="4.08" fill="#fff" /><rect x="10.31" y="7.01" width="1.36" height="2.72" fill="#fff" /><rect x="13.03" y="4.29" width="1.36" height="5.44" fill="#fff" /></g>
+<text x="1150" y="229.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">Week 08's workspace</text>
 </svg>

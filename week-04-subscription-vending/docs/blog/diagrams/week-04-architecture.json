@@ -1,0 +1,20 @@
+{
+  "title": "Week 04 — vending is four operations across three APIs, not one",
+  "alt": "Architecture diagram. A request carrying a landing zone name, owner and budget goes to the Subscription Alias API, which creates a subscription at tenant level and is irreversible. The alias API leaves every subscription under the Tenant Root Group, so a separate call to the Management Groups API places it at mg-lz-dev. Only then are a consumption budget and a role assignment applied. Create without place and the result is a subscription that is billed, healthy, and inherits nothing.",
+  "width": 1280,
+  "height": 340,
+  "groups": [
+    { "id": "ops", "style": "logical", "label": "four operations, three APIs — and the order is the whole lesson", "x": 400, "y": 95, "w": 840, "h": 200 }
+  ],
+  "nodes": [
+    { "id": "req", "label": "the request — name, owner, budget", "w": 220, "x": 170, "y": 195 },
+    { "id": "sub", "icon": "subscription.svg",      "label": "Subscription created", "x": 560, "y": 195 },
+    { "id": "mg",  "icon": "management-group.svg",  "label": "Placed at mg-lz-dev", "x": 820, "y": 195 },
+    { "id": "bud", "icon": "budget.svg",            "label": "Budget and RBAC", "x": 1080, "y": 195 }
+  ],
+  "edges": [
+    { "from": "req", "to": "sub", "label": "Alias API · irreversible", "label_at": [340, 181] },
+    { "from": "sub", "to": "mg",  "label": "a SEPARATE call", "label_at": [690, 181] },
+    { "from": "mg",  "to": "bud", "label": "only once placed", "label_at": [950, 181] }
+  ]
+}

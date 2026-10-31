@@ -1,0 +1,76 @@
+{
+  "title": "Week 09 — nothing runs until someone asks. The first person to ask pays for the wait.",
+  "alt": "Architecture diagram. A request from the internet over HTTPS reaches a Container Apps environment on the Consumption plan, which has no hourly fee of its own. The app scales to zero after about ten minutes idle, so the first request after idle took 16.9 seconds against 0.13 seconds warm. Console and system logs leave the environment through a diagnostic setting that authenticates as ARM, because week 08 disabled local authentication on the destination and the default shared-key log path therefore cannot work. The logs land in week 08's Log Analytics workspace in another subscription, which this week reads and never owns.",
+  "width": 1280,
+  "height": 330,
+  "groups": [
+    {
+      "id": "env",
+      "style": "logical",
+      "label": "Container Apps environment — Consumption plan",
+      "x": 360,
+      "y": 90,
+      "w": 420,
+      "h": 200
+    }
+  ],
+  "nodes": [
+    {
+      "id": "req",
+      "label": "a request from the internet, HTTPS only",
+      "w": 190,
+      "x": 130,
+      "y": 185
+    },
+    {
+      "id": "app",
+      "icon": "container-app.svg",
+      "label": "1 replica, then 0",
+      "x": 570,
+      "y": 185
+    },
+    {
+      "id": "diag",
+      "icon": "diagnostic-setting.svg",
+      "label": "Diagnostic setting",
+      "x": 880,
+      "y": 185
+    },
+    {
+      "id": "law",
+      "icon": "log-analytics.svg",
+      "label": "Week 08's workspace",
+      "x": 1120,
+      "y": 185
+    }
+  ],
+  "edges": [
+    {
+      "from": "req",
+      "to": "app",
+      "label": "first after idle: 16.9s",
+      "label_at": [
+        292,
+        171
+      ]
+    },
+    {
+      "from": "app",
+      "to": "diag",
+      "label": "logs",
+      "label_at": [
+        810,
+        171
+      ]
+    },
+    {
+      "from": "diag",
+      "to": "law",
+      "label": "authenticates as ARM",
+      "label_at": [
+        1000,
+        171
+      ]
+    }
+  ]
+}

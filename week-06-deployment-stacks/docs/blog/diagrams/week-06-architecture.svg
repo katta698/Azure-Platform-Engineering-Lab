@@ -1,83 +1,22 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 680" width="900" height="680" role="img" aria-label="Week 6 deployment stacks. One caller holding Owner and User Access Administrator attempts to delete two identical storage accounts in sub-lab-dev. The control, built by Terraform, deletes successfully. The protected one, owned by a deployment stack scoped at the mg-lz-dev management group with denyWriteAndDelete, is refused by a deny assignment.">
-  <defs>
-    <style>
-      .t    { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-      .hdr  { font-size: 13px; font-weight: 700; fill: #1f2933; }
-      .lbl  { font-size: 12px; fill: #1f2933; }
-      .sm   { font-size: 11px; fill: #52606d; }
-      .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; fill: #1f2933; }
-      .box  { fill: #ffffff; stroke: #c3cbd5; stroke-width: 1.2; }
-      .free { fill: #f2f9f4; stroke: #8fbf9f; stroke-width: 1.2; }
-      .bill { fill: #fdf1f1; stroke: #d9a2a2; stroke-width: 1.4; }
-      .band { fill: #f5f7fa; stroke: #dbe1e8; stroke-width: 1; }
-      .deny { stroke: #a4262c; stroke-width: 1.8; fill: none; }
-      .ok   { fill: #1b6e3c; }
-      .no   { fill: #a4262c; }
-    </style>
-    <marker id="r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M0,0 L10,5 L0,10 z" fill="#a4262c"/>
-    </marker>
-  </defs>
-
-  <!-- Opaque background. Without it the labels that sit outside a box are dark
-       grey on whatever the page is, and vanish entirely in dark mode. -->
-  <rect x="0" y="0" width="900" height="680" fill="#ffffff"/>
-
-  <text class="t hdr" x="24" y="28">Same Owner, same subscription, same SKU. One delete is refused.</text>
-
-  <!-- CALLER -->
-  <rect class="band" x="24" y="42" width="852" height="62" rx="8"/>
-  <text class="t hdr" x="42" y="66">THE CALLER</text>
-  <text class="t sm" x="42" y="88">one signed-in user, holding <tspan class="mono">Owner</tspan> + <tspan class="mono">User Access Administrator</tspan> on sub-lab-dev &#183; both deletes attempted with the same identity</text>
-
-  <!-- MANAGEMENT GROUP -->
-  <rect class="band" x="24" y="116" width="852" height="96" rx="8"/>
-  <text class="t hdr" x="42" y="140">mg-lz-dev &#8212; MANAGEMENT GROUP SCOPE</text>
-  <rect class="bill" x="42" y="150" width="380" height="48" rx="6"/>
-  <text class="t lbl" x="58" y="172">deployment stack <tspan class="mono">stack-wk06-protected</tspan></text>
-  <text class="t sm" x="58" y="190"><tspan class="mono">denySettingsMode: denyWriteAndDelete</tspan></text>
-  <text class="t sm" x="446" y="172">The stack lives ABOVE the subscription on purpose.</text>
-  <text class="t sm" x="446" y="190">A Contributor on sub-lab-dev cannot reach it to lift its own restriction.</text>
-
-  <!-- SUBSCRIPTION -->
-  <rect class="band" x="24" y="232" width="852" height="286" rx="8"/>
-  <text class="t hdr" x="42" y="256">sub-lab-dev &#8212; both halves deploy here</text>
-
-  <!-- The one arrow in the diagram: the stack's deny reaching the protected
-       half. Drawn AFTER the band it crosses, because the band's fill would
-       otherwise paint over it. Routed as an elbow down a clear corridor, with
-       its label set BESIDE the line rather than across the arrowhead. -->
-  <path class="deny" d="M 232 198 L 232 218 L 663 218 L 663 262" marker-end="url(#r)"/>
-  <text class="t sm no" x="676" y="250">deny assignment</text>
-
-  <!-- control -->
-  <rect class="free" x="42" y="268" width="390" height="236" rx="6"/>
-  <text class="t hdr ok" x="60" y="292">CONTROL &#183; no protection</text>
-  <text class="t sm" x="60" y="312">built by Terraform, state in HCP</text>
-  <rect class="box" x="60" y="324" width="354" height="60" rx="6"/>
-  <text class="t lbl" x="76" y="346"><tspan class="mono">rg-wk06-control-dev-scus-001</tspan></text>
-  <text class="t sm" x="76" y="368">storage account &#183; Standard_LRS &#183; StorageV2 &#183; TLS1_2</text>
-  <text class="t lbl ok" x="60" y="410">delete attempted &#8594; <tspan class="hdr ok">SUCCEEDS</tspan></text>
-  <text class="t sm" x="60" y="434">This is the half that makes the other half mean something.</text>
-  <text class="t sm" x="60" y="454">Without it, &#8220;the delete failed&#8221; has more than one</text>
-  <text class="t sm" x="60" y="474">explanation. Terraform re-creates it on the next apply.</text>
-
-  <!-- protected -->
-  <rect class="bill" x="468" y="268" width="390" height="236" rx="6"/>
-  <text class="t hdr no" x="486" y="292">PROTECTED &#183; owned by the stack</text>
-  <text class="t sm" x="486" y="312">deployed from ARM JSON by <tspan class="mono">az stack mg create</tspan></text>
-  <rect class="box" x="486" y="324" width="354" height="60" rx="6"/>
-  <text class="t lbl" x="502" y="346"><tspan class="mono">rg-wk06-protected-dev-scus-001</tspan></text>
-  <text class="t sm" x="502" y="368">storage account &#183; identical configuration to the control</text>
-  <text class="t lbl no" x="486" y="410">delete attempted &#8594; <tspan class="hdr no">REFUSED</tspan></text>
-  <text class="t mono" x="486" y="434">DenyAssignmentAuthorizationFailed</text>
-  <text class="t sm" x="486" y="454">&#8220;...has permission to perform action</text>
-  <text class="t sm" x="486" y="474"><tspan class="mono">Microsoft.Storage/storageAccounts/delete</tspan>&#8221; &#8212; and still cannot.</text>
-
-  <!-- TEARDOWN -->
-  <rect class="band" x="24" y="546" width="852" height="106" rx="8"/>
-  <text class="t hdr" x="42" y="572">TEARDOWN &#8212; the protected half is removed by deleting the STACK, never the resource</text>
-  <text class="t mono" x="42" y="598">az stack mg delete --action-on-unmanage deleteAll</text>
-  <text class="t sm no" x="42" y="622">The default is <tspan class="mono no">detach</tspan>: omit the flag and every resource keeps running,</text>
-  <text class="t sm no" x="42" y="640">untracked and unowned, while the command reports success.</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 560" width="1280" height="560" role="img" aria-label="Architecture diagram. A deployment stack created at the mg-lz-dev management group carries denySettingsMode denyWriteAndDelete, and it lives ABOVE the subscription on purpose so a Contributor inside the subscription cannot reach it to lift its own restriction. The stack places a deny assignment on one of two otherwise identical storage accounts in the lab subscription. The control storage account, built by Terraform with no protection, is deleted successfully. The protected one, deployed from ARM JSON and owned by the stack, refuses the same delete with DenyAssignmentAuthorizationFailed, attempted by the same signed-in Owner.">
+<!-- Generated by scripts/render_azure_diagram.py from the committed JSON spec beside this file. Do not hand-edit: regenerate.
+     Azure icons are official, used unmodified under Microsoft's icon terms, which permit use in architectural diagrams and documentation. -->
+<defs><marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2b3137"/></marker></defs>
+<rect x="0" y="0" width="1280" height="560" fill="#ffffff"/>
+<text x="28" y="34" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1f2933">Week 06 — same Owner, same subscription, same SKU. One delete is refused.</text>
+<rect x="40" y="90" width="1200" height="160" rx="4" fill="#ffffff" stroke="#b9c2cc" stroke-width="1.2"/>
+<text x="640.0" y="110" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#1f2933" text-anchor="middle">mg-lz-dev — the stack lives ABOVE the subscription on purpose</text>
+<rect x="40" y="290" width="1200" height="200" rx="4" fill="#ffffff" stroke="#b9c2cc" stroke-width="1.2"/>
+<text x="640.0" y="310" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#1f2933" text-anchor="middle">sub-lab-dev — both halves deploy here, with one signed-in Owner</text>
+<path d="M900.0,206.0 L900.0,356.0" fill="none" stroke="#2b3137" stroke-width="1.8" marker-end="url(#arw)"/>
+<text x="985" y="285" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="11" fill="#5b6670" text-anchor="middle">deny assignment</text>
+<rect x="750.0" y="140.0" width="300" height="60" rx="5" fill="#ffffff" stroke="#b9c2cc" stroke-width="1.3"/>
+<text x="900" y="162.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">deployment stack ·</text>
+<text x="900" y="179.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">denyWriteAndDelete</text>
+<g transform="translate(357.0,362.0) scale(2.555556)"><defs><linearGradient id="n1i0" x1="9" y1="15.83" x2="9" y2="5.79" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#b3b3b3" /><stop offset="0.26" stop-color="#c1c1c1" /><stop offset="1" stop-color="#e6e6e6" /></linearGradient></defs><title>Icon-storage-86</title><path d="M.5,5.79h17a0,0,0,0,1,0,0v9.48a.57.57,0,0,1-.57.57H1.07a.57.57,0,0,1-.57-.57V5.79A0,0,0,0,1,.5,5.79Z" fill="url(#n1i0)" /><path d="M1.07,2.17H16.93a.57.57,0,0,1,.57.57V5.79a0,0,0,0,1,0,0H.5a0,0,0,0,1,0,0V2.73A.57.57,0,0,1,1.07,2.17Z" fill="#37c2b1" /><path d="M2.81,6.89H15.18a.27.27,0,0,1,.26.27v1.4a.27.27,0,0,1-.26.27H2.81a.27.27,0,0,1-.26-.27V7.16A.27.27,0,0,1,2.81,6.89Z" fill="#fff" /><path d="M2.82,9.68H15.19a.27.27,0,0,1,.26.27v1.41a.27.27,0,0,1-.26.27H2.82a.27.27,0,0,1-.26-.27V10A.27.27,0,0,1,2.82,9.68Z" fill="#37c2b1" /><path d="M2.82,12.5H15.19a.27.27,0,0,1,.26.27v1.41a.27.27,0,0,1-.26.27H2.82a.27.27,0,0,1-.26-.27V12.77A.27.27,0,0,1,2.82,12.5Z" fill="#258277" /></g>
+<text x="380" y="424.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">control — delete</text>
+<text x="380" y="438.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">SUCCEEDS</text>
+<g transform="translate(877.0,362.0) scale(2.555556)"><defs><linearGradient id="n2i0" x1="9" y1="15.83" x2="9" y2="5.79" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#b3b3b3" /><stop offset="0.26" stop-color="#c1c1c1" /><stop offset="1" stop-color="#e6e6e6" /></linearGradient></defs><title>Icon-storage-86</title><path d="M.5,5.79h17a0,0,0,0,1,0,0v9.48a.57.57,0,0,1-.57.57H1.07a.57.57,0,0,1-.57-.57V5.79A0,0,0,0,1,.5,5.79Z" fill="url(#n2i0)" /><path d="M1.07,2.17H16.93a.57.57,0,0,1,.57.57V5.79a0,0,0,0,1,0,0H.5a0,0,0,0,1,0,0V2.73A.57.57,0,0,1,1.07,2.17Z" fill="#37c2b1" /><path d="M2.81,6.89H15.18a.27.27,0,0,1,.26.27v1.4a.27.27,0,0,1-.26.27H2.81a.27.27,0,0,1-.26-.27V7.16A.27.27,0,0,1,2.81,6.89Z" fill="#fff" /><path d="M2.82,9.68H15.19a.27.27,0,0,1,.26.27v1.41a.27.27,0,0,1-.26.27H2.82a.27.27,0,0,1-.26-.27V10A.27.27,0,0,1,2.82,9.68Z" fill="#37c2b1" /><path d="M2.82,12.5H15.19a.27.27,0,0,1,.26.27v1.41a.27.27,0,0,1-.26.27H2.82a.27.27,0,0,1-.26-.27V12.77A.27.27,0,0,1,2.82,12.5Z" fill="#258277" /></g>
+<text x="900" y="424.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">protected — delete</text>
+<text x="900" y="438.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">REFUSED</text>
 </svg>

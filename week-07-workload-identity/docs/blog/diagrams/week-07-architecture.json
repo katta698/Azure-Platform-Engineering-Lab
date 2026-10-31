@@ -1,0 +1,16 @@
+{
+  "title": "Week 07 — no password exists anywhere in this picture",
+  "alt": "Architecture diagram. A GitHub Actions workflow holds three repository variables and zero secrets. It presents an OIDC token to a federated credential configured once in Microsoft Entra, which matches on issuer, audience and an exact subject built from immutable numeric repository IDs. What comes back is an Azure access token valid for that run only, carrying exactly one role assignment: Reader on the lab subscription. Reads succeed and creates are refused.",
+  "width": 1280,
+  "height": 320,
+  "groups": [],
+  "nodes": [
+    { "id": "gh",  "label": "GitHub Actions — 3 repo variables, 0 secrets", "w": 250, "x": 190, "y": 185 },
+    { "id": "fed", "label": "Federated credential — issuer, audience, exact subject", "w": 270, "x": 620, "y": 185 },
+    { "id": "sub", "icon": "subscription.svg", "label": "Reader on sub-lab-dev", "x": 1050, "y": 185 }
+  ],
+  "edges": [
+    { "from": "gh",  "to": "fed", "label": "OIDC token", "label_at": [405, 171] },
+    { "from": "fed", "to": "sub", "label": "Azure token, this run only", "label_at": [850, 171] }
+  ]
+}

@@ -57,5 +57,32 @@ for legibility. Original names:
 
 (The Prometheus filename misspelling is Microsoft's, in the shipped package.)
 
+Added 2026-10-31 for the weeks 01-10 backfill, same package, same terms:
+
+    management-group.svg     10011-icon-service-Management-Groups.svg
+    policy.svg               10316-icon-service-Policy.svg
+    storage-account.svg      10086-icon-service-Storage-Accounts.svg
+    log-analytics.svg        00009-icon-service-Log-Analytics-Workspaces.svg
+    firewall.svg             10084-icon-service-Firewalls.svg
+    firewall-policy.svg      00272-icon-service-Azure-Firewall-Policy.svg
+    dns-zone.svg             10064-icon-service-DNS-Zones.svg
+    route-table.svg          10082-icon-service-Route-Tables.svg
+    container-apps-env.svg   02989-icon-service-Container-Apps-Environments.svg
+    container-app.svg        02884-icon-service-Worker-Container-App.svg
+    container-registry.svg   10105-icon-service-Container-Registries.svg
+    app-insights.svg         00012-icon-service-Application-Insights.svg
+    app-service.svg          10035-icon-service-App-Services.svg
+    budget.svg               10793-icon-service-Cost-Budgets.svg
+    diagnostic-setting.svg   00008-icon-service-Diagnostics-Settings.svg
+    key-vault.svg            10245-icon-service-Key-Vaults.svg
+
+THINGS WITH NO OFFICIAL ICON ARE DRAWN AS A PLAIN CARD
+------------------------------------------------------
+HCP Terraform, GitHub Actions, an ARM template, "100 rows sent". The terms
+forbid using a Microsoft product icon to stand for something that is not that
+product, and there is no generic glyph in the set to reach for. So the
+renderer draws a labelled box for those instead of borrowing a logo that
+would be wrong. A node with no `icon` in its spec gets that treatment.
+
 To add an icon: take it from the official download, copy it unmodified, add
 the mapping above. Do not edit the SVG.

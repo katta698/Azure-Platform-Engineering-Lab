@@ -1,0 +1,116 @@
+{
+  "title": "Week 01 — governance is assigned to the TREE, never to a subscription",
+  "alt": "Architecture diagram. A custom policy definition, deny-public-ip-on-nic, is defined once at the mg-katta management group and bundled into an initiative with allowed locations and a required tag. That one initiative is assigned twice: at mg-platform, where it always enforces, and at mg-lz-dev, where it is staged. Neither assignment names a subscription, and neither sits at the Tenant Root Group. Four subscriptions inherit the rules by position in the tree rather than by being listed. A test bed resource group holding a virtual network and subnet sits under the dev landing zone and is governed by inheritance alone.",
+  "width": 1280,
+  "height": 395,
+  "groups": [
+    {
+      "id": "defn",
+      "style": "logical",
+      "label": "mg-katta — defined once, here",
+      "x": 40,
+      "y": 95,
+      "w": 300,
+      "h": 260
+    },
+    {
+      "id": "assign",
+      "style": "logical",
+      "label": "assigned at MG scope, not at a subscription",
+      "x": 470,
+      "y": 95,
+      "w": 300,
+      "h": 260
+    },
+    {
+      "id": "inherit",
+      "style": "logical",
+      "label": "what inherits, by position in the tree",
+      "x": 900,
+      "y": 95,
+      "w": 340,
+      "h": 260
+    }
+  ],
+  "nodes": [
+    {
+      "id": "def",
+      "icon": "policy.svg",
+      "label": "deny-public-ip-on-nic",
+      "x": 190,
+      "y": 175
+    },
+    {
+      "id": "init",
+      "icon": "policy.svg",
+      "label": "initiative-lab-baseline",
+      "x": 190,
+      "y": 290
+    },
+    {
+      "id": "plat",
+      "icon": "management-group.svg",
+      "label": "mg-platform — enforcing",
+      "x": 620,
+      "y": 175
+    },
+    {
+      "id": "lz",
+      "icon": "management-group.svg",
+      "label": "mg-lz-dev — staged",
+      "x": 620,
+      "y": 290
+    },
+    {
+      "id": "subs",
+      "icon": "subscription.svg",
+      "label": "4 subscriptions",
+      "x": 1000,
+      "y": 175
+    },
+    {
+      "id": "vnet",
+      "icon": "virtual-network.svg",
+      "label": "test bed VNet + subnet",
+      "x": 1000,
+      "y": 290
+    }
+  ],
+  "edges": [
+    {
+      "from": "def",
+      "to": "init",
+      "label": "bundled with 2 built-ins",
+      "label_at": [
+        250,
+        240
+      ]
+    },
+    {
+      "from": "init",
+      "to": "plat",
+      "label": "one initiative, two assignments",
+      "label_at": [
+        405,
+        151
+      ]
+    },
+    {
+      "from": "init",
+      "to": "lz"
+    },
+    {
+      "from": "plat",
+      "to": "subs",
+      "label": "inherited, never listed",
+      "label_at": [
+        835,
+        151
+      ]
+    },
+    {
+      "from": "lz",
+      "to": "vnet"
+    }
+  ]
+}

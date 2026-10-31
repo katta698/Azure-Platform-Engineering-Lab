@@ -1,65 +1,23 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 470" width="900" height="470" role="img" aria-label="Week 7 workload identity. A GitHub Actions run mints a short-lived OIDC token describing the repository and branch. Entra checks it against a federated credential on a user-assigned managed identity, matching issuer, audience and an exact subject, then returns an Azure access token scoped to the Reader role. No secret is stored anywhere.">
-  <defs>
-    <style>
-      .t    { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-      .hdr  { font-size: 13px; font-weight: 700; fill: #1f2933; }
-      .lbl  { font-size: 12px; fill: #1f2933; }
-      .sm   { font-size: 11px; fill: #52606d; }
-      .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; fill: #1f2933; }
-      .box  { fill: #ffffff; stroke: #c3cbd5; stroke-width: 1.2; }
-      .free { fill: #f2f9f4; stroke: #8fbf9f; stroke-width: 1.2; }
-      .band { fill: #f5f7fa; stroke: #dbe1e8; stroke-width: 1; }
-      .flow { stroke: #4a7fb5; stroke-width: 1.8; fill: none; }
-      .ok   { fill: #1b6e3c; }
-      .no   { fill: #a4262c; }
-    </style>
-    <marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M0,0 L10,5 L0,10 z" fill="#4a7fb5"/>
-    </marker>
-  </defs>
-
-  <rect x="0" y="0" width="900" height="470" fill="#ffffff"/>
-  <text class="t hdr" x="24" y="28">No password exists anywhere in this picture.</text>
-
-  <!-- GITHUB -->
-  <rect class="band" x="24" y="44" width="390" height="180" rx="8"/>
-  <text class="t hdr" x="42" y="68">GITHUB ACTIONS</text>
-  <text class="t sm" x="42" y="88">the workflow runs on GitHub's infrastructure, not Azure's</text>
-  <rect class="box" x="42" y="100" width="354" height="106" rx="6"/>
-  <text class="t lbl" x="58" y="122">repository variables &#8212; not secrets</text>
-  <text class="t mono" x="58" y="142">AZURE_CLIENT_ID</text>
-  <text class="t mono" x="58" y="160">AZURE_TENANT_ID</text>
-  <text class="t mono" x="58" y="178">AZURE_SUBSCRIPTION_ID</text>
-  <text class="t sm ok" x="58" y="198">secrets configured: 0</text>
-
-  <!-- ENTRA -->
-  <rect class="band" x="486" y="44" width="390" height="180" rx="8"/>
-  <text class="t hdr" x="504" y="68">MICROSOFT ENTRA</text>
-  <text class="t sm" x="504" y="88">the federated credential, configured once</text>
-  <rect class="free" x="504" y="100" width="354" height="106" rx="6"/>
-  <text class="t sm" x="520" y="120">issuer &#8212; token.actions.githubusercontent.com</text>
-  <text class="t sm" x="520" y="138">audience &#8212; api://AzureADTokenExchange</text>
-  <text class="t sm" x="520" y="156">subject &#8212; exact match, immutable IDs:</text>
-  <text class="t mono" x="520" y="174">repo:owner@63027619/repo@1342954118</text>
-  <text class="t mono" x="520" y="192">  :ref:refs/heads/main</text>
-
-  <!-- flow arrows between them -->
-  <path class="flow" d="M 414 132 L 484 132" marker-end="url(#b)"/>
-  <text class="t sm" x="449" y="124" text-anchor="middle">token</text>
-
-  <!-- RESULT -->
-  <rect class="band" x="24" y="244" width="852" height="96" rx="8"/>
-  <text class="t hdr" x="42" y="268">WHAT COMES BACK</text>
-  <text class="t sm" x="42" y="290">An Azure access token, valid for this run only, carrying exactly one role assignment:</text>
-  <rect class="box" x="42" y="300" width="380" height="28" rx="6"/>
-  <text class="t mono" x="58" y="319">Reader on sub-lab-dev</text>
-  <text class="t sm ok" x="440" y="313">reads the subscription &#8212; succeeds</text>
-  <text class="t sm no" x="680" y="313">creates anything &#8212; refused</text>
-
-  <!-- WHY -->
-  <rect class="band" x="24" y="360" width="852" height="88" rx="8"/>
-  <text class="t hdr" x="42" y="384">WHY THIS IS DIFFERENT FROM A SERVICE PRINCIPAL WITH A SECRET</text>
-  <text class="t sm" x="42" y="406">A managed identity cannot hold a password &#8212; the API has nowhere to put one. So "no secret" is a property of the</text>
-  <text class="t sm" x="42" y="424">object, not a discipline somebody has to keep. There is nothing to rotate, nothing to expire, and nothing to leak.</text>
-  <text class="t sm no" x="42" y="442">A renamed or transferred repository does not carry the trust: the numeric IDs in the subject stop matching.</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 320" width="1280" height="320" role="img" aria-label="Architecture diagram. A GitHub Actions workflow holds three repository variables and zero secrets. It presents an OIDC token to a federated credential configured once in Microsoft Entra, which matches on issuer, audience and an exact subject built from immutable numeric repository IDs. What comes back is an Azure access token valid for that run only, carrying exactly one role assignment: Reader on the lab subscription. Reads succeed and creates are refused.">
+<!-- Generated by scripts/render_azure_diagram.py from the committed JSON spec beside this file. Do not hand-edit: regenerate.
+     Azure icons are official, used unmodified under Microsoft's icon terms, which permit use in architectural diagrams and documentation. -->
+<defs><marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2b3137"/></marker></defs>
+<rect x="0" y="0" width="1280" height="320" fill="#ffffff"/>
+<text x="28" y="34" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1f2933">Week 07 — no password exists anywhere in this picture</text>
+<path d="M321.0,185.0 L479.0,185.0" fill="none" stroke="#2b3137" stroke-width="1.8" marker-end="url(#arw)"/>
+<text x="405" y="171" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="11" fill="#5b6670" text-anchor="middle">OIDC token</text>
+<path d="M761.0,185.0 L1021.0,185.0" fill="none" stroke="#2b3137" stroke-width="1.8" marker-end="url(#arw)"/>
+<text x="850" y="171" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="11" fill="#5b6670" text-anchor="middle">Azure token, this run</text>
+<text x="850" y="183" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="11" fill="#5b6670" text-anchor="middle">only</text>
+<rect x="65.0" y="146.5" width="250" height="77" rx="5" fill="#ffffff" stroke="#b9c2cc" stroke-width="1.3"/>
+<text x="190" y="168.5" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">GitHub Actions — 3</text>
+<text x="190" y="185.5" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">repo variables, 0</text>
+<text x="190" y="202.5" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">secrets</text>
+<rect x="485.0" y="146.5" width="270" height="77" rx="5" fill="#ffffff" stroke="#b9c2cc" stroke-width="1.3"/>
+<text x="620" y="168.5" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">Federated credential —</text>
+<text x="620" y="185.5" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">issuer, audience,</text>
+<text x="620" y="202.5" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">exact subject</text>
+<g transform="translate(1027.0,162.0) scale(2.555556)"><defs><radialGradient id="n2i2" cx="-36.63" cy="17.12" r="11.18" gradientTransform="translate(41.88 -7.4) scale(0.94 0.94)" gradientUnits="userSpaceOnUse"><stop offset="0.27" stop-color="#ffd70f" /><stop offset="0.49" stop-color="#ffcb12" /><stop offset="0.88" stop-color="#feac19" /><stop offset="1" stop-color="#fea11b" /></radialGradient></defs><title>Icon-general-2</title><path id="n2i3" d="M13.56,7.19a2.07,2.07,0,0,0,0-2.93h0L10,.69a2.06,2.06,0,0,0-2.92,0h0L3.52,4.26a2.09,2.09,0,0,0,0,2.93l3,3a.61.61,0,0,1,.17.41v5.52a.7.7,0,0,0,.2.5l1.35,1.35a.45.45,0,0,0,.66,0l1.31-1.31h0l.77-.77a.26.26,0,0,0,0-.38l-.55-.56a.29.29,0,0,1,0-.42l.55-.56a.26.26,0,0,0,0-.38L10.4,13a.28.28,0,0,1,0-.41L11,12a.26.26,0,0,0,0-.38l-.77-.78v-.28Zm-5-5.64A1.18,1.18,0,1,1,7.37,2.73,1.17,1.17,0,0,1,8.54,1.55Z" fill="url(#n2i2)" /><path id="n2i1" d="M7.62,16.21h0A.25.25,0,0,0,8,16V11.55a.27.27,0,0,0-.11-.22h0a.25.25,0,0,0-.39.22V16A.27.27,0,0,0,7.62,16.21Z" fill="#ff9300" opacity="0.75" /><rect id="n2i4" x="5.69" y="5.45" width="5.86" height="0.69" rx="0.32" fill="#ff9300" opacity="0.75" /><rect id="n2i0" x="5.69" y="6.57" width="5.86" height="0.69" rx="0.32" fill="#ff9300" opacity="0.75" /></g>
+<text x="1050" y="224.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">Reader on</text>
+<text x="1050" y="238.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">sub-lab-dev</text>
 </svg>

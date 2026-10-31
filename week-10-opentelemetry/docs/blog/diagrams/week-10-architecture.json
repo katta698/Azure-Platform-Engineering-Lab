@@ -1,0 +1,112 @@
+{
+  "title": "Week 10 — a log says 256 ms. A trace says where it went.",
+  "alt": "Architecture diagram. Both container images are pulled from a Basic container registry using a user-assigned managed identity holding AcrPull, with the registry admin user disabled, so no password exists in the pull path. Inside the Container Apps environment a public frontend calls an internal-only backend, passing a traceparent header so the two spans belong to one trace. Both apps export spans over OTLP gRPC to the managed OpenTelemetry agent that Azure runs inside the environment at no compute cost. The agent forwards traces and logs to Application Insights, which is workspace-based and stores them in week 08's Log Analytics workspace. Measured: frontend p50 256.4 ms, backend p50 250.8 ms.",
+  "width": 1280,
+  "height": 490,
+  "groups": [
+    {
+      "id": "env",
+      "style": "logical",
+      "label": "Container Apps environment",
+      "x": 330,
+      "y": 90,
+      "w": 470,
+      "h": 210
+    }
+  ],
+  "nodes": [
+    {
+      "id": "acr",
+      "icon": "container-registry.svg",
+      "label": "ACR Basic — admin user off",
+      "x": 150,
+      "y": 190
+    },
+    {
+      "id": "fe",
+      "icon": "container-app.svg",
+      "label": "frontend — public",
+      "x": 450,
+      "y": 190
+    },
+    {
+      "id": "be",
+      "icon": "container-app.svg",
+      "label": "backend — internal only",
+      "x": 690,
+      "y": 190
+    },
+    {
+      "id": "otel",
+      "label": "managed OpenTelemetry agent — $0 compute",
+      "w": 250,
+      "x": 780,
+      "y": 400
+    },
+    {
+      "id": "ai",
+      "icon": "app-insights.svg",
+      "label": "Application Insights",
+      "x": 930,
+      "y": 190
+    },
+    {
+      "id": "law",
+      "icon": "log-analytics.svg",
+      "label": "Week 08's workspace",
+      "x": 1150,
+      "y": 190
+    }
+  ],
+  "edges": [
+    {
+      "from": "acr",
+      "to": "fe",
+      "label": "both images · AcrPull, no password",
+      "label_at": [
+        250,
+        150
+      ]
+    },
+    {
+      "from": "fe",
+      "to": "be",
+      "label": "traceparent",
+      "label_at": [
+        570,
+        166
+      ]
+    },
+    {
+      "from": "fe",
+      "to": "otel",
+      "label": "OTLP gRPC",
+      "label_at": [
+        612,
+        330
+      ]
+    },
+    {
+      "from": "be",
+      "to": "otel"
+    },
+    {
+      "from": "otel",
+      "to": "ai",
+      "label": "agent forwards",
+      "label_at": [
+        962,
+        330
+      ]
+    },
+    {
+      "from": "ai",
+      "to": "law",
+      "label": "workspace-based",
+      "label_at": [
+        1040,
+        166
+      ]
+    }
+  ]
+}

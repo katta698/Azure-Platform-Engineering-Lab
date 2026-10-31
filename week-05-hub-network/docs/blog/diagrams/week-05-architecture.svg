@@ -1,88 +1,40 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 700" width="900" height="700" role="img" aria-label="Week 5 hub network: a permanent free layer of hub VNet, spoke, peerings and private DNS estate, and a disposable billable layer of Azure Firewall Basic with its mandatory management NIC">
-  <defs>
-    <style>
-      .t    { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-      .hdr  { font-size: 13px; font-weight: 700; fill: #1f2933; }
-      .lbl  { font-size: 12px; fill: #1f2933; }
-      .sm   { font-size: 11px; fill: #52606d; }
-      .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; fill: #1f2933; }
-      .box  { fill: #ffffff; stroke: #c3cbd5; stroke-width: 1.2; }
-      .free { fill: #f2f9f4; stroke: #8fbf9f; stroke-width: 1.2; }
-      .bill { fill: #fdf1f1; stroke: #d9a2a2; stroke-width: 1.4; }
-      .band { fill: #f5f7fa; stroke: #dbe1e8; stroke-width: 1; }
-      .arrow{ stroke: #7b8794; stroke-width: 1.4; fill: none; }
-      .ok   { fill: #1b6e3c; }
-      .no   { fill: #a4262c; }
-    </style>
-    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M0,0 L10,5 L0,10 z" fill="#7b8794"/>
-    </marker>
-  </defs>
-
-  <text class="t hdr" x="24" y="26">Two layers, split by what they cost</text>
-
-  <!-- PERMANENT LAYER -->
-  <rect class="free" x="24" y="38" width="852" height="296" rx="8"/>
-  <text class="t hdr ok" x="42" y="60">PERMANENT &#183; ~$0/hour &#183; weeks 06+ attach to this</text>
-
-  <!-- hub -->
-  <rect class="box" x="42" y="74" width="390" height="150" rx="6"/>
-  <text class="t lbl" x="58" y="96">sub-connectivity</text>
-  <text class="t mono" x="58" y="116">vnet-hub  10.0.0.0/16</text>
-  <rect class="box" x="58" y="128" width="356" height="34" rx="4"/>
-  <text class="t mono" x="72" y="150">AzureFirewallSubnet          10.0.0.0/26</text>
-  <rect class="box" x="58" y="170" width="356" height="40" rx="4"/>
-  <text class="t mono" x="72" y="188">AzureFirewallManagementSubnet 10.0.0.64/26</text>
-  <text class="t sm no" x="72" y="204">created always &#8212; Basic mandates it</text>
-
-  <!-- spoke -->
-  <rect class="box" x="468" y="74" width="390" height="150" rx="6"/>
-  <text class="t lbl" x="484" y="96">sub-lab-dev</text>
-  <text class="t mono" x="484" y="116">vnet-spoke  10.1.0.0/16</text>
-  <rect class="box" x="484" y="128" width="356" height="34" rx="4"/>
-  <text class="t mono" x="498" y="150">snet-workload   10.1.0.0/24</text>
-  <rect class="box" x="484" y="170" width="356" height="40" rx="4"/>
-  <text class="t mono" x="498" y="188">rt-spoke  (route table)</text>
-  <text class="t sm" x="498" y="204">0.0.0.0/0 route added only with a firewall</text>
-
-  <!-- peering -->
-  <line class="arrow" x1="434" y1="130" x2="466" y2="130" marker-end="url(#a)"/>
-  <line class="arrow" x1="466" y1="146" x2="434" y2="146" marker-end="url(#a)"/>
-  <text class="t sm" x="404" y="238">two peering resources, one per side &#8212; one alone reports Initiated and carries nothing</text>
-
-  <!-- dns -->
-  <rect class="box" x="42" y="248" width="816" height="70" rx="6"/>
-  <text class="t lbl" x="58" y="270">private DNS estate &#8212; 6 zones in the hub, each linked to BOTH virtual networks</text>
-  <text class="t mono" x="58" y="290">privatelink.blob.core.windows.net &#183; .file &#183; .vaultcore.azure.net &#183; .database.windows.net &#183; .azurecr.io &#183; .monitor</text>
-  <text class="t sm no" x="58" y="308">linked to the hub only: the spoke resolves the PUBLIC ip and fails closed later, looking like a firewall fault</text>
-
-  <!-- BILLABLE LAYER -->
-  <rect class="bill" x="24" y="340" width="852" height="212" rx="8"/>
-  <text class="t hdr no" x="42" y="362">BILLABLE &#183; $0.405/hour on Basic &#183; ~$296/month &#183; deployed deliberately, destroyed same day</text>
-
-  <rect class="box" x="42" y="376" width="404" height="120" rx="6"/>
-  <text class="t lbl" x="58" y="398">Azure Firewall Basic</text>
-  <text class="t mono" x="58" y="420">ip_configuration          &#8594; data pip     $0.005/hr</text>
-  <text class="t mono" x="58" y="440">management_ip_configuration &#8594; mgmt pip   $0.005/hr</text>
-  <text class="t mono" x="58" y="460">deployment                              $0.395/hr</text>
-  <text class="t sm" x="58" y="482">no DNS proxy &#183; no network FQDN rules &#183; 250 Mbps</text>
-
-  <rect class="box" x="472" y="376" width="386" height="120" rx="6"/>
-  <text class="t lbl" x="488" y="398">Firewall policy hierarchy</text>
-  <rect class="box" x="488" y="410" width="354" height="32" rx="4"/>
-  <text class="t mono" x="502" y="431">afwp-platform-baseline   (parent)</text>
-  <line class="arrow" x1="510" y1="444" x2="510" y2="456" marker-end="url(#a)"/>
-  <rect class="box" x="488" y="458" width="354" height="32" rx="4"/>
-  <text class="t mono" x="502" y="479">afwp-lz-dev   base_policy_id &#8594; parent</text>
-
-  <text class="t sm" x="42" y="520">Policy tier must MATCH the firewall tier. The child inherits the parent's rule collection groups and is evaluated after them,</text>
-  <text class="t sm" x="42" y="538">so a landing zone can add rules and cannot remove the platform's &#8212; which is the only reason to run two policies.</text>
-
-  <!-- the switch -->
-  <rect class="band" x="24" y="568" width="852" height="112" rx="6"/>
-  <text class="t hdr" x="42" y="590">One variable separates them</text>
-  <text class="t mono" x="42" y="614">deploy.sh hub        deploy_firewall = false   &#8594;  permanent layer only</text>
-  <text class="t mono" x="42" y="634">deploy.sh firewall   deploy_firewall = true    &#8594;  + firewall, + route</text>
-  <text class="t mono" x="42" y="654">cleanup.sh           back to false             &#8594;  firewall and route removed together</text>
-  <text class="t sm" x="42" y="672">The route is gated on the same variable, so the spoke never keeps a default route to a next hop that stopped existing.</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 600" width="1280" height="600" role="img" aria-label="Architecture diagram in two bands. The permanent band costs about nothing per hour and stays up: a hub virtual network at 10.0.0.0/16 in the connectivity subscription, peered in both directions with a spoke virtual network at 10.1.0.0/16 in the lab subscription, and six private DNS zones linked to BOTH networks rather than to the hub alone. The billable band is deployed deliberately and destroyed the same day: an Azure Firewall Basic at about 40 cents an hour, a two-tier firewall policy where the child inherits the parent's rules and cannot remove them, and a spoke route table whose default route to the firewall is added only when the firewall exists.">
+<!-- Generated by scripts/render_azure_diagram.py from the committed JSON spec beside this file. Do not hand-edit: regenerate.
+     Azure icons are official, used unmodified under Microsoft's icon terms, which permit use in architectural diagrams and documentation. -->
+<defs><marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2b3137"/></marker></defs>
+<rect x="0" y="0" width="1280" height="600" fill="#ffffff"/>
+<text x="28" y="34" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1f2933">Week 05 — two layers, split by what they cost</text>
+<rect x="40" y="90" width="1200" height="200" rx="4" fill="#ffffff" stroke="#b9c2cc" stroke-width="1.2"/>
+<text x="640.0" y="110" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#1f2933" text-anchor="middle">PERMANENT — about $0/hour, and later weeks attach to it</text>
+<rect x="40" y="330" width="1200" height="200" rx="4" fill="#ffffff" stroke="#b9c2cc" stroke-width="1.2"/>
+<text x="640.0" y="350" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#1f2933" text-anchor="middle">BILLABLE — $0.405/hour on Basic, deployed deliberately and destroyed the same day</text>
+<path d="M289.0,185.0 L631.0,185.0" fill="none" stroke="#2b3137" stroke-width="1.8" marker-end="url(#arw)"/>
+<text x="460" y="160" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="11" fill="#5b6670" text-anchor="middle">peering, one resource</text>
+<text x="460" y="172" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="11" fill="#5b6670" text-anchor="middle">per side</text>
+<path d="M689.0,185.0 L1021.0,185.0" fill="none" stroke="#2b3137" stroke-width="1.8" marker-end="url(#arw)"/>
+<text x="855" y="160" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="11" fill="#5b6670" text-anchor="middle">linked to BOTH, not</text>
+<text x="855" y="172" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="11" fill="#5b6670" text-anchor="middle">the hub alone</text>
+<path d="M631.0,425.0 L289.0,425.0" fill="none" stroke="#2b3137" stroke-width="1.8" marker-end="url(#arw)"/>
+<text x="460" y="400" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="11" fill="#5b6670" text-anchor="middle">child cannot remove</text>
+<text x="460" y="412" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="11" fill="#5b6670" text-anchor="middle">the parent's rules</text>
+<path d="M689.0,425.0 L1021.0,425.0" fill="none" stroke="#2b3137" stroke-width="1.8" marker-end="url(#arw)"/>
+<text x="855" y="400" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="11" fill="#5b6670" text-anchor="middle">0.0.0.0/0 added only</text>
+<text x="855" y="412" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="11" fill="#5b6670" text-anchor="middle">with the firewall</text>
+<g transform="translate(237.0,162.0) scale(2.555556)"><defs><linearGradient id="n0i2" x1="9.88" y1="8.59" x2="11.52" y2="10.23" gradientTransform="translate(2.03 -0.4) rotate(-0.08)" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#86d633" /><stop offset="1" stop-color="#5e9624" /></linearGradient><linearGradient id="n0i0" x1="6.18" y1="8.59" x2="7.81" y2="10.23" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#86d633" /><stop offset="1" stop-color="#5e9624" /></linearGradient><linearGradient id="n0i1" x1="2.48" y1="8.59" x2="4.11" y2="10.23" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#86d633" /><stop offset="1" stop-color="#5e9624" /></linearGradient></defs><title>Icon-networking-61</title><circle cx="12.74" cy="8.99" r="1.16" fill="url(#n0i2)" /><circle cx="9.04" cy="9" r="1.16" fill="url(#n0i0)" /><circle cx="5.34" cy="9" r="1.16" fill="url(#n0i1)" /><path d="M2.61,7.28h.94a.3.3,0,0,1,.3.3v6.94a.6.6,0,0,1-.6.6H2.31a0,0,0,0,1,0,0V7.58a.3.3,0,0,1,.3-.3Z" transform="translate(13.18 16.93) rotate(134.92)" fill="#50e6ff" /><path d="M2.56,2.91H3.5a.3.3,0,0,1,.3.3v7.43a0,0,0,0,1,0,0H2.86a.6.6,0,0,1-.6-.6V3.21a.3.3,0,0,1,.3-.3Z" transform="translate(5.66 -0.16) rotate(44.92)" fill="#1490df" /><path d="M14.15,7.28h.94a.6.6,0,0,1,.6.6v6.94a.3.3,0,0,1-.3.3h-.94a.3.3,0,0,1-.3-.3V7.28a0,0,0,0,1,0,0Z" transform="translate(12.32 -7.28) rotate(45.08)" fill="#50e6ff" /><path d="M14.81,2.91h.94a0,0,0,0,1,0,0v7.43a.3.3,0,0,1-.3.3H14.5a.3.3,0,0,1-.3-.3V3.51a.6.6,0,0,1,.6-.6Z" transform="translate(30.36 0.99) rotate(135.08)" fill="#1490df" /></g>
+<text x="260" y="224.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">vnet-hub</text>
+<text x="260" y="238.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">10.0.0.0/16</text>
+<g transform="translate(637.0,162.0) scale(2.555556)"><defs><linearGradient id="n1i2" x1="9.88" y1="8.59" x2="11.52" y2="10.23" gradientTransform="translate(2.03 -0.4) rotate(-0.08)" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#86d633" /><stop offset="1" stop-color="#5e9624" /></linearGradient><linearGradient id="n1i0" x1="6.18" y1="8.59" x2="7.81" y2="10.23" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#86d633" /><stop offset="1" stop-color="#5e9624" /></linearGradient><linearGradient id="n1i1" x1="2.48" y1="8.59" x2="4.11" y2="10.23" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#86d633" /><stop offset="1" stop-color="#5e9624" /></linearGradient></defs><title>Icon-networking-61</title><circle cx="12.74" cy="8.99" r="1.16" fill="url(#n1i2)" /><circle cx="9.04" cy="9" r="1.16" fill="url(#n1i0)" /><circle cx="5.34" cy="9" r="1.16" fill="url(#n1i1)" /><path d="M2.61,7.28h.94a.3.3,0,0,1,.3.3v6.94a.6.6,0,0,1-.6.6H2.31a0,0,0,0,1,0,0V7.58a.3.3,0,0,1,.3-.3Z" transform="translate(13.18 16.93) rotate(134.92)" fill="#50e6ff" /><path d="M2.56,2.91H3.5a.3.3,0,0,1,.3.3v7.43a0,0,0,0,1,0,0H2.86a.6.6,0,0,1-.6-.6V3.21a.3.3,0,0,1,.3-.3Z" transform="translate(5.66 -0.16) rotate(44.92)" fill="#1490df" /><path d="M14.15,7.28h.94a.6.6,0,0,1,.6.6v6.94a.3.3,0,0,1-.3.3h-.94a.3.3,0,0,1-.3-.3V7.28a0,0,0,0,1,0,0Z" transform="translate(12.32 -7.28) rotate(45.08)" fill="#50e6ff" /><path d="M14.81,2.91h.94a0,0,0,0,1,0,0v7.43a.3.3,0,0,1-.3.3H14.5a.3.3,0,0,1-.3-.3V3.51a.6.6,0,0,1,.6-.6Z" transform="translate(30.36 0.99) rotate(135.08)" fill="#1490df" /></g>
+<text x="660" y="224.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">vnet-spoke</text>
+<text x="660" y="238.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">10.1.0.0/16</text>
+<g transform="translate(1027.0,162.0) scale(2.555556)"><defs><radialGradient id="n2i0" cx="-6811.4" cy="6729.69" r="17" gradientTransform="matrix(0.5, 0, 0, -0.5, 3414.91, 3374.05)" gradientUnits="userSpaceOnUse"><stop offset="0.18" stop-color="#5ea0ef" /><stop offset="1" stop-color="#0078d4" /></radialGradient></defs><title>Icon-networking-64</title><path id="n2i1" d="M14.21,15.72A8.5,8.5,0,0,1,3.79,2.28l.09-.06a8.5,8.5,0,0,1,10.33,13.5" fill="url(#n2i0)" /><path d="M9,1.31A7.69,7.69,0,1,0,16.69,9,7.7,7.7,0,0,0,9,1.31ZM14.15,3.9A7.37,7.37,0,0,1,12,4.7,8.83,8.83,0,0,0,10.75,2,7.2,7.2,0,0,1,14.15,3.9ZM9,1.74a6.59,6.59,0,0,1,1.09.09h0a7.48,7.48,0,0,1,1.53,3,15.12,15.12,0,0,1-5.45,0A7.38,7.38,0,0,1,7.68,1.89l0,0A7.34,7.34,0,0,1,9,1.74ZM7,2A8.72,8.72,0,0,0,5.73,4.68a5.58,5.58,0,0,1-1.9-.77A7.35,7.35,0,0,1,7,2ZM3.72,14a5.27,5.27,0,0,1,1.78-.76,7.08,7.08,0,0,0,1.35,2.72A7.25,7.25,0,0,1,3.72,14Zm6.41,2.2A7.08,7.08,0,0,1,9,16.26a6.83,6.83,0,0,1-1.44-.15l0,0a6,6,0,0,1-1.67-3,14.73,14.73,0,0,1,5.88,0,6,6,0,0,1-1.69,3Zm.73-.16a7.13,7.13,0,0,0,1.38-2.8,6.68,6.68,0,0,1,2,.83A7.13,7.13,0,0,1,10.86,16Zm1.48-3.22c.08-.36.15-.73.2-1.12l-.46.11c-.05.31-.1.62-.17.91a15.23,15.23,0,0,0-6.09,0c-.07-.27-.12-.56-.17-.86a.28.28,0,0,1,0-.09l-.46-.13a2.36,2.36,0,0,0,0,.28c0,.32.11.62.17.91a5.9,5.9,0,0,0-2,.85,7.24,7.24,0,0,1,.11-9.4,6.29,6.29,0,0,0,2.08.86c-.07.24-.13.5-.18.76s0,.25-.08.37l.47-.11,0-.17c.06-.26.12-.51.19-.75A14.89,14.89,0,0,0,9,5.48a15,15,0,0,0,2.78-.26c.07.27.14.56.2.85l.46.11q-.11-.54-.24-1a7.73,7.73,0,0,0,2.3-.91,7.22,7.22,0,0,1,.06,9.49A7.28,7.28,0,0,0,12.34,12.79Z" fill="#5ea0ef" /><path d="M3.69,7a7.92,7.92,0,0,1,1.16-.08,2.44,2.44,0,0,1,1.71.52A2,2,0,0,1,7.15,8.9a2.21,2.21,0,0,1-.61,1.64,2.6,2.6,0,0,1-1.86.61,9.17,9.17,0,0,1-1-.05Zm.55,3.73a4,4,0,0,0,.55,0A1.62,1.62,0,0,0,6.58,8.92,1.5,1.5,0,0,0,4.87,7.3a3.17,3.17,0,0,0-.63,0Z" fill="#fff" /><path d="M7.86,11.11V6.9h.59L9.8,9a12.18,12.18,0,0,1,.76,1.37h0c-.05-.56-.06-1.07-.06-1.73V6.9H11v4.21h-.55L9.13,9c-.29-.47-.57-1-.79-1.4h0c0,.53,0,1,0,1.74v1.8Z" fill="#fff" /><path d="M11.89,10.45a2,2,0,0,0,1,.27c.56,0,.88-.29.88-.72s-.22-.62-.79-.83-1.12-.6-1.12-1.2a1.22,1.22,0,0,1,1.37-1.14,2,2,0,0,1,.93.2L14,7.48a1.63,1.63,0,0,0-.8-.2c-.58,0-.8.34-.8.63s.26.59.84.81,1.08.62,1.08,1.24-.48,1.21-1.48,1.21a2.16,2.16,0,0,1-1.07-.27Z" fill="#fff" /></g>
+<text x="1050" y="224.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">6 private DNS zones</text>
+<g transform="translate(237.0,402.0) scale(2.555556)"><defs><linearGradient id="n3i0" x1="9" y1="14.14" x2="9" y2="1.38" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#0078d4" /><stop offset="0.82" stop-color="#5ea0ef" /></linearGradient></defs><title>Icon-networking-84</title><path d="M18,10.14a4.06,4.06,0,0,0-3.51-3.89A5.1,5.1,0,0,0,9.24,1.38a5.23,5.23,0,0,0-5,3.41A4.82,4.82,0,0,0,0,9.43a4.9,4.9,0,0,0,5.07,4.71l.44,0h8.21a1.46,1.46,0,0,0,.22,0A4.1,4.1,0,0,0,18,10.14Z" fill="url(#n3i0)" /><path d="M14.29,11.19a.42.42,0,0,0-.42-.41H4.13a.42.42,0,0,0-.42.41v5a.42.42,0,0,0,.42.41h9.74a.42.42,0,0,0,.42-.41v-5Z" fill="#821010" /><rect x="4.3" y="11.36" width="2.87" height="1.27" fill="#e62323" /><rect x="7.6" y="11.36" width="2.87" height="1.27" fill="#ff7381" /><rect x="10.9" y="11.36" width="2.87" height="1.27" fill="#e62323" /><rect x="4.3" y="13.06" width="1.19" height="1.27" fill="#e62323" /><rect x="12.58" y="13.06" width="1.19" height="1.27" fill="#ff7381" /><rect x="5.92" y="13.06" width="2.87" height="1.27" fill="#ff7381" /><rect x="9.23" y="13.06" width="2.87" height="1.27" fill="#e62323" /><rect x="4.3" y="14.76" width="2.87" height="1.27" fill="#e62323" /><rect x="7.6" y="14.76" width="2.87" height="1.27" fill="#ff7381" /><rect x="10.9" y="14.76" width="2.87" height="1.27" fill="#e62323" /></g>
+<text x="260" y="464.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">Azure Firewall</text>
+<text x="260" y="478.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">Basic</text>
+<g transform="translate(637.0,402.0) scale(2.555556)"><g id="n4i0"><g><path d="M6,10.58V8.63H16.35V3.11a.64.64,0,0,0-.64-.64H.64A.64.64,0,0,0,0,3.11v7.75a.64.64,0,0,0,.64.64H9v-.92ZM7.85,8H3.42V6H7.85ZM13,8H8.53V6H13Zm2.59,0H13.71V6h1.84ZM11.12,3.37h4.43v2H11.12ZM6,3.37h4.43v2H6ZM.9,3.37H5.34v2H.9ZM.9,6H2.75V8H.9Zm4.44,4.58H.9V8.63H5.34Z" fill="#821010" /><rect x="0.9" y="3.37" width="4.43" height="1.96" fill="#e62323" /><rect x="6.01" y="3.37" width="4.43" height="1.96" fill="#ff7381" /><rect x="11.12" y="3.37" width="4.43" height="1.96" fill="#e62323" /><rect x="0.9" y="6" width="1.84" height="1.96" fill="#e62323" /><rect x="13.71" y="6" width="1.84" height="1.96" fill="#ff7381" /><rect x="3.42" y="6" width="4.43" height="1.96" fill="#ff7381" /><rect x="8.53" y="6" width="4.43" height="1.96" fill="#e62323" /><rect x="0.9" y="8.63" width="4.43" height="1.96" fill="#e62323" /><path d="M9,8.87a.25.25,0,0,1,.26-.24H6v1.95H9V8.88Z" fill="#ff7381" /><path d="M18,8.88v.95H9v5.44a.27.27,0,0,0,.28.26h8.41a.28.28,0,0,0,.29-.26V8.88ZM9.72,11.21a.37.37,0,1,1,.37.37A.38.38,0,0,1,9.72,11.21Zm.37,3.36a.37.37,0,1,1,.37-.37A.38.38,0,0,1,10.09,14.57Zm0-1.58a.38.38,0,0,1-.37-.37.37.37,0,0,1,.74,0A.38.38,0,0,1,10.09,13ZM17,14.35c0,.07-.1.13-.22.13H11.23c-.12,0-.22-.06-.22-.13V14c0-.06.1-.12.22-.12h5.55c.12,0,.22.06.22.12Zm0-1.58c0,.07-.1.13-.22.13H11.23c-.12,0-.22-.06-.22-.13v-.31c0-.07.1-.12.22-.12h5.55c.12,0,.22.05.22.12Zm0-1.41c0,.07-.1.13-.22.13H11.23c-.12,0-.22-.06-.22-.13v-.31c0-.06.1-.12.22-.12h5.55c.12,0,.22.06.22.12Z" fill="#e6e6e6" /><path d="M9.29,8.62h0A.25.25,0,0,0,9,8.87H9v.95h9V8.88h0a.26.26,0,0,0-.27-.24H9.29Z" fill="#666" /><path d="M16.78,12.34H11.23c-.12,0-.22.05-.22.12v.31c0,.07.1.13.22.13h5.55c.12,0,.22-.06.22-.13v-.31C17,12.39,16.9,12.34,16.78,12.34Z" fill="#666" /><path d="M16.78,10.93H11.23c-.12,0-.22.06-.22.12v.31c0,.07.1.13.22.13h5.55c.12,0,.22-.06.22-.13v-.31C17,11,16.9,10.93,16.78,10.93Z" fill="#666" /><path d="M16.78,13.92H11.23c-.12,0-.22.06-.22.12v.31c0,.07.1.13.22.13h5.55c.12,0,.22-.06.22-.13V14C17,14,16.9,13.92,16.78,13.92Z" fill="#666" /><circle cx="10.09" cy="11.21" r="0.37" fill="#666" /><circle cx="10.09" cy="12.62" r="0.37" fill="#666" /><circle cx="10.09" cy="14.2" r="0.37" fill="#666" /></g></g></g>
+<text x="660" y="464.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">Policy parent and</text>
+<text x="660" y="478.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">child</text>
+<g transform="translate(1027.0,402.0) scale(2.555556)"><defs><linearGradient id="n5i1" x1="10.56" y1="7.77" x2="10.56" y2="19.24" gradientUnits="userSpaceOnUse"><stop offset="0.22" stop-color="#32d4f5" /><stop offset="1" stop-color="#198ab3" /></linearGradient><linearGradient id="n5i0" x1="10.23" y1="1.63" x2="11.07" y2="12.04" gradientUnits="userSpaceOnUse"><stop offset="0.22" stop-color="#32d4f5" /><stop offset="1" stop-color="#198ab3" /></linearGradient></defs><title>Icon-networking-82</title><path d="M16.23,17.17A1.21,1.21,0,0,0,17.46,16V15.8c-.49-3.86-2.69-7-6.89-7s-6.48,2.66-6.91,7a1.24,1.24,0,0,0,1.1,1.36H16.23Z" fill="url(#n5i1)" /><path d="M10.57,9.71a3.86,3.86,0,0,1-2.1-.61l2.08,5.42,2.06-5.39A3.83,3.83,0,0,1,10.57,9.71Z" fill="#fff" opacity="0.8" /><circle cx="10.57" cy="5.84" r="3.87" fill="url(#n5i0)" /><path d="M6,5.88V1A.16.16,0,0,0,5.84.83H4.57A.17.17,0,0,0,4.39,1V5.71a.18.18,0,0,1-.17.17H3.1A.12.12,0,0,1,3,5.76V4.45a.11.11,0,0,0-.19-.08L.59,6.57a.16.16,0,0,0,0,.24L2.79,9A.11.11,0,0,0,3,8.93V7.61A.11.11,0,0,1,3.1,7.5H5.84A.17.17,0,0,0,6,7.33V5.88Z" fill="#0078d4" /></g>
+<text x="1050" y="464.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">rt-spoke default</text>
+<text x="1050" y="478.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">route</text>
 </svg>

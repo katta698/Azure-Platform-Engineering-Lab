@@ -230,6 +230,31 @@ def render(spec: dict) -> str:
                 f"node {n.get('id')} has no label. Microsoft's icon guidance is "
                 f"to include the product name near the icon, so this is an error."
             )
+
+        # A CARD, for things Microsoft does not ship an icon for.
+        #
+        # HCP Terraform, GitHub Actions, an ARM template, a shell script.
+        # The icon terms forbid using a Microsoft product icon to stand for
+        # something that is not that product, and there is no generic glyph
+        # to reach for -- so these are drawn as a plain labelled box rather
+        # than by borrowing a logo that would be wrong.
+        if not n.get("icon"):
+            lines_ = wrap(n["label"], 22)
+            w = n.get("w", 200)
+            h = 26 + len(lines_) * 17
+            cx, cy = n["x"] - w / 2, n["y"] - h / 2
+            out.append(
+                f'<rect x="{cx}" y="{cy}" width="{w}" height="{h}" rx="5" '
+                f'fill="#ffffff" stroke="{GROUP_LINE}" stroke-width="1.3"/>'
+            )
+            for i2, line in enumerate(lines_):
+                out.append(
+                    f'<text x="{n["x"]}" y="{cy + 22 + i2 * 17}" {FONT} '
+                    f'font-size="12.5" fill="{INK}" text-anchor="middle">'
+                    f'{escape(line)}</text>'
+                )
+            continue
+
         inner, vb = load_icon(n["icon"], f"n{idx}")
         s = ICON_PX / vb                      # uniform. never anything else.
         ix, iy = n["x"] - ICON_PX / 2, n["y"] - ICON_PX / 2
@@ -268,14 +293,54 @@ def trim_endpoints(pts, a, b):
         dist = (dx * dx + dy * dy) ** 0.5 or 1
         return (round(x1 + dx / dist * amount, 1), round(y1 + dy / dist * amount, 1))
 
-    base = ICON_PX / 2 + 6
     pts = list(pts)
 
+    def radius(node, vertical):
+        """How far back to stop, for this node's actual drawn shape.
+
+        A CARD has no icon and no caption underneath -- its label is inside
+        the box -- so the connector must stop at the box edge, not at an icon
+        radius it does not have. Without this the line is drawn under the
+        card's white fill and only LOOKS right, which breaks the moment a
+        card is given a transparent background.
+        """
+        if not node.get("icon"):
+            w = node.get("w", 200)
+            lines = len(wrap(node["label"], 22))
+            h = 26 + lines * 17
+            return (h / 2 if vertical else w / 2) + 6
+        return ICON_PX / 2 + 6
+
+    def clear_label(node, p, q):
+        """Pad far enough that the edge clears the node's caption VERTICALLY.
+
+        The caption hangs below the icon, so what has to be cleared is a
+        vertical distance. On a diagonal edge, padding by that distance ALONG
+        THE LINE only moves down by pad*sin(theta) and the line still cuts
+        through the words -- which is how week 10's agent edges were drawn
+        through "frontend - public". Scale by dist/|dy| so the vertical
+        component is the one that clears.
+        """
+        need = ICON_PX / 2 + label_block(node)
+        dx, dy = q[0] - p[0], q[1] - p[1]
+        dist = (dx * dx + dy * dy) ** 0.5 or 1
+        if abs(dy) < 1e-6:
+            return need
+        return min(need * dist / abs(dy), dist * 0.45)
+
     leaves_downward = pts[1][1] > pts[0][1]
-    start_pad = ICON_PX / 2 + label_block(a) if leaves_downward else base
+    start_vertical = abs(pts[1][1] - pts[0][1]) > abs(pts[1][0] - pts[0][0])
+    if a.get("icon") and leaves_downward:
+        start_pad = clear_label(a, pts[0], pts[1])
+    else:
+        start_pad = radius(a, start_vertical)
 
     arrives_from_below = pts[-2][1] > pts[-1][1]
-    end_pad = ICON_PX / 2 + label_block(b) if arrives_from_below else base
+    end_vertical = abs(pts[-2][1] - pts[-1][1]) > abs(pts[-2][0] - pts[-1][0])
+    if b.get("icon") and arrives_from_below:
+        end_pad = clear_label(b, pts[-1], pts[-2])
+    else:
+        end_pad = radius(b, end_vertical)
 
     pts[0] = pull(pts[0], pts[1], start_pad)
     pts[-1] = pull(pts[-1], pts[-2], end_pad)

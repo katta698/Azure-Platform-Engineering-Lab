@@ -1,103 +1,26 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 700" width="880" height="700" role="img" aria-label="Week 4 subscription vending: four operations across three APIs, the two stages, and the decommission path">
-  <defs>
-    <style>
-      .t    { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-      .hdr  { font-size: 13px; font-weight: 700; fill: #1f2933; }
-      .lbl  { font-size: 12px; fill: #1f2933; }
-      .sm   { font-size: 11px; fill: #52606d; }
-      .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; fill: #1f2933; }
-      .box  { fill: #ffffff; stroke: #c3cbd5; stroke-width: 1.2; }
-      .band { fill: #f5f7fa; stroke: #dbe1e8; stroke-width: 1; }
-      .amber{ fill: #fdf6e3; stroke: #e0c068; stroke-width: 1.2; }
-      .red  { fill: #fdf1f1; stroke: #d9a2a2; stroke-width: 1.2; }
-      .arrow{ stroke: #7b8794; stroke-width: 1.4; fill: none; }
-      .no   { fill: #a4262c; }
-      .ok   { fill: #1b6e3c; }
-    </style>
-    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M0,0 L10,5 L0,10 z" fill="#7b8794"/>
-    </marker>
-  </defs>
-
-  <!-- Row 1: the request -->
-  <text class="t hdr" x="24" y="28">Vending is four operations across three APIs, not one</text>
-
-  <rect class="box" x="24" y="40" width="160" height="72" rx="6"/>
-  <text class="t lbl" x="40" y="64">the request</text>
-  <text class="t sm"  x="40" y="84">landing zone name,</text>
-  <text class="t sm"  x="40" y="100">owner, budget</text>
-
-  <line class="arrow" x1="186" y1="76" x2="238" y2="76" marker-end="url(#a)"/>
-
-  <rect class="amber" x="240" y="40" width="180" height="72" rx="6"/>
-  <text class="t hdr" x="256" y="64">1. create</text>
-  <text class="t sm"  x="256" y="84">Subscription Alias API</text>
-  <text class="t sm"  x="256" y="100">tenant-level &#183; irreversible</text>
-
-  <line class="arrow" x1="422" y1="76" x2="468" y2="76" marker-end="url(#a)"/>
-
-  <rect class="amber" x="470" y="40" width="180" height="72" rx="6"/>
-  <text class="t hdr" x="486" y="64">2. place</text>
-  <text class="t sm"  x="486" y="84">Management Groups API</text>
-  <text class="t sm no" x="486" y="100">a SEPARATE call</text>
-
-  <line class="arrow" x1="652" y1="76" x2="698" y2="76" marker-end="url(#a)"/>
-
-  <rect class="box" x="700" y="40" width="156" height="72" rx="6"/>
-  <text class="t hdr" x="716" y="64">3. budget</text>
-  <text class="t hdr" x="716" y="88">4. grant</text>
-  <text class="t sm"  x="716" y="104">Consumption &#183; RBAC</text>
-
-  <text class="t sm" x="240" y="134">The alias API creates every subscription under the Tenant Root Group and does not move it. Create without place and you get a</text>
-  <text class="t sm" x="240" y="150">subscription that is billed, healthy and inherits nothing &#8212; visible only when something that should have been stopped is not.</text>
-
-  <!-- Row 2: the two stages -->
-  <text class="t hdr" x="24" y="196">One payload, two stages</text>
-  <rect class="band" x="24" y="208" width="832" height="150" rx="6"/>
-
-  <rect class="box" x="44" y="228" width="376" height="112" rx="6"/>
-  <text class="t lbl" x="60" y="250">deploy.sh config   &#8212;  the repeatable one</text>
-  <text class="t sm"  x="60" y="272">vends onto a subscription that already exists</text>
-  <text class="t sm"  x="60" y="292">steps 2, 3, 4. No alias call.</text>
-  <text class="t sm ok" x="60" y="316">tears down completely</text>
-
-  <rect class="box" x="460" y="228" width="376" height="112" rx="6"/>
-  <text class="t lbl" x="476" y="250">deploy.sh vend   &#8212;  the one-way one</text>
-  <text class="t sm"  x="476" y="272">creates a subscription, then does 2, 3, 4</text>
-  <text class="t mono" x="476" y="292">alias created in 2m16s</text>
-  <text class="t sm no" x="476" y="316">cannot be deleted today</text>
-
-  <!-- Row 3: the lifecycle problem -->
-  <text class="t hdr" x="24" y="396">Why teardown is the hard half</text>
-
-  <rect class="red" x="24" y="408" width="832" height="96" rx="6"/>
-  <text class="t lbl" x="44" y="432">A vended subscription is the one object this lab can create and cannot delete.</text>
-  <text class="t sm"  x="44" y="456">cancel  &#8594;  billing stops immediately</text>
-  <text class="t sm"  x="44" y="476">delete  &#8594;  the option does not appear for 3 DAYS; Azure removes it automatically after 90</text>
-  <text class="t sm"  x="44" y="496">so &#8220;cleanup&#8221; for a subscription means decommission, not delete</text>
-
-  <!-- Row 4: decommission path -->
-  <text class="t hdr" x="24" y="542">Decommission, in the order that matters</text>
-
-  <rect class="box" x="24" y="554" width="250" height="76" rx="6"/>
-  <text class="t lbl" x="40" y="578">1. move</text>
-  <text class="t sm"  x="40" y="598">to mg-decommissioned</text>
-  <text class="t sm"  x="40" y="616">while it still accepts writes</text>
-
-  <line class="arrow" x1="276" y1="592" x2="318" y2="592" marker-end="url(#a)"/>
-
-  <rect class="amber" x="320" y="554" width="266" height="76" rx="6"/>
-  <text class="t lbl" x="336" y="578">2. prove the deny</text>
-  <text class="t sm"  x="336" y="598">attempt a deployment there</text>
-  <text class="t sm"  x="336" y="616">the deny-all should refuse it</text>
-
-  <line class="arrow" x1="588" y1="592" x2="630" y2="592" marker-end="url(#a)"/>
-
-  <rect class="box" x="632" y="554" width="224" height="76" rx="6"/>
-  <text class="t lbl" x="648" y="578">3. cancel</text>
-  <text class="t sm"  x="648" y="598">billing stops immediately</text>
-  <text class="t sm"  x="648" y="616">the object remains</text>
-
-  <text class="t sm" x="24" y="656">Move before cancel: a cancelled subscription is read-only, so the move has to happen while writes are still accepted. The move is</text>
-  <text class="t sm" x="24" y="674">also the actual control &#8212; a subscription left in the landing zone tree with &#8220;we will cancel it next week&#8221; attached is one somebody deploys into.</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 340" width="1280" height="340" role="img" aria-label="Architecture diagram. A request carrying a landing zone name, owner and budget goes to the Subscription Alias API, which creates a subscription at tenant level and is irreversible. The alias API leaves every subscription under the Tenant Root Group, so a separate call to the Management Groups API places it at mg-lz-dev. Only then are a consumption budget and a role assignment applied. Create without place and the result is a subscription that is billed, healthy, and inherits nothing.">
+<!-- Generated by scripts/render_azure_diagram.py from the committed JSON spec beside this file. Do not hand-edit: regenerate.
+     Azure icons are official, used unmodified under Microsoft's icon terms, which permit use in architectural diagrams and documentation. -->
+<defs><marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2b3137"/></marker></defs>
+<rect x="0" y="0" width="1280" height="340" fill="#ffffff"/>
+<text x="28" y="34" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1f2933">Week 04 — vending is four operations across three APIs, not one</text>
+<rect x="400" y="95" width="840" height="200" rx="4" fill="#ffffff" stroke="#b9c2cc" stroke-width="1.2"/>
+<text x="820.0" y="115" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#1f2933" text-anchor="middle">four operations, three APIs — and the order is the whole lesson</text>
+<path d="M286.0,195.0 L531.0,195.0" fill="none" stroke="#2b3137" stroke-width="1.8" marker-end="url(#arw)"/>
+<text x="340" y="181" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="11" fill="#5b6670" text-anchor="middle">Alias API ·</text>
+<text x="340" y="193" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="11" fill="#5b6670" text-anchor="middle">irreversible</text>
+<path d="M589.0,195.0 L791.0,195.0" fill="none" stroke="#2b3137" stroke-width="1.8" marker-end="url(#arw)"/>
+<text x="690" y="181" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="11" fill="#5b6670" text-anchor="middle">a SEPARATE call</text>
+<path d="M849.0,195.0 L1051.0,195.0" fill="none" stroke="#2b3137" stroke-width="1.8" marker-end="url(#arw)"/>
+<text x="950" y="181" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="11" fill="#5b6670" text-anchor="middle">only once placed</text>
+<rect x="60.0" y="165.0" width="220" height="60" rx="5" fill="#ffffff" stroke="#b9c2cc" stroke-width="1.3"/>
+<text x="170" y="187.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">the request — name,</text>
+<text x="170" y="204.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">owner, budget</text>
+<g transform="translate(537.0,172.0) scale(2.555556)"><defs><radialGradient id="n1i2" cx="-36.63" cy="17.12" r="11.18" gradientTransform="translate(41.88 -7.4) scale(0.94 0.94)" gradientUnits="userSpaceOnUse"><stop offset="0.27" stop-color="#ffd70f" /><stop offset="0.49" stop-color="#ffcb12" /><stop offset="0.88" stop-color="#feac19" /><stop offset="1" stop-color="#fea11b" /></radialGradient></defs><title>Icon-general-2</title><path id="n1i3" d="M13.56,7.19a2.07,2.07,0,0,0,0-2.93h0L10,.69a2.06,2.06,0,0,0-2.92,0h0L3.52,4.26a2.09,2.09,0,0,0,0,2.93l3,3a.61.61,0,0,1,.17.41v5.52a.7.7,0,0,0,.2.5l1.35,1.35a.45.45,0,0,0,.66,0l1.31-1.31h0l.77-.77a.26.26,0,0,0,0-.38l-.55-.56a.29.29,0,0,1,0-.42l.55-.56a.26.26,0,0,0,0-.38L10.4,13a.28.28,0,0,1,0-.41L11,12a.26.26,0,0,0,0-.38l-.77-.78v-.28Zm-5-5.64A1.18,1.18,0,1,1,7.37,2.73,1.17,1.17,0,0,1,8.54,1.55Z" fill="url(#n1i2)" /><path id="n1i1" d="M7.62,16.21h0A.25.25,0,0,0,8,16V11.55a.27.27,0,0,0-.11-.22h0a.25.25,0,0,0-.39.22V16A.27.27,0,0,0,7.62,16.21Z" fill="#ff9300" opacity="0.75" /><rect id="n1i4" x="5.69" y="5.45" width="5.86" height="0.69" rx="0.32" fill="#ff9300" opacity="0.75" /><rect id="n1i0" x="5.69" y="6.57" width="5.86" height="0.69" rx="0.32" fill="#ff9300" opacity="0.75" /></g>
+<text x="560" y="234.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">Subscription</text>
+<text x="560" y="248.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">created</text>
+<g transform="translate(797.0,172.0) scale(2.555556)"><defs><linearGradient id="n2i1" x1="9" y1="2.95" x2="9" y2="6.34" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#c69aeb" /><stop offset="1" stop-color="#6f4bb2" /></linearGradient><linearGradient id="n2i0" x1="8.99" y1="6.76" x2="8.99" y2="9.22" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#54aef0" /><stop offset="1" stop-color="#1988d9" /></linearGradient></defs><title>Icon-general-11</title><g><polygon points="13.69 11.22 12.19 7.92 9 4.2 5.79 7.91 4.28 11.2 4.81 11.45 6.04 8.77 7.25 11.45 7.79 11.21 6.39 8.12 9 5.1 11.6 8.13 10.18 11.21 10.71 11.46 11.94 8.79 13.15 11.47 13.69 11.22" fill="#949494" /><circle cx="9" cy="4.65" r="1.69" fill="url(#n2i1)" /><path d="M6,6.76A1.23,1.23,0,1,1,4.82,8,1.23,1.23,0,0,1,6,6.76ZM10.72,8a1.22,1.22,0,0,0,1.22,1.22A1.23,1.23,0,1,0,10.72,8Z" fill="url(#n2i0)" /><g><g><circle cx="4.54" cy="11.32" r="0.97" fill="#37c2b1" /><circle cx="7.52" cy="11.33" r="0.97" fill="#37c2b1" /></g><g><circle cx="10.44" cy="11.34" r="0.97" fill="#37c2b1" /><circle cx="13.42" cy="11.35" r="0.97" fill="#37c2b1" /></g></g><path d="M.5,15.22a.16.16,0,0,0,.08.14L1.73,16l2,1.14a.18.18,0,0,0,.23-.06L4.57,16a.15.15,0,0,0-.06-.22L2.22,14.41a.16.16,0,0,1-.08-.14V3.73a.16.16,0,0,1,.08-.14L4.51,2.26A.15.15,0,0,0,4.57,2L3.92.89A.18.18,0,0,0,3.69.83L1.77,1.94l-1.19.7a.16.16,0,0,0-.08.14V15.22Z" fill="#949494" /><path d="M4.57,2,3.92.89A.18.18,0,0,0,3.75.81l-.08,0L1.75,1.94l-1.19.7a.1.1,0,0,0-.06,0h0a.24.24,0,0,0,0,.08l1.64,1a.16.16,0,0,1,.08-.14L4.51,2.26A.15.15,0,0,0,4.57,2Z" fill="#a3a3a3" /><path d="M4.57,16l-.65,1.15a.18.18,0,0,1-.17.08.12.12,0,0,1-.08,0L1.75,16.06l-1.19-.7a.1.1,0,0,1-.06,0h0a.24.24,0,0,1,0-.08l1.64-1a.16.16,0,0,0,.08.14l2.29,1.33A.16.16,0,0,1,4.57,16Z" fill="#a3a3a3" /><path d="M17.5,2.78a.16.16,0,0,0-.08-.14L16.27,2l-2-1.14a.18.18,0,0,0-.23.06L13.43,2a.15.15,0,0,0,.06.22l2.29,1.33a.16.16,0,0,1,.08.14V14.27a.16.16,0,0,1-.08.14l-2.29,1.33a.15.15,0,0,0-.06.22l.65,1.15a.18.18,0,0,0,.23.06l1.92-1.11,1.19-.7a.16.16,0,0,0,.08-.14V2.78Z" fill="#949494" /><path d="M13.43,16l.65,1.15a.18.18,0,0,0,.17.08l.08,0,1.92-1.11,1.19-.7a.1.1,0,0,0,.06,0h0a.24.24,0,0,0,0-.08l-1.64-1a.16.16,0,0,1-.08.14l-2.29,1.33A.15.15,0,0,0,13.43,16Z" fill="#a3a3a3" /><path d="M13.43,2,14.08.89a.18.18,0,0,1,.17-.08.12.12,0,0,1,.08,0l1.92,1.11,1.19.7a.1.1,0,0,1,.06,0h0a.24.24,0,0,1,0,.08l-1.64,1a.16.16,0,0,0-.08-.14L13.49,2.26A.16.16,0,0,1,13.43,2Z" fill="#a3a3a3" /></g></g>
+<text x="820" y="234.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">Placed at mg-lz-dev</text>
+<g transform="translate(1057.0,172.0) scale(2.555556)"><defs><radialGradient id="n3i1" cx="9.477" cy="9.576" r="7.889" gradientUnits="userSpaceOnUse"><stop offset="0.669" stop-color="#76bc2d" /><stop offset="0.787" stop-color="#70b22b" /><stop offset="0.985" stop-color="#5f9825" /><stop offset="1" stop-color="#5e9624" /></radialGradient></defs><title>MsPortalFx.base.images-11</title><g id="n3i0"><g><path d="M11.609,9.82h0A4.577,4.577,0,0,0,9.9,8.81V6.93a4.118,4.118,0,0,1,1.547.547.134.134,0,0,0,.134,0,.131.131,0,0,0,.068-.115V5.849a.134.134,0,0,0-.068-.116A4.064,4.064,0,0,0,9.9,5.343V4.449a.132.132,0,0,0-.133-.133H8.952a.132.132,0,0,0-.133.133V5.37a2.76,2.76,0,0,0-1.58.739,2.159,2.159,0,0,0-.669,1.6,2.147,2.147,0,0,0,.547,1.528,4.625,4.625,0,0,0,1.7,1.006v1.8a4.391,4.391,0,0,1-.968-.244,3.133,3.133,0,0,1-.919-.46.136.136,0,0,0-.139-.011.135.135,0,0,0-.072.119V13a.132.132,0,0,0,.071.118,4.667,4.667,0,0,0,2.027.529V14.7a.132.132,0,0,0,.133.132h.811A.132.132,0,0,0,9.9,14.7V13.6a2.883,2.883,0,0,0,1.65-.716,2.129,2.129,0,0,0,.619-1.588A2.071,2.071,0,0,0,11.609,9.82Zm-1.186,1.538v.01a.606.606,0,0,1-.527.638V10.685C10.242,10.876,10.419,11.1,10.423,11.358ZM8.313,7.615a.618.618,0,0,1,.506-.646V8.355A.873.873,0,0,1,8.313,7.615Z" fill="#76bc2d" /><circle cx="2.027" cy="8.496" r="1.527" fill="#f78d1e" /><circle cx="4.102" cy="3.932" r="1.527" fill="#f78d1e" /><path d="M11.636,1.891a7.742,7.742,0,0,0-.947-.2,1.512,1.512,0,0,1-.252,1.146A6.825,6.825,0,1,1,3.683,13.168l.6-.225a.132.132,0,0,0,.038-.226L2.172,10.945a.133.133,0,0,0-.216.081l-.448,2.747a.133.133,0,0,0,.178.146l.883-.332a8,8,0,1,0,9.067-11.7Z" fill="url(#n3i1)" /><circle cx="8.566" cy="1.928" r="1.527" fill="#f78d1e" /></g></g></g>
+<text x="1080" y="234.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">Budget and RBAC</text>
 </svg>

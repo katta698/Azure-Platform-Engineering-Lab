@@ -85,8 +85,8 @@ MEASURE_JS = """
     // rect over ZONE_AREA of the canvas; week 09's band is 20.3%, the content
     // boxes that genuinely clip their text are under 5%.
     if (b.width >= vb.width - 2 && b.height >= vb.height - 2) continue;
-    if (b.width * b.height > ZONE_AREA * vb.width * vb.height) continue;
-    rects.push({x: b.x, y: b.y, w: b.width, h: b.height, fill});
+    const isZone = b.width * b.height > ZONE_AREA * vb.width * vb.height;
+    rects.push({x: b.x, y: b.y, w: b.width, h: b.height, fill, isZone});
   }
   // Connectors, sampled along their real geometry.
   //
@@ -131,10 +131,32 @@ def smallest_container(t, rects):
     my = t["y"] + t["h"] / 2
     best = None
     for r in rects:
+        if r.get("isZone"):
+            continue
         if r["x"] <= mx <= r["x"] + r["w"] and r["y"] <= my <= r["y"] + r["h"]:
             if best is None or r["w"] * r["h"] < best["w"] * best["h"]:
                 best = r
     return best
+
+
+def titled_rect(t, rects):
+    """The rect this text is the TITLE of, zone or panel.
+
+    A zone is excluded from ordinary containment, because a connector label
+    legitimately sits in the gap between zones. But its OWN title is not a
+    connector label -- it belongs to the box and has to fit inside it. Week
+    09's "Container Apps environment - Consumption plan, no hourly fee of its
+    own" hung ten pixels off both ends of its box and nothing saw it, because
+    the only rect that could have caught it was the one being skipped.
+
+    A title is centred on the rect horizontally and sits near its top.
+    """
+    tcx = t["x"] + t["w"] / 2
+    for r in rects:
+        rcx = r["x"] + r["w"] / 2
+        if abs(tcx - rcx) <= 6 and 0 <= (t["y"] - r["y"]) <= 34:
+            return r
+    return None
 
 
 def audit(page, svg_path: pathlib.Path):
@@ -157,6 +179,16 @@ def audit(page, svg_path: pathlib.Path):
                 (t["y"] + t["h"]) - (vb["y"] + vb["h"])), 1)
             problems.append(("OVERFLOW", f'"{label}" past the canvas edge by {over}px'))
             continue
+
+        title_of = titled_rect(t, rects)
+        if title_of:
+            out = round(max(title_of["x"] - t["x"],
+                            (t["x"] + t["w"]) - (title_of["x"] + title_of["w"])), 1)
+            if out > TOLERANCE:
+                problems.append(("TITLE-WIDE",
+                                 f'the box title "{label}" is {out}px wider '
+                                 f'than the box it names'))
+                continue
 
         box = smallest_container(t, rects)
         if box:

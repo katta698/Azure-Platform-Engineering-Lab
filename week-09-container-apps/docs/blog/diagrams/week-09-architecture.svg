@@ -1,94 +1,25 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520" width="900" height="520" role="img" aria-label="Week 09 Container Apps. A request from the internet arrives at HTTPS-only ingress on a container app in sub-lab-dev. The app runs between zero and three replicas, scaling on concurrent requests, and sits inside a Container Apps environment on the Consumption plan. When idle the app drops to zero replicas and bills nothing, measured at about ten minutes after the last request; the next request waits for a cold start. The environment sends two log categories through a diagnostic setting across a subscription boundary into week 08's Log Analytics workspace in sub-management, which this week reads but does not own.">
-  <defs>
-    <style>
-      .t    { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-      .hdr  { font-size: 13px; font-weight: 700; fill: #1f2933; }
-      .lbl  { font-size: 12px; fill: #1f2933; }
-      .sm   { font-size: 11px; fill: #52606d; }
-      .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 11px; fill: #1f2933; }
-      .box  { fill: #ffffff; stroke: #c3cbd5; stroke-width: 1.2; }
-      .live { fill: #f2f9f4; stroke: #8fbf9f; stroke-width: 1.3; }
-      .zero { fill: #f6f7f9; stroke: #b9c0c9; stroke-width: 1.3; stroke-dasharray: 5 3; }
-      .band { fill: #f5f7fa; stroke: #dbe1e8; stroke-width: 1; }
-      .own  { fill: #f7f5fb; stroke: #b3a8d1; stroke-width: 1.2; }
-      .flow { stroke: #4a7fb5; stroke-width: 1.8; fill: none; }
-      .logs { stroke: #6b5b9a; stroke-width: 1.6; fill: none; }
-      .ok   { fill: #1b6e3c; font-weight: 700; }
-      .cost { fill: #8a5a00; font-weight: 700; }
-    </style>
-    <marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M0,0 L10,5 L0,10 z" fill="#4a7fb5"/>
-    </marker>
-    <marker id="p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M0,0 L10,5 L0,10 z" fill="#6b5b9a"/>
-    </marker>
-  </defs>
-
-  <rect x="0" y="0" width="900" height="520" fill="#ffffff"/>
-  <text class="t hdr" x="24" y="28">Nothing runs until someone asks. The first person to ask pays for the wait.</text>
-
-  <!-- ── the request ── -->
-  <rect class="box" x="24" y="56" width="150" height="74" rx="6"/>
-  <text class="t hdr" x="38" y="80">A REQUEST</text>
-  <text class="t sm" x="38" y="100">from the internet,</text>
-  <text class="t sm" x="38" y="116">HTTPS only</text>
-
-  <path class="flow" d="M174,93 L252,93" marker-end="url(#b)"/>
-
-  <!-- ── sub-lab-dev band ── -->
-  <rect class="band" x="252" y="44" width="372" height="256" rx="8"/>
-  <text class="t hdr" x="268" y="66">sub-lab-dev</text>
-  <text class="t sm" x="268" y="84">mg-lz-dev — the workload is an application</text>
-
-  <!-- environment -->
-  <rect class="box" x="268" y="98" width="340" height="186" rx="6"/>
-  <text class="t hdr" x="284" y="120">CONTAINER APPS ENVIRONMENT</text>
-  <text class="t sm" x="284" y="138">Consumption plan — no hourly fee of its own</text>
-
-  <!-- the app -->
-  <rect class="live" x="284" y="152" width="150" height="76" rx="5"/>
-  <text class="t hdr" x="296" y="174">1 replica</text>
-  <text class="t sm" x="296" y="192">serving traffic</text>
-  <text class="t sm" x="296" y="208">0.25 vCPU / 0.5Gi</text>
-  <text class="t sm ok" x="296" y="222">billed</text>
-
-  <rect class="zero" x="448" y="152" width="146" height="76" rx="5"/>
-  <text class="t hdr" x="460" y="174">0 replicas</text>
-  <text class="t sm" x="460" y="192">after ~10 min idle</text>
-  <text class="t sm" x="460" y="208">nothing running</text>
-  <text class="t sm ok" x="460" y="222">$0.00</text>
-
-  <path class="flow" d="M434,178 L446,178" marker-end="url(#b)"/>
-  <text class="t sm" x="300" y="252">scales on CONCURRENT REQUESTS, 10 per replica, ceiling of 3</text>
-  <text class="t mono cost" x="300" y="270">first request after idle: 16.9s   (warm: 0.13s)</text>
-
-  <!-- ── logs across the boundary ── -->
-  <path class="logs" d="M608,190 L672,190" marker-end="url(#p)"/>
-  <text class="t sm" x="612" y="182">logs</text>
-
-  <rect class="own" x="672" y="44" width="204" height="256" rx="8"/>
-  <text class="t hdr" x="688" y="66">sub-management</text>
-  <text class="t sm" x="688" y="84">mg-management — platform</text>
-  <text class="t sm" x="688" y="100">telemetry</text>
-
-  <rect class="box" x="688" y="118" width="172" height="166" rx="6"/>
-  <text class="t hdr" x="702" y="140">WEEK 08's WORKSPACE</text>
-  <text class="t sm" x="702" y="160">read, never owned —</text>
-  <text class="t sm" x="702" y="176">a data source cannot</text>
-  <text class="t sm" x="702" y="192">be destroyed by this</text>
-  <text class="t sm" x="702" y="208">week's teardown</text>
-  <text class="t mono" x="702" y="232">ContainerAppConsoleLogs</text>
-  <text class="t mono" x="702" y="248">ContainerAppSystemLogs</text>
-  <text class="t sm" x="702" y="270">Dedicated tables</text>
-
-  <!-- ── the forced decision ── -->
-  <rect class="band" x="24" y="324" width="852" height="80" rx="8"/>
-  <text class="t hdr" x="40" y="348">WHY THE LOGS GO THE LONG WAY ROUND</text>
-  <text class="t lbl" x="40" y="370">The default log path wires the environment to a workspace using that workspace's SHARED KEY. Week 08 disabled local</text>
-  <text class="t lbl" x="40" y="388">authentication, so there is no key to hand over — the default cannot work here. A diagnostic setting authenticates as ARM instead.</text>
-
-  <text class="t sm" x="24" y="432">5 resources: resource group, user-assigned identity, environment, container app, diagnostic setting.</text>
-  <text class="t sm" x="24" y="450">The identity holds no password, because a managed identity cannot have one. It is the seam a private registry would use.</text>
-  <text class="t sm" x="24" y="468">Free each month per subscription: 180,000 vCPU-seconds, 360,000 GiB-seconds, 2 million requests. Health probes are not billed.</text>
-  <text class="t sm" x="24" y="486">Idle replicas bill at a reduced rate — but only if the floor is above zero. A floor of zero has no idle state to bill.</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 330" width="1280" height="330" role="img" aria-label="Architecture diagram. A request from the internet over HTTPS reaches a Container Apps environment on the Consumption plan, which has no hourly fee of its own. The app scales to zero after about ten minutes idle, so the first request after idle took 16.9 seconds against 0.13 seconds warm. Console and system logs leave the environment through a diagnostic setting that authenticates as ARM, because week 08 disabled local authentication on the destination and the default shared-key log path therefore cannot work. The logs land in week 08's Log Analytics workspace in another subscription, which this week reads and never owns.">
+<!-- Generated by scripts/render_azure_diagram.py from the committed JSON spec beside this file. Do not hand-edit: regenerate.
+     Azure icons are official, used unmodified under Microsoft's icon terms, which permit use in architectural diagrams and documentation. -->
+<defs><marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2b3137"/></marker></defs>
+<rect x="0" y="0" width="1280" height="330" fill="#ffffff"/>
+<text x="28" y="34" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="15" font-weight="700" fill="#1f2933">Week 09 — nothing runs until someone asks. The first person to ask pays for the wait.</text>
+<rect x="360" y="90" width="420" height="200" rx="4" fill="#ffffff" stroke="#b9c2cc" stroke-width="1.2"/>
+<text x="570.0" y="110" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#1f2933" text-anchor="middle">Container Apps environment — Consumption plan</text>
+<path d="M231.0,185.0 L541.0,185.0" fill="none" stroke="#2b3137" stroke-width="1.8" marker-end="url(#arw)"/>
+<text x="292" y="171" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="11" fill="#5b6670" text-anchor="middle">first after idle:</text>
+<text x="292" y="183" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="11" fill="#5b6670" text-anchor="middle">16.9s</text>
+<path d="M599.0,185.0 L851.0,185.0" fill="none" stroke="#2b3137" stroke-width="1.8" marker-end="url(#arw)"/>
+<text x="810" y="171" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="11" fill="#5b6670" text-anchor="middle">logs</text>
+<path d="M909.0,185.0 L1091.0,185.0" fill="none" stroke="#2b3137" stroke-width="1.8" marker-end="url(#arw)"/>
+<text x="1000" y="171" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="11" fill="#5b6670" text-anchor="middle">authenticates as ARM</text>
+<rect x="35.0" y="155.0" width="190" height="60" rx="5" fill="#ffffff" stroke="#b9c2cc" stroke-width="1.3"/>
+<text x="130" y="177.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">a request from the</text>
+<text x="130" y="194.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">internet, HTTPS only</text>
+<g transform="translate(547.0,162.0) scale(2.555556)"><defs><linearGradient id="n1i1" x1="8.798" y1="8.703" x2="14.683" y2="8.703" gradientUnits="userSpaceOnUse"><stop offset="0.001" stop-color="#773adc" /><stop offset="1" stop-color="#552f99" /></linearGradient><linearGradient id="n1i2" x1="5.764" y1="3.777" x2="5.764" y2="13.78" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#a67af4" /><stop offset="0.999" stop-color="#773adc" /></linearGradient></defs><g id="n1i3"><g><g><g><path d="M16.932,11.578a8.448,8.448,0,0,1-7.95,5.59,8.15,8.15,0,0,1-2.33-.33,2.133,2.133,0,0,0,.18-.83c.01,0,.03.01.04.01a7.422,7.422,0,0,0,2.11.3,7.646,7.646,0,0,0,6.85-4.28l.01-.01Z" fill="#32bedd" /><path d="M3.582,14.068a2.025,2.025,0,0,0-.64.56,8.6,8.6,0,0,1-1.67-2.44l1.04.23v.26a.6.6,0,0,0,.47.59l.14.03a6.136,6.136,0,0,0,.62.73Z" fill="#32bedd" /><path d="M12.352.958a2.28,2.28,0,0,0-.27.81c-.02-.01-.05-.02-.07-.03a7.479,7.479,0,0,0-3.03-.63,7.643,7.643,0,0,0-5.9,2.8l-.29.06a.6.6,0,0,0-.48.58v.46l-1.02.19A8.454,8.454,0,0,1,8.982.268,8.6,8.6,0,0,1,12.352.958Z" fill="#32bedd" /><path d="M16.872,5.7l-1.09-.38a6.6,6.6,0,0,0-.72-1.16c-.02-.03-.04-.05-.05-.07a2.083,2.083,0,0,0,.72-.45A7.81,7.81,0,0,1,16.872,5.7Z" fill="#32bedd" /><path d="M10.072,11.908l2.54.56L8.672,14.1c-.02,0-.03.01-.05.01a.154.154,0,0,1-.15-.15V3.448a.154.154,0,0,1,.15-.15.09.09,0,0,1,.05.01l4.46,1.56-3.05.57a.565.565,0,0,0-.44.54v5.4A.537.537,0,0,0,10.072,11.908Z" fill="#fff" /><g><g id="n1i4"><path d="M1.1,5.668l1.21-.23v6.55l-1.23-.27-.99-.22a.111.111,0,0,1-.09-.12v-5.4a.12.12,0,0,1,.09-.12Z" fill="#a67af4" /></g><g><g id="n1i0"><g><path d="M10.072,11.908l2.54.56L8.672,14.1c-.02,0-.03.01-.05.01a.154.154,0,0,1-.15-.15V3.448a.154.154,0,0,1,.15-.15.09.09,0,0,1,.05.01l4.46,1.56-3.05.57a.565.565,0,0,0-.44.54v5.4A.537.537,0,0,0,10.072,11.908Z" fill="url(#n1i1)" /><path d="M8.586,3.3,2.878,4.378a.177.177,0,0,0-.14.175V12.68a.177.177,0,0,0,.137.174L8.581,14.1a.176.176,0,0,0,.21-.174V3.478A.175.175,0,0,0,8.619,3.3Z" fill="url(#n1i2)" /></g></g><polygon points="5.948 4.921 5.948 12.483 7.934 12.814 7.934 4.564 5.948 4.921" fill="#b796f9" opacity="0.5" /><polygon points="3.509 5.329 3.509 11.954 5.238 12.317 5.238 5.031 3.509 5.329" fill="#b796f9" opacity="0.5" /></g></g></g><path d="M16,2.048a1.755,1.755,0,1,1-1.76-1.76A1.756,1.756,0,0,1,16,2.048Z" fill="#32bedd" /><circle cx="4.65" cy="15.973" r="1.759" fill="#32bedd" /></g><path d="M18,6.689v3.844a.222.222,0,0,1-.133.2l-.766.316-3.07,1.268-.011,0a.126.126,0,0,1-.038,0,.1.1,0,0,1-.1-.1V5.234a.1.1,0,0,1,.054-.088l0,0,.019,0a.031.031,0,0,1,.019,0,.055.055,0,0,1,.034.008l.011,0,.012,0L17.05,6.2l.8.282A.213.213,0,0,1,18,6.689Z" fill="#773adc" /><path d="M13.959,5.14l-3.8.715a.118.118,0,0,0-.093.117v5.409a.118.118,0,0,0,.091.116l3.8.831a.115.115,0,0,0,.137-.09.109.109,0,0,0,0-.026V5.256a.117.117,0,0,0-.115-.118A.082.082,0,0,0,13.959,5.14Z" fill="#a67af4" /></g></g></g>
+<text x="570" y="224.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">1 replica, then 0</text>
+<g transform="translate(857.0,162.0) scale(2.555556)"><defs><linearGradient id="n2i0" x1="8.15" y1="17.49" x2="8.15" y2="2.09" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#5e9624" /><stop offset="0.31" stop-color="#69a828" /><stop offset="0.93" stop-color="#86d633" /></linearGradient></defs><path d="M15.2.5H3.59a.57.57,0,0,0-.44.2L1.93,2.11,15.31,15.67l-2,1.83h1a.71.71,0,0,0,.46-.17l1.17-1.07a.59.59,0,0,0,.19-.43V1.33A.81.81,0,0,0,15.2.5Z" fill="#5e9624" /><path d="M2.91,2.1l.74-.84A.5.5,0,0,1,4,1.08H14.88a.52.52,0,0,1,.52.52V15.38a.52.52,0,0,1-.17.38l-1.15,1.06" fill="#fff" /><path d="M14,2.09H2a.06.06,0,0,0-.05.06v15a.38.38,0,0,0,.38.38H14a.38.38,0,0,0,.38-.38V2.48A.38.38,0,0,0,14,2.09Z" fill="url(#n2i0)" /><path d="M12.5,7.82a.37.37,0,0,0-.37-.39H10.28a.16.16,0,0,0-.15.09L9.36,8.9,8.1,6.35,6.93,10l-1-2.6L4.61,9.84a.18.18,0,0,1-.15.1h-.6a.37.37,0,0,0-.37.33h0a.37.37,0,0,0,.37.41h1a.18.18,0,0,0,.16-.1L5.8,9.11l1.21,3L8.24,8.25l1.08,2.19,1.21-2.17a.16.16,0,0,1,.15-.09h1.45a.37.37,0,0,0,.37-.36Z" fill="#fff" /></g>
+<text x="880" y="224.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">Diagnostic setting</text>
+<g transform="translate(1097.0,162.0) scale(2.555556)"><defs><linearGradient id="n3i0" x1="5.23" y1="17.45" x2="5.23" y2="8.09" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#1988d9" /><stop offset="0.9" stop-color="#54aef0" /></linearGradient><linearGradient id="n3i1" x1="11.5" y1="12.45" x2="11.5" y2="0.55" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#198ab3" /><stop offset="0.01" stop-color="#198bb4" /><stop offset="0.44" stop-color="#27b2d7" /><stop offset="0.79" stop-color="#2fcbed" /><stop offset="1" stop-color="#32d4f5" /></linearGradient></defs><title>Icon-manage-307</title><path d="M5.59,13.13H9.91v4.32H5.59ZM1.15,17.45H4.87V13.13H.55v3.72A.6.6,0,0,0,1.15,17.45Zm-.6-5H4.87V8.09H.55Z" fill="url(#n3i0)" /><path d="M11.5.55a5.89,5.89,0,0,1,5.95,6,5.89,5.89,0,0,1-5.95,5.95H5.55V6.5A5.89,5.89,0,0,1,11.5.55Z" fill-rule="evenodd" fill="url(#n3i1)" /><rect x="7.59" y="5.65" width="1.36" height="4.08" fill="#fff" /><rect x="10.31" y="7.01" width="1.36" height="2.72" fill="#fff" /><rect x="13.03" y="4.29" width="1.36" height="5.44" fill="#fff" /></g>
+<text x="1120" y="224.0" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12.5" fill="#1f2933" text-anchor="middle">Week 08's workspace</text>
 </svg>
