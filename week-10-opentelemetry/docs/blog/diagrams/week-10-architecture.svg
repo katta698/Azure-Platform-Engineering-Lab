@@ -54,7 +54,7 @@
   <!-- backend -->
   <rect class="int" x="418" y="76" width="166" height="74" rx="5"/>
   <text class="t hdr" x="430" y="97">backend</text>
-  <text class="t sm" x="430" y="114">INTERNAL only — 404 from outside</text>
+  <text class="t sm" x="430" y="114">INTERNAL only — 404 outside</text>
   <text class="t mono ok" x="430" y="134">p50 250.8 ms</text>
 
   <!-- agent -->

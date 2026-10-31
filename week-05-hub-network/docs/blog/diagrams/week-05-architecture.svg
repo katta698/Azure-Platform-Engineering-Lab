@@ -22,7 +22,7 @@
   <text class="t hdr" x="24" y="26">Two layers, split by what they cost</text>
 
   <!-- PERMANENT LAYER -->
-  <rect class="free" x="24" y="38" width="852" height="286" rx="8"/>
+  <rect class="free" x="24" y="38" width="852" height="296" rx="8"/>
   <text class="t hdr ok" x="42" y="60">PERMANENT &#183; ~$0/hour &#183; weeks 06+ attach to this</text>
 
   <!-- hub -->
@@ -48,13 +48,13 @@
   <!-- peering -->
   <line class="arrow" x1="434" y1="130" x2="466" y2="130" marker-end="url(#a)"/>
   <line class="arrow" x1="466" y1="146" x2="434" y2="146" marker-end="url(#a)"/>
-  <text class="t sm" x="404" y="250">two peering resources, one per side &#8212; one alone reports Initiated and carries nothing</text>
+  <text class="t sm" x="404" y="238">two peering resources, one per side &#8212; one alone reports Initiated and carries nothing</text>
 
   <!-- dns -->
-  <rect class="box" x="42" y="238" width="816" height="70" rx="6"/>
-  <text class="t lbl" x="58" y="260">private DNS estate &#8212; 6 zones in the hub, each linked to BOTH virtual networks</text>
-  <text class="t mono" x="58" y="280">privatelink.blob.core.windows.net &#183; .file &#183; .vaultcore.azure.net &#183; .database.windows.net &#183; .azurecr.io &#183; .monitor</text>
-  <text class="t sm no" x="58" y="298">linked to the hub only: the spoke resolves the PUBLIC ip and fails closed later, looking like a firewall fault</text>
+  <rect class="box" x="42" y="248" width="816" height="70" rx="6"/>
+  <text class="t lbl" x="58" y="270">private DNS estate &#8212; 6 zones in the hub, each linked to BOTH virtual networks</text>
+  <text class="t mono" x="58" y="290">privatelink.blob.core.windows.net &#183; .file &#183; .vaultcore.azure.net &#183; .database.windows.net &#183; .azurecr.io &#183; .monitor</text>
+  <text class="t sm no" x="58" y="308">linked to the hub only: the spoke resolves the PUBLIC ip and fails closed later, looking like a firewall fault</text>
 
   <!-- BILLABLE LAYER -->
   <rect class="bill" x="24" y="340" width="852" height="212" rx="8"/>
