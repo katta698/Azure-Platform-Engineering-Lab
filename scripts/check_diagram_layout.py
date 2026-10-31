@@ -58,6 +58,7 @@ TOLERANCE = 1.5          # px of horizontal contact that is not a collision
 TOLERANCE_Y = 5.0
 EDGE_SLACK = 0.5         # px a glyph may sit outside the viewBox
 
+ARROW_PAD = 2.0          # px inside a text box before a connector counts as crossing it
 ZONE_AREA = 0.15        # a rect bigger than this share of the canvas is a zone, not a box
 
 MEASURE_JS = """
@@ -87,7 +88,27 @@ MEASURE_JS = """
     if (b.width * b.height > ZONE_AREA * vb.width * vb.height) continue;
     rects.push({x: b.x, y: b.y, w: b.width, h: b.height, fill});
   }
-  return {vb: {x: vb.x, y: vb.y, w: vb.width, h: vb.height}, texts, rects};
+  // Connectors, sampled along their real geometry.
+  //
+  // Not bounding boxes: a diagonal arrow's bbox covers a large rectangle it
+  // never actually crosses, which would report collisions that are not there.
+  // getPointAtLength walks the drawn line itself and works for <line>,
+  // <path> and <polyline> alike.
+  const arrows = [];
+  for (const el of svg.querySelectorAll('line, path, polyline')) {
+    if (el.closest('marker') || el.closest('defs')) continue;   // arrowheads
+    let len = 0;
+    try { len = el.getTotalLength(); } catch (e) { continue; }
+    if (!len || len < 2) continue;
+    const pts = [];
+    const steps = Math.max(8, Math.min(140, Math.round(len / 3)));
+    for (let i = 0; i <= steps; i++) {
+      const pt = el.getPointAtLength(len * i / steps);
+      pts.push({x: pt.x, y: pt.y});
+    }
+    arrows.push({pts, len});
+  }
+  return {vb: {x: vb.x, y: vb.y, w: vb.width, h: vb.height}, texts, rects, arrows};
 }
 """
 
@@ -144,6 +165,34 @@ def audit(page, svg_path: pathlib.Path):
             if out > TOLERANCE:
                 problems.append(("OUTSIDE", f'"{label}" escapes its panel by {out}px'))
 
+    # --- connectors ------------------------------------------------------
+    for a in data.get("arrows", []):
+        pts = a["pts"]
+        off = [p for p in pts
+               if p["x"] < vb["x"] - EDGE_SLACK
+               or p["y"] < vb["y"] - EDGE_SLACK
+               or p["x"] > vb["x"] + vb["w"] + EDGE_SLACK
+               or p["y"] > vb["y"] + vb["h"] + EDGE_SLACK]
+        if off:
+            p0 = off[0]
+            problems.append(("ARROW-OFF",
+                             f'a connector leaves the canvas near '
+                             f'({round(p0["x"])},{round(p0["y"])})'))
+            continue
+
+        for t in texts:
+            # ignore the first and last few samples: an arrow legitimately
+            # starts and ends beside its own label
+            inner = pts[2:-2] if len(pts) > 6 else []
+            hit = [p for p in inner
+                   if t["x"] + ARROW_PAD <= p["x"] <= t["x"] + t["w"] - ARROW_PAD
+                   and t["y"] + ARROW_PAD <= p["y"] <= t["y"] + t["h"] - ARROW_PAD]
+            if len(hit) >= 2:
+                problems.append(("ARROW-THRU",
+                                 f'a connector runs through the words '
+                                 f'"{t["s"][:34]}"'))
+                break
+
     for i in range(len(texts)):
         for j in range(i + 1, len(texts)):
             ox, oy = intersect(texts[i], texts[j])
@@ -166,6 +215,10 @@ def self_test(page) -> int:
            '<text x="20" y="70" font-size="12">collide</text>'
            '<text x="20" y="70" font-size="12">collide</text>'
            '<text x="150" y="95" font-size="12">off the right edge entirely</text>'
+           # a connector that leaves the canvas, and one driven through words
+           '<line x1="100" y1="50" x2="260" y2="50" stroke="#000"/>'
+           '<text x="20" y="20" font-size="12">speared</text>'
+           '<line x1="5" y1="16" x2="90" y2="16" stroke="#000"/>'
            '</svg>')
     tmp = LAB / "scripts" / ".diagram-selftest.svg"
     tmp.write_text(bad, encoding="utf-8")
@@ -175,14 +228,14 @@ def self_test(page) -> int:
         tmp.unlink(missing_ok=True)
     kinds = {k for k, _ in problems}
     ok = True
-    for want in ("OVERFLOW", "OUTSIDE", "OVERLAP"):
+    for want in ("OVERFLOW", "OUTSIDE", "OVERLAP", "ARROW-OFF", "ARROW-THRU"):
         hit = want in kinds
         ok &= hit
         print(f"  [{' ok ' if hit else 'FAIL'}] detects {want}")
     if not ok:
         print("\nSELF-TEST FAILED: the check cannot see the defects it exists for.")
         return 1
-    print("\nself-test passed: overflow, panel escape and collision are all detected.")
+    print("\nself-test passed: overflow, panel escape, text collision, a connector leaving the canvas, and a connector driven through words are all detected.")
     return 0
 
 
