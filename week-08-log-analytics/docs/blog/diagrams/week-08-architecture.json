@@ -1,61 +1,61 @@
 {
   "title": "Week 08 — the cheapest log is the one you never ingested",
   "alt": "Architecture diagram. One hundred rows are sent to a data collection endpoint and rule, where a single line of KQL is applied at ingest time. Eighty rows are dropped there: never stored, never billed, and never counted against the daily cap. The twenty rows that are kept land in a Log Analytics workspace holding two custom tables on deliberately different plans, an Analytics table for the alerting path whose queries are free to run, and a Basic table for the incident path which is cheaper to ingest but bills per gigabyte scanned. A scheduled query alert watches for the daily cap being reached, because a cap that trips in silence is data loss nobody noticed.",
-  "width": 1280,
-  "height": 580,
+  "width": 960,
+  "height": 435,
   "groups": [
     {
       "id": "ws",
       "style": "logical",
       "label": "Log Analytics workspace — two tables, deliberately different plans",
-      "x": 700,
-      "y": 90,
-      "w": 540,
-      "h": 340
+      "x": 525,
+      "y": 68,
+      "w": 405,
+      "h": 255
     }
   ],
   "nodes": [
     {
       "id": "sent",
       "label": "100 rows sent",
-      "w": 180,
-      "x": 150,
-      "y": 180
+      "w": 135,
+      "x": 112,
+      "y": 135
     },
     {
       "id": "dcr",
       "icon": "data-collection-rule.svg",
       "label": "Collection endpoint + rule",
-      "x": 470,
-      "y": 180
+      "x": 352,
+      "y": 135
     },
     {
       "id": "ana",
       "icon": "log-analytics.svg",
       "label": "Analytics — queries free",
-      "x": 880,
-      "y": 180
+      "x": 660,
+      "y": 135
     },
     {
       "id": "basic",
       "icon": "log-analytics.svg",
       "label": "Basic — queries bill per GB",
-      "x": 880,
-      "y": 310
+      "x": 660,
+      "y": 232
     },
     {
       "id": "dropped",
       "label": "80 rows dropped — never stored, never billed, never capped",
-      "w": 300,
-      "x": 470,
-      "y": 400
+      "w": 225,
+      "x": 352,
+      "y": 300
     },
     {
       "id": "alert",
       "icon": "alerts.svg",
       "label": "Daily-cap alert",
-      "x": 1140,
-      "y": 490
+      "x": 855,
+      "y": 368
     }
   ],
   "edges": [
@@ -64,8 +64,8 @@
       "to": "dcr",
       "label": "one line of KQL, at ingest",
       "label_at": [
-        345,
-        152
+        259,
+        114
       ]
     },
     {
@@ -73,8 +73,8 @@
       "to": "ana",
       "label": "20 rows kept",
       "label_at": [
-        620,
-        152
+        465,
+        114
       ]
     },
     {
@@ -86,8 +86,8 @@
       "to": "dropped",
       "label": "80 dropped",
       "label_at": [
-        548,
-        300
+        411,
+        225
       ]
     },
     {
@@ -95,8 +95,8 @@
       "to": "alert",
       "label": "scheduled query",
       "label_at": [
-        1075,
-        330
+        806,
+        248
       ]
     }
   ]

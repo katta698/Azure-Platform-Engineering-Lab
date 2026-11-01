@@ -56,10 +56,10 @@ from xml.sax.saxutils import escape
 
 ICON_DIR = Path(__file__).resolve().parent / "diagram-icons"
 
-ICON_PX = 46          # rendered icon box, uniform
-LABEL_DY = 16         # first label baseline below the icon box
-LABEL_LH = 14         # label line height
-LABEL_MAX = 19        # chars per label line before wrapping
+ICON_PX = 40          # rendered icon box, uniform
+LABEL_DY = 15         # first label baseline below the icon box
+LABEL_LH = 15         # label line height
+LABEL_MAX = 17        # chars per label line before wrapping
 
 INK = "#1f2933"       # body text
 MUTED = "#5b6670"     # edge labels, group notes
@@ -164,7 +164,7 @@ def render(spec: dict) -> str:
 
     if spec.get("title"):
         out.append(
-            f'<text x="28" y="34" {FONT} font-size="15" font-weight="700" '
+            f'<text x="28" y="34" {FONT} font-size="17" font-weight="700" '
             f'fill="{INK}">{escape(spec["title"])}</text>'
         )
 
@@ -191,12 +191,12 @@ def render(spec: dict) -> str:
             )
             if g.get("label"):
                 out.append(
-                    f'<text x="{x + w / 2}" y="{y + 20}" {FONT} font-size="13" '
+                    f'<text x="{x + w / 2}" y="{y + 20}" {FONT} font-size="14" '
                     f'fill="{INK}" text-anchor="middle">{escape(g["label"])}</text>'
                 )
         if g.get("note"):
             out.append(
-                f'<text x="{x + 10}" y="{y + h - 10}" {FONT} font-size="11" '
+                f'<text x="{x + 10}" y="{y + h - 10}" {FONT} font-size="12" '
                 f'fill="{MUTED}">{escape(g["note"])}</text>'
             )
 
@@ -219,7 +219,7 @@ def render(spec: dict) -> str:
             lx, ly = edge_label_pos(pts, e)
             for i, line in enumerate(wrap(e["label"], 22)):
                 out.append(
-                    f'<text x="{lx}" y="{ly + i * 12}" {FONT} font-size="11" '
+                    f'<text x="{lx}" y="{ly + i * 12}" {FONT} font-size="12" '
                     f'fill="{MUTED}" text-anchor="middle">{escape(line)}</text>'
                 )
 
@@ -250,7 +250,7 @@ def render(spec: dict) -> str:
             for i2, line in enumerate(lines_):
                 out.append(
                     f'<text x="{n["x"]}" y="{cy + 22 + i2 * 17}" {FONT} '
-                    f'font-size="12.5" fill="{INK}" text-anchor="middle">'
+                    f'font-size="13.5" fill="{INK}" text-anchor="middle">'
                     f'{escape(line)}</text>'
                 )
             continue
@@ -263,7 +263,7 @@ def render(spec: dict) -> str:
         for i, line in enumerate(wrap(n["label"])):
             out.append(
                 f'<text x="{n["x"]}" y="{ty + i * LABEL_LH}" {FONT} '
-                f'font-size="12.5" fill="{INK}" text-anchor="middle">'
+                f'font-size="13.5" fill="{INK}" text-anchor="middle">'
                 f'{escape(line)}</text>'
             )
 
