@@ -1,0 +1,51 @@
+Retired figure slots — week 12
+==============================
+
+The gate reads this file for bare filenames on their own line. Keep the line
+below exactly as it is; the prose underneath is for humans.
+
+05-incident.png
+
+05  the incident in a console view
+    RETIRED 2026-11-07, after three capture routes were tried and failed.
+    The evidence it would have shown is NOT missing; only a console picture
+    of it is.
+
+    Route 1 — Azure portal Sentinel Incidents page.
+      Rendered a full grid once at 22:51Z: three incidents, alert counts
+      1, 11 and 1, all titled "Role assignment created". Twenty minutes
+      later, on three consecutive attempts, the same URL served
+      "This page has been moved to the Defender portal" instead. That
+      placeholder was captured, recognised and DELETED rather than
+      committed. Sentinel loses Azure portal support after 31 March 2027;
+      on this tenant the incident views went first, mid-session.
+
+    Route 2 — Azure portal Sentinel Overview tile.
+      Read "Incidents (0) - No incidents found" while the ARM API returned
+      two incidents created twenty minutes earlier. Later read 2 while the
+      API said 3. It is an aggregate with its own refresh interval, not a
+      view of the data, and a screenshot of it would have asserted the
+      opposite of what happened.
+
+    Route 3 — Defender portal, security.microsoft.com.
+      A separate session from the Azure portal on the same identity. Signing
+      in loops: the Entra account picker is clicked, the flow returns to
+      /common/reprocess, and it never reaches the host. The identity on this
+      subscription is a personal Microsoft account
+      (an outlook.com address), and the Defender portal is not generally
+      available to MSA identities. Tried both interactively and
+      programmatically.
+
+    WHAT CARRIES THE PROOF INSTEAD: figure 06, validate.sh.
+      8 passed / 0 failed, including POSITIVE control fired, NEGATIVE
+      control stayed silent, and the automation rule's labels. Backed by the
+      ARM API: 13 alerts grouped into 3 incidents.
+
+      Under the lab's figure rules a terminal is legitimate "only where a
+      terminal is the honest surface for that evidence". That condition is
+      met here and not merely asserted: the portal was MEASURED disagreeing
+      with the API twice in one afternoon. The API is the source of truth
+      for this week, so the terminal reading it is the honest surface.
+
+      The post says the console view is missing and why. It does not pretend
+      otherwise, and no frame was manufactured to fill the slot.

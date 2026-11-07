@@ -1,0 +1,21 @@
+title: What the week actually created
+subtitle: week-12-detections-as-code — terraform state after apply, 7 resources
+width: 1000
+---
+$ terraform state list
+azurerm_log_analytics_workspace.detections
+azurerm_monitor_diagnostic_setting.activity
+azurerm_resource_group.detections
+azurerm_sentinel_alert_rule_scheduled.escalation
+azurerm_sentinel_alert_rule_scheduled.tampering
+azurerm_sentinel_automation_rule.tag_escalation
+azurerm_sentinel_log_analytics_workspace_onboarding.detections
+
+$ terraform output
+  resource_group         = rg-detections-lab-dev-scus-001
+  workspace_name         = law-wk12-dev-scus-001
+  detection_rule_names   = ["Role assignment created", "Policy assignment deleted"]
+
+# Sentinel is ENABLED on a workspace, not deployed. The onboarding and
+# the workspace are separate objects with separate lifecycles, which is
+# why removing Sentinel does not remove the workspace -- or its bill.

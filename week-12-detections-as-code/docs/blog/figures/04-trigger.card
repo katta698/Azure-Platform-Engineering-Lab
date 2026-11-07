@@ -1,0 +1,31 @@
+title: The deliberate event the detection is tested against
+subtitle: week-12-detections-as-code — captured 2026-11-07, identifiers masked
+width: 1000
+---
+# az role assignment create fails with MissingSubscription on CLI 2.86.0
+# here -- for `list` as well as `create` -- while the same call through the
+# ARM API works. So the trigger goes through az rest.
+
+$ date -u +"TRIGGER at %Y-%m-%dT%H:%M:%SZ"
+TRIGGER at 2026-11-07T15:17:43Z
+
+$ az rest --method put \
+    --url ".../roleAssignments/$RA?api-version=2022-04-01" \
+    --body @ra.json \
+    --query "{role:properties.roleDefinitionId,
+              type:properties.principalType,
+              created:properties.createdOn}"
+
+{
+  "created": "2026-11-07T15:17:45.5404434Z",
+  "role": "/subscriptions/<guid>/providers/Microsoft.Authorization/roleDefinitions/<guid>",
+  "type": "User"
+}
+
+# Reader, at the week's own resource group scope. Revoked by cleanup.sh
+# BEFORE the destroy, explicitly rather than implicitly -- a lab that
+# demonstrates privilege escalation and leaves the privilege behind has
+# not finished.
+#
+# This is the INPUT to the test. It is not evidence that anything detected
+# it; that is figure 06.

@@ -1,0 +1,29 @@
+title: Teardown, verified against Azure rather than against an exit code
+subtitle: week-12-detections-as-code — cleanup.sh, 2026-11-07
+width: 1020
+---
+$ bash week-12-detections-as-code/scripts/cleanup.sh
+removing the role assignment created for the positive control...
+  removed
+
+terraform destroy...
+azurerm_resource_group.detections: Destruction complete after 26s
+
+Destroy complete! Resources: 7 destroyed.
+
+verifying against Azure rather than against the destroy's exit code
+  ------------------------------------------------------------------
+  resource group gone                        PASS
+  Log Analytics workspace gone               PASS
+  note: workspace is soft-deleted for 14 days, name still reserved
+  subscription diagnostic setting gone       PASS
+
+  teardown verified.
+
+# Removing Sentinel does NOT remove the workspace -- Microsoft say so
+# plainly. The workspace is the billable object and it survives, so the
+# check asks Azure whether it is gone instead of trusting the destroy.
+#
+# The soft-delete note is correct behaviour, not a failure: a deleted
+# Log Analytics workspace is recoverable by name for 14 days. It stops
+# ingesting and stops billing, but the NAME stays reserved.
