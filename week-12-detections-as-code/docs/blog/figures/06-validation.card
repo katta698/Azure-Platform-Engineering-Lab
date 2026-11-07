@@ -1,0 +1,27 @@
+title: The matched pair, and what each one proved
+subtitle: week-12-detections-as-code — validate.sh against the deployed workspace
+width: 1000
+---
+$ bash week-12-detections-as-code/scripts/validate.sh
+
+Week 12 validation — 2026-11-07T23:06:06Z
+  Test                                           Result
+  ---------------------------------------------- --------------------------
+  Log Analytics workspace exists                 law-wk12-dev-scus-001      PASS
+  Sentinel enabled on the workspace              onboardingState present    PASS
+  Detection enabled: Role assignment created     enabled                    PASS
+  Detection enabled: Policy assignment deleted   enabled                    PASS
+
+  waiting for AzureActivity to carry the triggering event...
+  Activity log reached the workspace             3 role-assignment row(s)   PASS
+
+  waiting for the detection to produce an incident...
+  POSITIVE control fired                         3 incident(s)              PASS
+  NEGATIVE control stayed silent                 0 incidents, as required   PASS
+  Automation rule labelled the incident          3 labels applied           PASS
+
+  8 passed / 0 failed
+
+# The two rows that matter are the last two before the count.
+# A rule that fires on a true positive might fire on anything;
+# a rule silent on a true negative might simply be broken.

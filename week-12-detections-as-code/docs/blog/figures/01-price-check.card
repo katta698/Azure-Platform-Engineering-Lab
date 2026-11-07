@@ -1,0 +1,34 @@
+title: Every meter this week can be billed on, before anything was deployed
+subtitle: week-12-detections-as-code — price_check.py, written after week 11's $6 surprise
+width: 1040
+---
+$ python scripts/price_check.py week-12-detections-as-code
+Meters that can bill, region southcentralus
+==================================================================
+
+  FLAT RECURRING METERS -- bill while the thing exists (43)
+  --------------------------------------------------------------
+    ack 117990.00000 1/Day      Commitment Tier Capacity Reservation Sentinel  [12 tiers]
+    ack 84640.00000 1/Day      Commitment Tier Capacity Reservation Azure Monitor  [2 tiers]
+    ack    3.60000 1 Hour     Graph                                Sentinel
+    ack    3.00000 1/Month    Health System Log Monitored          Azure Monitor
+    ack    3.00000 1/Month    Alerts System Log Monitored          Azure Monitor  [3 tiers]
+    ack    2.00000 1/Hour     Solution for SAP Applications Hourly Sentinel
+    ack    0.30000 1/Month    Alerts Resource Monitored            Azure Monitor  [4 tiers]
+    ack    0.30000 1/Month    Health Prom Monitored Metric Monitor Azure Monitor
+    ack    0.30000 1/Month    Health Metric Monitored              Azure Monitor
+    ack    0.18000 1 Hour     Advanced Data Insights               Sentinel
+    ack    0.10000 1/Month    Health Dynamic Threshold Signal      Azure Monitor
+    ack    0.10000 1/Month    Alerts Dynamic Threshold             Azure Monitor
+    ack    0.10000 1/Month    Alerts Metric Monitored              Azure Monitor
+
+  USAGE METERS -- bill on consumption (138)
+  --------------------------------------------------------------
+           5.16000 1 GB       Pay-as-you-go Analysis                 Sentinel
+...
+
+  OK -- every flat recurring meter is acknowledged in meters.json.
+
+  This says what CAN be billed. It is not an estimate, and it is
+  not the cost of the week. Read that from the invoice after
+  teardown.

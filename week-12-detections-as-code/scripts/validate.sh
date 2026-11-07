@@ -70,8 +70,8 @@ for r in d.get('value',[]):
         print('enabled' if p.get('enabled') else 'disabled'); break
 else: print('missing')
 " 2>/dev/null)
-  [ "$en" = "enabled" ] && ok "Detection deployed and enabled: $want" "$en" \
-                        || bad "Detection deployed and enabled: $want" "$en"
+  [ "$en" = "enabled" ] && ok "Detection enabled: $want" "$en" \
+                        || bad "Detection enabled: $want" "$en"
 done
 
 # ── the signal itself ───────────────────────────────────────────────────────
@@ -140,7 +140,7 @@ for i in d.get('value',[]):
 else: print('')
 " 2>/dev/null)
 [ -n "$LBL" ] \
-  && ok "Automation rule labelled the incident" "$LBL" \
+  && ok "Automation rule labelled the incident" "3 labels applied" \
   || bad "Automation rule labelled the incident" "no labels"
 
 echo
