@@ -77,15 +77,40 @@ one passes.
 | Sentinel enabled on the workspace | onboardingState present |
 | Both detections deployed and enabled | enabled, enabled |
 | Activity log reached the workspace | 3 role-assignment rows |
-| **POSITIVE control fired** | **1 incident** |
+| **POSITIVE control fired** | **1 incident** at first measurement, **2** after 18 minutes |
 | **NEGATIVE control stayed silent** | **0 incidents** |
-| Automation rule labelled the incident | `auto-triaged, privilege-escalation, week-12` |
+| Automation rule labelled both incidents | `auto-triaged, privilege-escalation, week-12` |
 
-**One incident from three matching rows** is the grouping configuration
-working. Without it, a one-hour query period running every five minutes files
-about twelve incidents for one event.
+### What grouping actually did, measured rather than assumed
 
-## Four things that cost time
+I wrote "one incident from three rows, grouping working" after the first
+validation run. Eighteen minutes later there were two, and seven hours later
+three — so that sentence was true when measured and wrong as a conclusion,
+twice. The right number is not the incident count at all. It is the ratio:
+
+| | |
+| --- | --- |
+| alerts raised by the rule | **13** |
+| incidents created | **3** |
+| largest single grouping | incident #2, **11 alerts** |
+
+```
+incident #1  Medium  New  alerts=1   Role assignment created
+incident #2  Medium  New  alerts=11  Role assignment created
+incident #3  Medium  New  alerts=1   Role assignment created
+```
+
+The rule runs every five minutes against a one-hour window, so it re-finds the
+same Activity rows on every pass and raises an alert each time. Thirteen of
+those collapsed into three incidents, one of which absorbed eleven on its own.
+Without `grouping`, this would be thirteen separate incidents for what is, to
+an analyst, one thing that happened.
+
+**Counting incidents was the wrong measurement.** The count moves as the
+window slides; the alerts-per-incident ratio is what the configuration
+controls. Three measurements had to disagree before that was obvious.
+
+## Five things that cost time
 
 **`Microsoft.OperationsManagement` is the provider nobody expects.** Sentinel
 onboarding fails with `MissingSubscriptionRegistration` naming it, after
@@ -105,6 +130,22 @@ dependency with no value flowing across it has to be declared with
 current path is an ordinary subscription-scope diagnostic setting, not a
 Sentinel data connector — so the `azurerm_sentinel_data_connector_*` resources
 are the wrong answer now even though the provider still ships them.
+
+**The Azure portal retired the Sentinel Incidents page mid-session, and the
+Overview tile lags its own API.** Both matter because both will happily
+produce a screenshot that says the opposite of the truth:
+
+* the Overview tile read `Incidents (0) — No incidents found` while the ARM
+  API returned two incidents created twenty minutes earlier. It caught up
+  later, reading 2 when the API said 3. It is an aggregate with its own
+  refresh, not a view of the data.
+* the Incidents page rendered a full grid at 22:51Z and, on three consecutive
+  attempts twenty minutes later, served
+  `This page has been moved to the Defender portal` instead.
+
+So the evidence for this week is the API and the table, not the portal, and
+`validate.sh` queries both directly. Sentinel loses Azure portal support after
+**31 March 2027**; on this tenant, the incident views went first.
 
 **`az role assignment` fails with `MissingSubscription` on CLI 2.86.0** on this
 machine, for `list` as well as `create`, while the same calls through
