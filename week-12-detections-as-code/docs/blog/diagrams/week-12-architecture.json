@@ -1,0 +1,112 @@
+{
+  "title": "Week 12 — a detection is only proved by the pair: one that fires, one that must not",
+  "alt": "Architecture diagram. At the subscription, a diagnostic setting forwards three Azure Activity log categories — Administrative, Policy and Security — into a Log Analytics workspace that has Microsoft Sentinel enabled on it. Sentinel has no icon in Microsoft's published set, so it is named on the workspace node rather than drawn with a borrowed logo, and the Sentinel-specific objects are plain cards for the same reason. Two scheduled analytics rules read the AzureActivity table every five minutes over a one-hour window: a positive control on role assignment creation, which is deliberately triggered, and a negative control on policy assignment deletion, which must stay silent. The positive control raised thirteen alerts, which incident grouping collapsed into three incidents, and an automation rule applied three labels to each without a Logic App.",
+  "width": 960,
+  "height": 400,
+  "groups": [
+    {
+      "id": "sub",
+      "style": "logical",
+      "label": "sub-lab-dev — subscription scope",
+      "x": 30,
+      "y": 71,
+      "w": 258,
+      "h": 150
+    },
+    {
+      "id": "rg",
+      "style": "logical",
+      "label": "rg-detections-lab-dev-scus-001 — the SIEM",
+      "x": 330,
+      "y": 71,
+      "w": 600,
+      "h": 288
+    }
+  ],
+  "nodes": [
+    {
+      "id": "subn",
+      "icon": "subscription.svg",
+      "label": "Azure subscription",
+      "x": 95,
+      "y": 145
+    },
+    {
+      "id": "diag",
+      "icon": "diagnostic-setting.svg",
+      "label": "Diagnostic setting",
+      "x": 218,
+      "y": 145
+    },
+    {
+      "id": "law",
+      "icon": "log-analytics.svg",
+      "label": "Log Analytics workspace + Sentinel",
+      "x": 430,
+      "y": 145
+    },
+    {
+      "id": "rules",
+      "label": "2 analytics rules",
+      "w": 150,
+      "x": 430,
+      "y": 310
+    },
+    {
+      "id": "inc",
+      "label": "3 incidents, 13 alerts",
+      "w": 150,
+      "x": 630,
+      "y": 310
+    },
+    {
+      "id": "auto",
+      "label": "Automation rule",
+      "w": 150,
+      "x": 830,
+      "y": 310
+    }
+  ],
+  "edges": [
+    {
+      "from": "subn",
+      "to": "diag"
+    },
+    {
+      "from": "diag",
+      "to": "law",
+      "label": "AzureActivity · free",
+      "label_at": [
+        415,
+        112
+      ]
+    },
+    {
+      "from": "law",
+      "to": "rules",
+      "label": "PT5M over PT1H",
+      "label_at": [
+        505,
+        235
+      ]
+    },
+    {
+      "from": "rules",
+      "to": "inc",
+      "label": "grouping",
+      "label_at": [
+        530,
+        276
+      ]
+    },
+    {
+      "from": "inc",
+      "to": "auto",
+      "label": "on create",
+      "label_at": [
+        730,
+        276
+      ]
+    }
+  ]
+}
