@@ -89,3 +89,7 @@ scripts/screenshots/.session-cookie
 # markdown under docs/ is already covered by the *.md rule above, but these
 # are .txt and would otherwise ride along on a `git add .`.
 docs/audit/
+
+# Week 12 writes the id of the role assignment it deliberately creates so
+# cleanup can remove exactly that one. It is a GUID, so it never lands in git.
+**/.trigger-assignment-id
