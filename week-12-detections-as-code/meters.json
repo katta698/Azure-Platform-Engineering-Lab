@@ -1,0 +1,57 @@
+{
+  "_comment": [
+    "Every flat recurring meter the services in this week CAN bill on, each",
+    "with the reason it does not apply to this design. Produced by",
+    "  python scripts/price_check.py week-12-detections-as-code",
+    "and checked in so the charges this week accepted are public, next to the",
+    "code, rather than in a local note. Written BEFORE deployment.",
+    "",
+    "This is not a cost estimate. The measured cost is read from the invoice",
+    "after teardown."
+  ],
+
+  "region": "southcentralus",
+  "services": ["Sentinel", "Log Analytics", "Azure Monitor"],
+
+  "acknowledged": {
+    "Commitment Tier Capacity Reservation": "NOT USED. Covers 14 tiers across Sentinel and Azure Monitor, dearest 117,990.00 per DAY. A commitment tier starts at 100 GB/day and must be explicitly selected; the workspace stays on pay-as-you-go, which is the default. Terraform never sets a sku on the workspace other than PerGB2018, so this cannot be reached by accident. The dearest flat meter in the whole lab so far -- it is listed first for that reason.",
+
+    "Graph": "NOT USED. 3.60 per hour. Sentinel graph billing is consumption based on graph build and query operations via notebooks, the Graph Query API or the MCP graph tools. This week creates none of those.",
+
+    "Advanced Data Insights": "NOT USED. 0.18 per hour. Data lake notebook sessions and jobs, billed per compute hour. No notebooks, and no table is switched to the Lake tier -- data lake meters are explicitly NOT waived by the Sentinel free trial, which is why this one is called out rather than assumed away.",
+
+    "Solution for SAP Applications Hourly": "NOT USED. 2.00 per hour. A separately installed Sentinel solution. Not deployed.",
+
+    "Alerts System Log Monitored": "NOT USED. Up to 3.00 per month per rule. This is the Azure Monitor LOG SEARCH ALERT meter, for Microsoft.Insights/scheduledQueryRules. This week's detections are Sentinel analytics rules, Microsoft.SecurityInsights/alertRules, and Microsoft documents that there is no additional cost for analytics rules or automation rules -- the cost is in data ingestion, not rule execution. CHECKED rather than assumed: this is the one meter most likely to apply to a week whose whole subject is scheduled queries, and assuming would be the exact mistake week 11 made.",
+
+    "Health System Log Monitored": "NOT USED. Same Azure Monitor log-alert family as above, health signals. No scheduledQueryRules are created.",
+
+    "Alerts Resource Monitored": "NOT USED. Azure Monitor metric alerts per monitored resource, 4 frequency tiers. The week creates no metric alerts.",
+
+    "Alerts Metric Monitored": "NOT USED. Azure Monitor per-monitored-metric alert meter. No metric alerts.",
+
+    "Health Metric Monitored": "NOT USED. Same family, health signals. No metric alerts.",
+
+    "Alerts Dynamic Threshold": "NOT USED. Dynamic threshold metric alerts. None created.",
+
+    "Health Dynamic Threshold Signal": "NOT USED. Same family. None created.",
+
+    "Health Prom Monitored Metric Monitored": "NOT USED. Managed Prometheus health metrics. Week 11 built the only managed Prometheus in this lab and tore it down on 2026-10-28; nothing in week 12 creates an Azure Monitor workspace."
+  },
+
+  "usage_meters_that_DO_apply": {
+    "_comment": "Not a gate -- these bill on consumption, and the design is built to keep them at or near zero. Recorded so the cost note can be written from facts rather than hope.",
+
+    "Sentinel Pay-as-you-go Analysis": "5.16 per GB analysed. The ONLY data source is Azure Activity, which Microsoft lists as a free data type in both Log Analytics and Sentinel. On top of that, enabling Sentinel on a workspace grants 10 GB/day free for 31 days, waiving both ingestion and analysis. Expected contribution: zero. VERIFY ON THE BILL.",
+
+    "Log Analytics Analytics Logs Data Ingestion": "2.76 per GB. Same reasoning -- AzureActivity is an excluded table. Expected zero. The table plan must stay ANALYTICS: scheduled analytics rules cannot query Basic Logs tables at all, so the cheaper plan is not merely undesirable here, it is unusable.",
+
+    "Log Analytics Analytics Logs Data Retention": "0.12 per GB per month beyond 90 days. Retention is left at the 90-day default that Sentinel includes at no charge, and the workspace is destroyed at teardown well inside it."
+  },
+
+  "residual_risks": [
+    "Removing Sentinel does NOT remove the Log Analytics workspace. Microsoft states this explicitly. cleanup.sh must destroy the workspace itself, and the teardown check must assert the workspace is gone, not just that Sentinel is offboarded.",
+    "The free trial is per workspace with a limit of 20 per tenant. Repeatedly destroying and recreating the workspace burns trials. Deploy once.",
+    "Automation via Logic Apps playbooks is NOT waived by the trial. This week deliberately uses azurerm_sentinel_automation_rule, which needs no Logic App, instead of a playbook. If a playbook is ever added, Logic Apps must be added to services above and re-checked."
+  ]
+}
