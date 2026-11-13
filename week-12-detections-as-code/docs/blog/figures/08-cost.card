@@ -1,0 +1,24 @@
+title: The measured bill, read from Cost Management
+subtitle: week-12-detections-as-code — ActualCost, 2026-11-01 to 2026-11-12
+width: 1000
+---
+$ az rest --method post --url ".../Microsoft.CostManagement/query?api-version=2023-03-01" \
+    --body @query.json      # ActualCost, grouped by ServiceName
+
+  (no rows)
+
+  TOTAL: 0.00 USD
+
+# A zero result is not a fact until the method is proved. The same query over
+# October, when week 11 ran, returns:
+#
+#        6.0000 USD  Azure Grafana Service
+#        1.0839 USD  Virtual Machines
+#        0.0618 USD  Virtual Network
+#        0.0345 USD  Storage
+#        0.0202 USD  Container Registry
+#        0.0121 USD  Azure Monitor
+#     TOTAL 7.2125
+#
+# So the query works, and November is empty because nothing was billable --
+# not because the question was asked wrongly.

@@ -7,8 +7,11 @@ the same from the outside.
 
 ## Cost note
 
-**Measured: pending the invoice.** Deployed and validated 2026-11-07; the
-figure will be read from Cost Management, not from a rate card.
+**Measured: $0.00.** Read from Cost Management (ActualCost, 2026-11-01 to
+2026-11-12), not from a rate card: no billable rows. The same query over
+October returns $7.2125 for week 11, including the $6.00 Azure Grafana
+Service line, so the empty November result is an absence of charges rather
+than a broken query.
 
 **What runs continuously:** nothing. The whole week is destroyed by
 `scripts/cleanup.sh`.
