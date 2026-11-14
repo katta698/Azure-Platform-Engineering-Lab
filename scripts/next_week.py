@@ -85,9 +85,23 @@ def published_weeks():
 # and this check promptly stopped finding any row at all -- it reported
 # "week 10 is published but has no row", which is exactly the failure it
 # exists to catch, against a tracker that was correct.
-README_ROW = re.compile(
-    r"^\|\s*(?:\[)?(\d{2})(?:\][^|]*)?\s*\|[^|]*\|"
-    r"\s*(?:\[)?([A-Za-z]+)(?:\][^|]*)?\s*\|")
+# Columns are SPLIT, not matched by one regex. The regex broke twice: when the
+# status cell became a link (2026-10-27) and when the tracker gained a services
+# column (2026-11-13). Both times it called every published week missing.
+WEEK_CELL = re.compile(r"(\d{2})")
+WORD = re.compile(r"([A-Za-z]+)")
+
+
+def _row(line):
+    """(week number, status word) from a tracker row, or None."""
+    if not line.startswith("|"):
+        return None
+    cells = [c.strip() for c in line.strip().strip("|").split("|")]
+    if len(cells) < 3:
+        return None
+    wk = WEEK_CELL.search(cells[0])
+    st = WORD.search(cells[-1])
+    return (int(wk.group(1)), st.group(1)) if wk and st else None
 
 
 def readme_status():
@@ -110,9 +124,9 @@ def readme_status():
         return None
     out = {}
     for line in open(f, encoding="utf-8").read().split("\n"):
-        m = README_ROW.match(line.strip())
-        if m:
-            out[int(m.group(1))] = m.group(2)
+        r = _row(line.strip())
+        if r:
+            out[r[0]] = r[1]
     return out
 
 
