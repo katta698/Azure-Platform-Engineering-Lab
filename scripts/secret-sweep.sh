@@ -136,9 +136,9 @@ if ! python "$(dirname "$0")/next_week.py" --check; then
   exit 1
 fi
 
-# The tracker in README.md is the only public signal that a week shipped.
-if ! python "$(dirname "$0")/check_week_tracker.py"; then
+if ! python "$(dirname "$0")/check_root_readme_current.py"; then
   echo ""
-  echo "WEEK TRACKER IS STALE — do not push."
+  echo "ROOT README ROADMAP IS STALE — do not push."
   exit 1
 fi
+
