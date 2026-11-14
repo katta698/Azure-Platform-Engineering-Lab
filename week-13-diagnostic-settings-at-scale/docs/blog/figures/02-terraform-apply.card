@@ -1,0 +1,24 @@
+title: What the week creates
+subtitle: week-13 — nine resources, two of them outside the resource group
+width: 1000
+---
+$ terraform state list
+    data.azurerm_client_config.current
+    data.azurerm_policy_set_definition.diag_to_law
+    azurerm_key_vault.target
+    azurerm_log_analytics_workspace.diag
+    azurerm_network_security_group.target
+    azurerm_public_ip.target
+    azurerm_resource_group.diag
+    azurerm_role_assignment.kv_writer
+    azurerm_role_assignment.remediation
+    azurerm_storage_account.target
+    azurerm_subscription_policy_assignment.diag
+
+# azurerm_subscription_policy_assignment and its role assignment are at
+# SUBSCRIPTION scope. Deleting the resource group would leave both
+# behind, still trying to remediate into a workspace that is gone.
+#
+# The initiative itself is Azure's. It is looked up by display name
+# rather than GUID: a bare GUID in a .tf file is indistinguishable
+# from a leaked identifier to secret-sweep.sh.

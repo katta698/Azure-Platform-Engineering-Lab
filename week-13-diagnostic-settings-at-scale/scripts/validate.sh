@@ -61,7 +61,7 @@ check_diag "$BASE/Microsoft.Network/publicIPAddresses/pip-wk13-dev-scus-001" "pu
 # audit does not cover network security groups; allLogs does. Not a failure.
 check_diag "$BASE/Microsoft.Network/networkSecurityGroups/nsg-wk13-dev-scus-001" "NSG under audit" no
 # no built-in policy exists for storage accounts at any category group.
-check_diag "$BASE/Microsoft.Storage/storageAccounts/stwk13devscus001" "storage (no built-in policy)" no
+check_diag "$BASE/Microsoft.Storage/storageAccounts/stwk13devscus001" "storage" no
 
 # ── generate something to log, then prove it arrived ────────────────────────
 echo

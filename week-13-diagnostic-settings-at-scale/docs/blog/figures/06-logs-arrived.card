@@ -1,0 +1,21 @@
+title: The only slot that proves data moved
+subtitle: week-13 — a deliberate Key Vault operation, read back out of the workspace
+width: 1020
+---
+# Compliance says a diagnostic setting EXISTS. This asks the workspace.
+
+$ ... "AzureDiagnostics | summarize rows=count() by ResourceProvider, Category"
+
+    MICROSOFT.KEYVAULT     AuditEvent   14 rows
+
+$ ... "AzureDiagnostics | project TimeGenerated, OperationName, ResultSignature"
+
+    2026-11-14T13:35:54Z       SecretGet        OK
+    2026-11-14T13:35:50Z       SecretSet        OK
+    2026-11-14T13:34:53Z       SecretGet        OK
+    2026-11-14T13:34:53Z       Authentication   Unauthorized
+
+# A diagnostic setting only collects what happens AFTER it is active.
+# The first probe wrote its secret in the same minute the setting was
+# being created and was never captured. These rows come from
+# operations issued once it was live.

@@ -1,0 +1,33 @@
+title: Every meter this week can bill on, before anything was deployed
+subtitle: week-13 — and the one that actually applies is a USAGE meter the gate does not cover
+width: 1040
+---
+$ python scripts/price_check.py week-13-diagnostic-settings-at-scale
+Meters that can bill, region southcentralus
+==================================================================
+
+  FLAT RECURRING METERS -- bill while the thing exists (30)
+  --------------------------------------------------------------
+    ack 84640.00000 1/Day      Commitment Tier Capacity Reservation Azure Monitor  [2 tiers]
+    ack    4.85000 1 Hour     Standard Instance                    Key Vault
+    ack    3.20000 1 Hour     Standard B1 Instance                 Key Vault
+    ack    3.00000 1/Month    Health System Log Monitored          Azure Monitor
+    ack    3.00000 1/Month    Alerts System Log Monitored          Azure Monitor  [3 tiers]
+    ack    0.30000 1/Month    Alerts Resource Monitored            Azure Monitor  [4 tiers]
+    ack    0.30000 1/Month    Health Prom Monitored Metric Monitor Azure Monitor
+    ack    0.30000 1/Month    Health Metric Monitored              Azure Monitor
+    ack    0.10000 1/Month    Health Dynamic Threshold Signal      Azure Monitor
+    ack    0.10000 1/Month    Alerts Dynamic Threshold             Azure Monitor
+    ack    0.10000 1/Month    Alerts Metric Monitored              Azure Monitor
+...
+  OK -- every flat recurring meter is acknowledged in meters.json.
+
+  This says what CAN be billed. It is not an estimate, and it is
+  not the cost of the week. Read that from the invoice after
+  teardown.
+
+# price_check.py gates FLAT meters. This week's exposure is Analytics
+# ingestion at $2.76/GB, because the whole point is turning logging ON.
+# So the bound is in Terraform instead: daily_quota_gb = 0.5, and a
+# predicted volume written into meters.json BEFORE deploying, so the
+# measurement can contradict it.

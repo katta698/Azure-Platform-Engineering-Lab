@@ -1,0 +1,27 @@
+title: Teardown, verified against Azure rather than an exit code
+subtitle: week-13 — two of the nine resources live outside the resource group
+width: 1020
+---
+$ bash week-13-diagnostic-settings-at-scale/scripts/cleanup.sh
+removing remediation tasks...
+  deleted rem-keyvault-vaults
+
+terraform destroy...
+azurerm_resource_group.diag: Destruction complete after 26s
+
+Destroy complete! Resources: 9 destroyed.
+
+verifying against Azure, not against the destroy's exit code
+  ------------------------------------------------------------------
+  resource group gone                        PASS
+  Log Analytics workspace gone               PASS
+  subscription policy assignment gone        PASS
+  remediation role assignment gone           PASS
+  note: workspace soft-deleted for 14 days, name still reserved
+
+  teardown verified.
+
+# The policy assignment and its role assignment are at SUBSCRIPTION
+# scope. Deleting the resource group leaves both behind, still trying
+# to remediate into a workspace that no longer exists -- which is why
+# they are asserted separately.

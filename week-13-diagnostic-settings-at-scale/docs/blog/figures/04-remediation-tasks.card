@@ -1,0 +1,25 @@
+title: Remediation is per POLICY, not per initiative
+subtitle: week-13 — assigning the initiative changed nothing for resources that already existed
+width: 1040
+---
+# The initiative holds 69 policies. Evaluation found three with a
+# matching resource in this subscription:
+
+    keyvault-vaults                    Compliant
+    network-publicipaddresses          Compliant
+    operationalinsights-workspaces     Compliant
+
+# A remediation task is required for EACH, named by its
+# policyDefinitionReferenceId. One initiative, three tasks:
+
+$ az policy remediation create --definition-reference-id <ref> ...
+
+    rem-keyvault-vaults                  Succeeded   1 deployment
+    rem-network-publicipaddresses        Succeeded   1 deployment
+    rem-operationalinsights-workspaces   Succeeded   1 deployment
+
+# Without these the assignment only affects resources created AFTER it.
+#
+# Compliance lags reality: the public IP read NonCompliant for minutes
+# after its setting existed. The settings themselves were checked
+# per-resource rather than read off the dashboard.

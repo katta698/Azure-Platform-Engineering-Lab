@@ -1,0 +1,30 @@
+title: Four resources, three outcomes, one initiative
+subtitle: week-13 — validate.sh, checked per resource rather than read off a dashboard
+width: 1020
+---
+$ bash week-13-diagnostic-settings-at-scale/scripts/validate.sh
+
+Week 13 validation — 2026-11-14T13:35:23Z
+  Test                                               Result
+  -------------------------------------------------- ----------------------
+  Workspace exists                                   law-wk13-dev-scus-001  PASS
+  Daily ingestion cap set                            0.5 GB/day             PASS
+  Diagnostic setting on key vault                    1 setting(s)           PASS
+  Diagnostic setting on public IP                    1 setting(s)           PASS
+  No setting on NSG under audit (expected)           0, by design           PASS
+  No setting on storage (expected)                   0, by design           PASS
+
+  writing a secret to generate a Key Vault audit event...
+  waiting for AuditEvent rows to reach the workspace...
+  Logs actually arrived in the workspace             13 Key Vault row(s)    PASS
+
+  7 passed / 0 failed
+
+
+# Two of those PASS rows are resources the policy did NOT touch.
+# The NSG supports allLogs and not audit. No built-in policy covers
+# storage accounts at any category group. Both look like failures on
+# a compliance dashboard and neither is.
+#
+# The last row is the only one that proves data moved. Everything
+# above it proves configuration.

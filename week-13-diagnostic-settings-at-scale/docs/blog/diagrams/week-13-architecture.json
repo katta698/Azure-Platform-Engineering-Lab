@@ -1,0 +1,115 @@
+{
+  "title": "Week 13 — one initiative, four resources, three different outcomes",
+  "alt": "Architecture diagram. At subscription scope, a built-in Azure Policy initiative is assigned with a system-assigned managed identity holding Log Analytics Contributor; the identity is what deployIfNotExists deploys as. Inside the resource group, four target resources produce three outcomes. A key vault and a public IP are remediated and send resource logs to the Log Analytics workspace. A network security group is untouched, because it supports the allLogs category group and not audit. A storage account is untouched because no built-in policy covers the type at any category group. The workspace itself is also covered and logs itself. Remediation tasks are created per policy, not per initiative.",
+  "width": 960,
+  "height": 380,
+  "groups": [
+    {
+      "id": "sub",
+      "style": "logical",
+      "label": "sub-lab-dev — subscription scope",
+      "x": 30,
+      "y": 71,
+      "w": 268,
+      "h": 150
+    },
+    {
+      "id": "rg",
+      "style": "logical",
+      "label": "rg-diagnostics-lab-dev — four resources, three outcomes",
+      "x": 330,
+      "y": 71,
+      "w": 390,
+      "h": 262
+    },
+    {
+      "id": "dest",
+      "style": "logical",
+      "label": "the destination",
+      "x": 760,
+      "y": 71,
+      "w": 170,
+      "h": 150
+    }
+  ],
+  "nodes": [
+    {
+      "id": "init",
+      "icon": "policy.svg",
+      "label": "Built-in initiative — 69 policies",
+      "x": 100,
+      "y": 148
+    },
+    {
+      "id": "mi",
+      "icon": "managed-identity.svg",
+      "label": "System-assigned identity",
+      "x": 228,
+      "y": 148
+    },
+    {
+      "id": "kv",
+      "icon": "key-vault.svg",
+      "label": "Key Vault — remediated",
+      "x": 405,
+      "y": 148
+    },
+    {
+      "id": "pip",
+      "icon": "public-ip.svg",
+      "label": "Public IP — remediated",
+      "x": 560,
+      "y": 148
+    },
+    {
+      "id": "nsg",
+      "label": "NSG — allLogs only, not audit",
+      "w": 160,
+      "x": 420,
+      "y": 272
+    },
+    {
+      "id": "st",
+      "icon": "storage-account.svg",
+      "label": "Storage — no built-in policy",
+      "x": 630,
+      "y": 272
+    },
+    {
+      "id": "law",
+      "icon": "log-analytics.svg",
+      "label": "Log Analytics workspace",
+      "x": 845,
+      "y": 148
+    }
+  ],
+  "edges": [
+    {
+      "from": "init",
+      "to": "mi",
+      "label": "deploys as",
+      "label_at": [
+        164,
+        116
+      ]
+    },
+    {
+      "from": "mi",
+      "to": "kv",
+      "label": "remediates",
+      "label_at": [
+        385,
+        116
+      ]
+    },
+    {
+      "from": "pip",
+      "to": "law",
+      "label": "resource logs — both",
+      "label_at": [
+        700,
+        116
+      ]
+    }
+  ]
+}
