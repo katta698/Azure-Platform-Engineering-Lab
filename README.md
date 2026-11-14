@@ -39,7 +39,7 @@ the things it governs.
 | [Week 10](./week-10-opentelemetry) | OpenTelemetry — one trace across two services, and sampling that keeps it whole | Application Insights, Container Apps, Container Registry, OpenTelemetry | [✅ Complete](https://jayanthkatta.com/blog/week-10-opentelemetry/) |
 | [Week 11](./week-11-managed-prometheus) | Managed Prometheus and Grafana, alerts as code — no cluster, no secret | Azure Monitor Workspace, Managed Grafana, Linux VM, Prometheus Rule Groups | [✅ Complete](https://jayanthkatta.com/blog/week-11-managed-prometheus/) |
 | [Week 12](./week-12-detections-as-code) | Detections as code — a matched pair, one that fires and one that must not | Microsoft Sentinel, Log Analytics, Analytics Rules, Automation Rules | [✅ Complete](https://jayanthkatta.com/blog/week-12-detections-as-code/) |
-| Week 13 | Diagnostic settings enforced at scale | Azure Policy `deployIfNotExists`, Diagnostic Settings, Log Analytics | 📅 Planned |
+| [Week 13](./week-13-diagnostic-settings-at-scale) | Diagnostic settings at scale — one built-in initiative, three different outcomes | Azure Policy `deployIfNotExists`, Log Analytics, Key Vault, Public IP | 🚧 In progress |
 
 ### Phase 3 — Identity (Weeks 14–17)
 
