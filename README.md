@@ -94,7 +94,7 @@ write-up.
 | [09](week-09-container-apps) | Container Apps — a workload that scales to zero | [Complete](https://jayanthkatta.com/blog/week-09-container-apps/) |
 | [10](week-10-opentelemetry) | OpenTelemetry — one trace across two services, and sampling that keeps it whole | [Complete](https://jayanthkatta.com/blog/week-10-opentelemetry/) |
 | [11](week-11-managed-prometheus) | Managed Prometheus and Grafana, alerts as code — no cluster, no secret | [Complete](https://jayanthkatta.com/blog/week-11-managed-prometheus/) |
-| 12 | Detections as code in Microsoft Sentinel | Planned |
+| [12](week-12-detections-as-code) | Detections as code — a matched pair, one that fires and one that must not | [Complete](https://jayanthkatta.com/blog/week-12-detections-as-code/) |
 | 13 | Diagnostic settings enforced at scale | Planned |
 | **Identity** — blocked on an Entra ID P1/P2 licence | | |
 | 14 | PIM, access reviews and break-glass | Blocked |
