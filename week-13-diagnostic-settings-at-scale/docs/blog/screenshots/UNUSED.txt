@@ -1,0 +1,28 @@
+Retired figure slots — week 13
+==============================
+
+The gate reads this file for bare filenames on their own line.
+
+01-hcp-workspace.png
+
+    NOT CAPTURED, and it should have been.
+
+    Weeks 07 through 11 each open with an HCP workspace figure showing the
+    workspace, its execution mode and the resource count. Week 13 uses HCP for
+    state like every other week -- terraform/versions.tf carries a cloud {}
+    block for workspace azure-week-13-dev -- and shipped without one. Week 12
+    did the same. FIGURE_PLAN.md is written fresh each week and nothing
+    compared it against what earlier weeks included.
+
+    It is no longer capturable in the form the other weeks show. The HCP API
+    reports azure-week-13-dev at resource-count 0 after teardown, so a capture
+    now would be an empty workspace presented as evidence of a deploy.
+
+    NOT re-deployed to stage it. The week's cost figure is still pending and a
+    second deployment would change the number this lab committed to measuring.
+    A screenshot is not worth corrupting a measurement.
+
+    scripts/check_hcp_figure.py now fails for a week that uses a cloud {} block
+    and has no hcp figure, so weeks 14+ cannot repeat it. Weeks 01, 02, 04 and
+    06 also lack one; backfilling those is a separate decision and they are not
+    re-deployable either.
