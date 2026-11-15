@@ -39,7 +39,7 @@ the things it governs.
 | [Week 10](./week-10-opentelemetry) | OpenTelemetry — one trace across two services, and sampling that keeps it whole | Application Insights, Container Apps, Container Registry, OpenTelemetry | [✅ Complete](https://jayanthkatta.com/blog/week-10-opentelemetry/) |
 | [Week 11](./week-11-managed-prometheus) | Managed Prometheus and Grafana, alerts as code — no cluster, no secret | Azure Monitor Workspace, Managed Grafana, Linux VM, Prometheus Rule Groups | [✅ Complete](https://jayanthkatta.com/blog/week-11-managed-prometheus/) |
 | [Week 12](./week-12-detections-as-code) | Detections as code — a matched pair, one that fires and one that must not | Microsoft Sentinel, Log Analytics, Analytics Rules, Automation Rules | [✅ Complete](https://jayanthkatta.com/blog/week-12-detections-as-code/) |
-| [Week 13](./week-13-diagnostic-settings-at-scale) | Diagnostic settings at scale — one built-in initiative, three different outcomes | Azure Policy `deployIfNotExists`, Log Analytics, Key Vault, Public IP | 🚧 In progress |
+| [Week 13](./week-13-diagnostic-settings-at-scale) | Diagnostic settings at scale — one built-in initiative, three different outcomes | Azure Policy `deployIfNotExists`, Log Analytics, Key Vault, Public IP | [✅ Complete](https://jayanthkatta.com/blog/week-13-diagnostic-settings-at-scale/) |
 
 ### Phase 3 — Identity (Weeks 14–17)
 
@@ -375,6 +375,19 @@ Every week follows the same pattern:
 - An automation rule labelling incidents, with no Logic App
 
 **Resources:** 7 Terraform resources | **Measured:** 13 alerts grouped into 3 incidents, $0.00 billed | **Blog:** https://jayanthkatta.com/blog/week-12-detections-as-code/
+
+---
+
+## Week 13 — Diagnostic settings at scale
+
+**The story:** "All our resources send logs" is a claim every platform team makes and almost none can demonstrate. One built-in initiative turns logging on across a subscription — and two of the four target resources were never going to comply, which is the result rather than a gap.
+
+**What it builds:**
+- A capped Log Analytics workspace and Azure's built-in `audit` initiative assigned at subscription scope, looked up by display name so no GUID lands in Terraform
+- A system-assigned identity holding Log Analytics Contributor, and one remediation task per policy
+- Four targets producing three outcomes: remediated, uncovered by the category group, and uncovered by any built-in policy
+
+**Resources:** 9 Terraform resources | **Measured:** 14 Key Vault audit rows reached the workspace | **Blog:** https://jayanthkatta.com/blog/week-13-diagnostic-settings-at-scale/
 
 ---
 
