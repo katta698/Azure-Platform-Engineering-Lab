@@ -49,3 +49,15 @@ below exactly as it is; the prose underneath is for humans.
 
       The post says the console view is missing and why. It does not pretend
       otherwise, and no frame was manufactured to fill the slot.
+
+01-hcp-workspace.png
+
+    NOT CAPTURED, and correctly so.
+
+    HCP holds this lab's state and executes nothing: every workspace runs in
+    LOCAL execution mode, so no run is created. Measured 2026-11-14 on the
+    API -- azure-week-12-dev and azure-week-13-dev both report 0 runs, as does
+    azure-week-11-dev. There is no HCP activity for a week to show.
+
+    Recorded here so weeks 12 and 13 give the same answer rather than leaving
+    an unexplained difference between them.
