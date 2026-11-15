@@ -5,24 +5,22 @@ The gate reads this file for bare filenames on their own line.
 
 01-hcp-workspace.png
 
-    NOT CAPTURED, and it should have been.
+    NOT CAPTURED, and correctly so.
 
-    Weeks 07 through 11 each open with an HCP workspace figure showing the
-    workspace, its execution mode and the resource count. Week 13 uses HCP for
-    state like every other week -- terraform/versions.tf carries a cloud {}
-    block for workspace azure-week-13-dev -- and shipped without one. Week 12
-    did the same. FIGURE_PLAN.md is written fresh each week and nothing
-    compared it against what earlier weeks included.
+    HCP holds this lab's state and executes nothing. Every workspace runs in
+    LOCAL execution mode, so no run is created in HCP -- measured on the API:
+    azure-week-13-dev has 3 state versions and 0 runs, and azure-week-11-dev
+    has 8 state versions and 0 runs. The same is true of every week.
 
-    It is no longer capturable in the form the other weeks show. The HCP API
-    reports azure-week-13-dev at resource-count 0 after teardown, so a capture
-    now would be an empty workspace presented as evidence of a deploy.
+    So there is no HCP activity to show for this week. The workspace page
+    would report execution mode Local and a resource count read from state,
+    which is a picture of where state lives rather than evidence of anything
+    this week did.
 
-    NOT re-deployed to stage it. The week's cost figure is still pending and a
-    second deployment would change the number this lab committed to measuring.
-    A screenshot is not worth corrupting a measurement.
+    Jay, 2026-11-14: "this week genuine though HCP is not taken because it's
+    not used."
 
-    scripts/check_hcp_figure.py now fails for a week that uses a cloud {} block
-    and has no hcp figure, so weeks 14+ cannot repeat it. Weeks 01, 02, 04 and
-    06 also lack one; backfilling those is a separate decision and they are not
-    re-deployable either.
+    A check keyed on the presence of a cloud {} block was written and then
+    deleted: it would have demanded this figure every week forever, because
+    every week has that block. The condition that matters is whether HCP did
+    something, and under local execution it never does.
