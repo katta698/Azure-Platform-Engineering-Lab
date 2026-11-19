@@ -1,0 +1,22 @@
+title: Measured against the prediction, not against a rate card
+subtitle: week-13 — Cost Management, ActualCost for 14 November 2026
+width: 1020
+---
+$ az rest --method post --url ".../Microsoft.CostManagement/query" --body @query.json
+
+       0.0053 USD  Virtual Network      <- the public IP, for the hours it existed
+       0.0000 USD  Key Vault
+       0.0000 USD  Storage
+    TOTAL 0.0053 USD
+
+# Log Analytics does not appear at all. The meter this week was built to
+# worry about -- Analytics Logs Data Ingestion at $2.76/GB -- billed nothing.
+#
+# PREDICTED in meters.json before deploying: under 0.05 GB/day, cap 0.5.
+# MEASURED: no ingestion line on the invoice. The prediction held.
+#
+# The control matters. The same query over October returns $7.2125 including
+# week 11's $6.00 Grafana line, so an empty Log Analytics row here means no
+# charge rather than a question asked wrongly. An earlier attempt returned
+# HTTP 429 and printed nothing to stdout -- which reads identically to $0.00
+# if you do not check stderr.

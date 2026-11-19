@@ -6,8 +6,13 @@ outcomes** — and only one of them is "it worked".
 
 ## Cost note
 
-**Measured: pending the invoice.** Deployed and validated 2026-11-14, torn down
-the same day. The figure will be read from Cost Management, not estimated.
+**Measured: $0.0053.** Read from Cost Management (ActualCost, 14 November
+2026): $0.0053 for the public IP, $0.00 for the key vault and storage, and
+**no Log Analytics line at all**. The meter this week was built around —
+Analytics ingestion at $2.76/GB — billed nothing.
+
+The prediction written into [`meters.json`](meters.json) *before* deploying was
+under 0.05 GB/day against a 0.5 GB cap. It held.
 
 **What runs continuously:** nothing. `scripts/cleanup.sh` destroys the week.
 
