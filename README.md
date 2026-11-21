@@ -41,39 +41,43 @@ the things it governs.
 | [Week 12](./week-12-detections-as-code) | Detections as code — a matched pair, one that fires and one that must not | Microsoft Sentinel, Log Analytics, Analytics Rules, Automation Rules | [✅ Complete](https://jayanthkatta.com/blog/week-12-detections-as-code/) |
 | [Week 13](./week-13-diagnostic-settings-at-scale) | Diagnostic settings at scale — one built-in initiative, three different outcomes | Azure Policy `deployIfNotExists`, Log Analytics, Key Vault, Public IP | [✅ Complete](https://jayanthkatta.com/blog/week-13-diagnostic-settings-at-scale/) |
 
-### Phase 3 — Data (Weeks 14–19)
+### Phase 3 — What an app team actually consumes (Weeks 14–19)
 
-Moved ahead of compute and containers on 2026-11-20. The identity phase is
-blocked on a licence with no pay-as-you-go path, and the hub network and
-private DNS estate that private data services need were finished in week 05 —
-so data is the next thing that can actually be built.
-
-| Week | Pattern | Key Azure Services | Status |
-|------|---------|-------------------|--------|
-| Week 14 | PostgreSQL Flexible Server — HA, private, Entra auth, no passwords | PostgreSQL Flexible Server, Private Endpoints, Entra auth | 📅 Planned |
-| Week 15 | Azure SQL Hyperscale and a failover actually performed | Azure SQL Hyperscale, Failover Groups | 📅 Planned |
-| Week 16 | Cosmos DB multi-region — consistency demonstrated, vector search | Cosmos DB, Vector Search | 📅 Planned |
-| Week 17 | Azure Managed Redis | Azure Managed Redis | 📅 Planned |
-| Week 18 | Storage that survives an auditor — immutability and replication | Storage, Immutable Blob, Object Replication | 📅 Planned |
-| Week 19 | Real-time analytics on Fabric | Microsoft Fabric, Eventstream, KQL Database | 📅 Planned |
-
-### Phase 4 — Compute and containers (Weeks 20–25)
+Weeks 01–13 built the platform's foundations on empty ground. Nothing yet has
+an app team touching it. The test for every week here: **would an app team
+notice if this did not exist?**
 
 | Week | Pattern | Key Azure Services | Status |
 |------|---------|-------------------|--------|
-| Week 20 | Container Apps self-service — KEDA event-driven scaling, building on week 09 | Container Apps, KEDA, Service Bus | 📅 Planned |
-| Week 21 | AKS Automatic with workload identity | AKS Automatic, Workload Identity, Managed Identity | 📅 Planned |
-| Week 22 | GitOps with Flux, guarded by Azure Policy for Kubernetes | AKS, Flux, Azure Policy for Kubernetes | 📅 Planned |
-| Week 23 | Gateway API ingress with Application Gateway for Containers | Application Gateway for Containers, Gateway API | 📅 Planned |
-| Week 24 | The Istio add-on — mTLS, and what a mesh costs | AKS Istio add-on, mTLS | 📅 Planned |
+| Week 14 | A database with **no password anywhere** — private, HA, Entra auth | PostgreSQL Flexible Server, Private Endpoint, Entra auth | 📅 Planned |
+| Week 15 | The golden path — code to running, **without a platform engineer in the loop** | Container Apps, Container Registry, GitHub Actions + OIDC | 📅 Planned |
+| Week 16 | The same path on **Azure DevOps** — a service connection with workload identity federation | Azure Pipelines, workload identity federation, Container Apps | 📅 Planned |
+| Week 17 | Config without redeploy, and **no secret in any repo** | Key Vault, App Configuration, managed identity references | 📅 Planned |
+| Week 18 | Answer "**which team spent this?**" | Cost Management, budgets, tag policy, exports | 📅 Planned |
+| Week 19 | A backup nobody has restored is a hypothesis — **perform the restore** | Backup Vault, PostgreSQL point-in-time restore | 📅 Planned |
+
+**Weeks 15 and 16 are the same claim on two delivery systems**, deliberately.
+Most Azure enterprises run Azure DevOps rather than GitHub, and a platform team
+is usually asked to support both. The secretless deploy from week 07 should be
+provable on either without changing the target.
+
+### Phase 4 — Scale, release safety and the shared estate (Weeks 20–25)
+
+| Week | Pattern | Key Azure Services | Status |
+|------|---------|-------------------|--------|
+| Week 20 | Scale on a queue, not on CPU — a spike absorbed without over-provisioning | Container Apps, KEDA, Service Bus | 📅 Planned |
+| Week 21 | Ship a change safely, and roll it back when it misbehaves | Container Apps revisions, traffic splitting | 📅 Planned |
+| Week 22 | Prove the data tier is **not reachable from the internet** | Private Endpoints, Private DNS zones (week 05's estate) | 📅 Planned |
+| Week 23 | AKS Automatic with workload identity | AKS Automatic, Workload Identity | ⚠️ Quota risk |
+| Week 24 | GitOps with Flux, guarded by Azure Policy for Kubernetes | AKS, Flux, Azure Policy for Kubernetes | ⚠️ Quota risk |
 | Week 25 | An internal developer platform — Deployment Environments | Deployment Environments, Azure Policy | 📅 Planned |
 
-**Week 25 was week 18 and lost its slot deliberately.** Deployment Environments
-is a narrow service most Azure practitioners never meet, and its neighbour in
-the Dev Center family — Dev Box — carries per-hour compute that does not appear
-in the Azure retail price API at all, so `scripts/price_check.py` cannot
-enumerate its meters before a deploy. Dev Box is dropped from the week
-entirely; Deployment Environments survives on its own, later.
+**Weeks 23–24 carry a quota risk and are flagged rather than assumed.** This
+subscription's Total Regional vCPU limit is **10**, measured 2026-11-20. AKS
+Automatic sets its own minimum node sizing, and if it does not fit, these two
+move and something else comes up. Everything else in phases 3 and 4 avoids VM
+quota entirely — Container Apps is serverless and the database tiers are
+burstable.
 
 ### Phase 5 — Identity — UNSCHEDULED, blocked on a licence
 
@@ -97,50 +101,67 @@ covers all four.
 | Access packages for self-service access | Entra ID P2, Entitlement Management | 🔒 Blocked |
 | Lifecycle workflows — joiner, mover, leaver | Entra ID Governance, Lifecycle Workflows | 🔒 Blocked |
 
-### Phase 6 — AI platform (Weeks 26–31)
+### Phase 6 — Migrating what already exists (Weeks 26–30)
+
+The modernization core, pulled forward from the year-2 sketch. Everything
+before this builds a platform on empty ground; this is the phase where
+something that already runs somewhere else has to move onto it.
 
 | Week | Pattern | Key Azure Services | Status |
 |------|---------|-------------------|--------|
-| Week 26 | An AI landing zone — private, and governed like everything else | Azure AI Foundry, Private Endpoints, Azure Policy | 📅 Planned |
-| Week 27 | RAG on the hub network — retrieval quality and private endpoints | Azure AI Search, Azure OpenAI, Private Link | 📅 Planned |
-| Week 28 | Agents with tools, under a managed identity | Azure AI Agent Service, Managed Identity | 📅 Planned |
-| Week 29 | Evaluation and content safety gating deploys | Azure AI Evaluation, Content Safety | 📅 Planned |
-| Week 30 | An AI gateway — token quotas and per-team chargeback | API Management, Azure OpenAI | 📅 Planned |
-| Week 31 | Model economics — provisioned throughput versus pay-as-you-go | Azure OpenAI PTU, Cost Management | 📅 Planned |
+| Week 26 | Discovery and assessment — what is actually running, and what it would cost here | Azure Migrate, Cost Management | 📅 Planned |
+| Week 27 | A database moved with **measured** downtime, not estimated | Database Migration Service, PostgreSQL Flexible Server | 📅 Planned |
+| Week 28 | A web app lifted, then actually modernized — not just rehosted | App Service, Container Apps, Managed Identity | 📅 Planned |
+| Week 29 | Hybrid connectivity — reaching what has not moved yet | VPN Gateway, Private DNS Resolver, hub network from week 05 | 📅 Planned |
+| Week 30 | Strangler routing — old and new serving the same users at once | Application Gateway, Front Door, traffic weighting | 📅 Planned |
 
-### Phase 7 — Security (Weeks 32–37)
-
-| Week | Pattern | Key Azure Services | Status |
-|------|---------|-------------------|--------|
-| Week 32 | Defender for Cloud attack paths, closed | Defender for Cloud, Attack Path Analysis | 📅 Planned |
-| Week 33 | Customer-managed keys and the rotation that breaks things | Key Vault, CMK, Managed HSM | 📅 Planned |
-| Week 34 | Confidential computing and attestation | Confidential VMs, Microsoft Azure Attestation | 📅 Planned |
-| Week 35 | Private Link at scale — DNS Private Resolver, and a broken zone link | Private Link, DNS Private Resolver, Private DNS Zones | 📅 Planned |
-| Week 36 | WAF tested with real payloads | Application Gateway WAF, Front Door WAF | 📅 Planned |
-| Week 37 | Supply chain — signed images and admission control that rejects | Container Registry, Notation, Azure Policy for Kubernetes | 📅 Planned |
-
-### Phase 8 — Resilience (Weeks 38–43)
+### Phase 7 — Running it safely (Weeks 31–36)
 
 | Week | Pattern | Key Azure Services | Status |
 |------|---------|-------------------|--------|
-| Week 38 | Zone redundancy, proven per service | Availability Zones | 📅 Planned |
-| Week 39 | Chaos Studio experiments in CI | Azure Chaos Studio | 📅 Planned |
-| Week 40 | Backup vaults, with a restore performed | Backup Vault, Azure Backup | 📅 Planned |
-| Week 41 | Multi-region failover — and failing back | Traffic Manager, Front Door, Site Recovery | 📅 Planned |
-| Week 42 | Load testing to the actual ceiling | Azure Load Testing | 📅 Planned |
-| Week 43 | A DR game day with measured RTO and RPO | Site Recovery, Backup Vault | 📅 Planned |
+| Week 31 | Defender for Cloud attack paths, closed | Defender for Cloud, Attack Path Analysis | 📅 Planned |
+| Week 32 | Customer-managed keys and the rotation that breaks things | Key Vault, CMK, Managed HSM | 📅 Planned |
+| Week 33 | Private Link at scale — DNS Private Resolver, and a deliberately broken zone link | Private Link, DNS Private Resolver | 📅 Planned |
+| Week 34 | WAF tested with real payloads | Application Gateway WAF, Front Door WAF | 📅 Planned |
+| Week 35 | Supply chain — signed images and admission control that rejects | Container Registry, Notation, Azure Policy | 📅 Planned |
+| Week 36 | Confidential computing and attestation | Confidential VMs, Microsoft Azure Attestation | 📅 Planned |
 
-### Phase 9 — FinOps and operations (Weeks 44–48)
+### Phase 8 — Proving it survives (Weeks 37–41)
 
 | Week | Pattern | Key Azure Services | Status |
 |------|---------|-------------------|--------|
-| Week 44 | FinOps toolkit — exports, anomaly alerts, real attribution | Cost Management, FinOps Toolkit, Data Factory | 📅 Planned |
-| Week 45 | Reservations and savings plans modelled on real usage | Reservations, Savings Plans, Cost Management | 📅 Planned |
-| Week 46 | Carbon optimization, with a workload changed because of it | Carbon Optimization, Azure Monitor | 📅 Planned |
-| Week 47 | Arc and Update Manager — a non-Azure machine, same policy set | Azure Arc, Update Manager, Azure Policy | 📅 Planned |
-| Week 48 | Compute Fleet and spot, proven by forcing an eviction | Azure Compute Fleet, Spot VMs | 📅 Planned |
+| Week 37 | Zone redundancy, proven per service | Availability Zones | 📅 Planned |
+| Week 38 | Chaos Studio experiments in CI | Azure Chaos Studio | 📅 Planned |
+| Week 39 | Multi-region failover — and failing back | Front Door, Traffic Manager, Site Recovery | 📅 Planned |
+| Week 40 | Load testing to the actual ceiling | Azure Load Testing | 📅 Planned |
+| Week 41 | A DR game day with measured RTO and RPO | Site Recovery, Backup Vault | 📅 Planned |
 
----
+### Phase 9 — Paying for it (Weeks 42–45)
+
+Cost *attribution* is week 18, early and deliberately: an app team that cannot
+see its own bill cannot act on it. This phase is optimisation, which only makes
+sense once there is real usage to optimise.
+
+| Week | Pattern | Key Azure Services | Status |
+|------|---------|-------------------|--------|
+| Week 42 | FinOps toolkit — exports, anomaly alerts, real attribution at scale | Cost Management, FinOps Toolkit, Data Factory | 📅 Planned |
+| Week 43 | Reservations and savings plans modelled on real usage | Reservations, Savings Plans | 📅 Planned |
+| Week 44 | Carbon optimization, with a workload changed because of it | Carbon Optimization, Azure Monitor | 📅 Planned |
+| Week 45 | Arc and Update Manager — a non-Azure machine, same policy set | Azure Arc, Update Manager, Azure Policy | 📅 Planned |
+
+### Phase 10 — AI as a workload the platform hosts (Weeks 46–48)
+
+Deliberately last, and deliberately short. AI here is **a workload type the
+platform already knows how to run** — private networking, managed identity,
+cost attribution, observability — rather than a separate tour of AI services.
+It is also the fastest-moving area in the product, so planning it eighteen
+months out would be planning fiction.
+
+| Week | Pattern | Key Azure Services | Status |
+|------|---------|-------------------|--------|
+| Week 46 | An AI workload on the existing platform — private, governed, attributed | Azure AI Foundry, Private Endpoints, Managed Identity | 📅 Planned |
+| Week 47 | An AI gateway — token quotas and per-team chargeback | API Management, Azure OpenAI | 📅 Planned |
+| Week 48 | Model economics — provisioned throughput versus pay-as-you-go, measured | Azure OpenAI PTU, Cost Management | 📅 Planned |
 
 **Weeks 49–52 are deliberately unallocated.** They are where the identity
 phase lands if a licence ever exists — four weeks, run back to back so one
@@ -168,15 +189,22 @@ Briefing.
 
 ### Carried forward — displaced from Year 1, not dropped on merit
 
-| Week | Project | Key Azure Services |
-|------|---------|-------------------|
-| Week 53 | The whole platform reviewed — every measured number, and what to redo | All of the above |
+| Project | Key Azure Services | Why it moved |
+|---------|-------------------|--------------|
+| The whole platform reviewed — every measured number, and what to redo | All of the above | 53 topics were drafted for 52 slots; the capstone is the overflow |
+| Azure SQL Hyperscale, with a failover performed | Azure SQL Hyperscale, Failover Groups | one managed database tier proves the pattern; a second is a service tour |
+| Cosmos DB multi-region — consistency demonstrated | Cosmos DB, Vector Search | same reason |
+| Azure Managed Redis | Azure Managed Redis | same reason |
+| Storage that survives an auditor — immutability and replication | Immutable Blob, Object Replication | compliance-shaped rather than app-team-shaped |
+| Real-time analytics on Fabric | Microsoft Fabric, Eventstream | Fabric's capacity model is its own subject, not a platform week |
+| Gateway API ingress with Application Gateway for Containers | AGC, Gateway API | depends on the AKS weeks surviving the vCPU quota |
+| The Istio add-on — mTLS, and what a mesh costs | AKS Istio add-on | same dependency |
 
-One row, because only one topic was displaced: the roadmap drafted 53 topics
-for 52 slots and the capstone is the overflow. The identity weeks were delayed
-inside Year 1 rather than pushed out of it — they moved from the 12–15 range to
-14–17 when the licence turned out to be missing, and the observability phase
-moved up to fill the gap.
+**These were displaced on 2026-11-20 when the roadmap was reorganised around
+what an app team consumes.** Six of them are additional managed data or
+networking services; the pattern each would demonstrate is already proved by a
+sibling week. None was dropped for lacking merit, and any can come back if a
+week frees up.
 
 ### Candidate themes for Weeks 56+
 
