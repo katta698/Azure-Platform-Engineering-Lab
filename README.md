@@ -51,15 +51,25 @@ notice if this did not exist?**
 |------|---------|-------------------|--------|
 | Week 14 | A database with **no password anywhere** — private, HA, Entra auth | PostgreSQL Flexible Server, Private Endpoint, Entra auth | 📅 Planned |
 | Week 15 | The golden path — code to running, **without a platform engineer in the loop** | Container Apps, Container Registry, GitHub Actions + OIDC | 📅 Planned |
-| Week 16 | The same path on **Azure DevOps** — a service connection with workload identity federation | Azure Pipelines, workload identity federation, Container Apps | 📅 Planned |
+| Week 16 | Prove the data tier is **not reachable from the internet** | Private Endpoints, Private DNS zones (week 05's estate) | 📅 Planned |
 | Week 17 | Config without redeploy, and **no secret in any repo** | Key Vault, App Configuration, managed identity references | 📅 Planned |
 | Week 18 | Answer "**which team spent this?**" | Cost Management, budgets, tag policy, exports | 📅 Planned |
 | Week 19 | A backup nobody has restored is a hypothesis — **perform the restore** | Backup Vault, PostgreSQL point-in-time restore | 📅 Planned |
 
-**Weeks 15 and 16 are the same claim on two delivery systems**, deliberately.
-Most Azure enterprises run Azure DevOps rather than GitHub, and a platform team
-is usually asked to support both. The secretless deploy from week 07 should be
-provable on either without changing the target.
+**Azure DevOps was considered for week 16 and dropped on 2026-11-20.** The
+claim would have been the secretless deploy from week 07 proved on a second
+delivery system, which is a real platform-engineering case — most Azure
+enterprises run Pipelines rather than Actions.
+
+It fails on evidence rather than on merit. **Public projects in Azure DevOps
+are retired**: the policy is unavailable to organisations not already using it,
+existing public projects convert to private from 2027, and Microsoft's own
+guidance is to use GitHub for anything public. A private project puts a login
+wall in front of every pipeline run, so a reader could not click through to the
+evidence the way they can with this repository. It would also need a hosted
+parallelism grant with a 4–5 business day lead time.
+
+Delivery stays on GitHub Actions.
 
 ### Phase 4 — Scale, release safety and the shared estate (Weeks 20–25)
 
@@ -67,7 +77,7 @@ provable on either without changing the target.
 |------|---------|-------------------|--------|
 | Week 20 | Scale on a queue, not on CPU — a spike absorbed without over-provisioning | Container Apps, KEDA, Service Bus | 📅 Planned |
 | Week 21 | Ship a change safely, and roll it back when it misbehaves | Container Apps revisions, traffic splitting | 📅 Planned |
-| Week 22 | Prove the data tier is **not reachable from the internet** | Private Endpoints, Private DNS zones (week 05's estate) | 📅 Planned |
+| Week 22 | Azure SQL Hyperscale, with a failover actually performed | Azure SQL Hyperscale, Failover Groups | 📅 Planned |
 | Week 23 | AKS Automatic with workload identity | AKS Automatic, Workload Identity | ⚠️ Quota risk |
 | Week 24 | GitOps with Flux, guarded by Azure Policy for Kubernetes | AKS, Flux, Azure Policy for Kubernetes | ⚠️ Quota risk |
 | Week 25 | An internal developer platform — Deployment Environments | Deployment Environments, Azure Policy | 📅 Planned |
@@ -192,7 +202,6 @@ Briefing.
 | Project | Key Azure Services | Why it moved |
 |---------|-------------------|--------------|
 | The whole platform reviewed — every measured number, and what to redo | All of the above | 53 topics were drafted for 52 slots; the capstone is the overflow |
-| Azure SQL Hyperscale, with a failover performed | Azure SQL Hyperscale, Failover Groups | one managed database tier proves the pattern; a second is a service tour |
 | Cosmos DB multi-region — consistency demonstrated | Cosmos DB, Vector Search | same reason |
 | Azure Managed Redis | Azure Managed Redis | same reason |
 | Storage that survives an auditor — immutability and replication | Immutable Blob, Object Replication | compliance-shaped rather than app-team-shaped |
