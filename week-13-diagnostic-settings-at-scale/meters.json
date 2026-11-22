@@ -9,44 +9,32 @@
     "is to turn logging ON across resource types. The gate does not cover it, so",
     "the bound is set in Terraform instead: see usage_meters_that_DO_apply."
   ],
-
   "region": "southcentralus",
-  "services": ["Log Analytics", "Azure Monitor", "Key Vault"],
-
+  "services": [
+    "Log Analytics",
+    "Azure Monitor",
+    "Key Vault"
+  ],
   "acknowledged": {
     "Commitment Tier Capacity Reservation": "NOT USED. Dearest 84,640.00 per DAY across 2 Azure Monitor tiers. A commitment tier starts at 100 GB/day and must be selected explicitly; the workspace is PerGB2018, which is the default.",
-
     "Standard Instance": "NOT USED. 4.85 per hour. CHECKED, not assumed: the price API attributes this meter to productName 'Azure Dedicated HSM', not to Key Vault. This week creates an azurerm_key_vault with sku_name = standard, which bills per 10,000 operations and has no hourly meter.",
-
     "Standard B1 Instance": "NOT USED. 3.20 per hour, productName 'Key Vault HSM Pool' -- again a different product from a standard vault. Same verification as above.",
-
     "Alerts System Log Monitored": "NOT USED. Up to 3.00 per month per rule, the Azure Monitor log-search-alert meter for Microsoft.Insights/scheduledQueryRules. This week creates no alert rules; it creates diagnostic settings, which are not alerts.",
-
     "Health System Log Monitored": "NOT USED. Same family, health signals. No scheduledQueryRules.",
-
     "Alerts Resource Monitored": "NOT USED. Azure Monitor metric alerts per monitored resource, 4 frequency tiers. No metric alerts.",
-
     "Alerts Metric Monitored": "NOT USED. Per-monitored-metric alert meter. No metric alerts.",
-
     "Health Metric Monitored": "NOT USED. Same family. No metric alerts.",
-
     "Alerts Dynamic Threshold": "NOT USED. Dynamic threshold metric alerts. None created.",
-
     "Health Dynamic Threshold Signal": "NOT USED. Same family. None created.",
-
-    "Health Prom Monitored Metric Monitored": "NOT USED. Managed Prometheus health metrics. Week 11 built the only Azure Monitor workspace in this lab and destroyed it on 2026-10-28."
+    "Health Prom Monitored Metric Monitored": "NOT USED. Managed Prometheus health metrics. Week 11 built the only Azure Monitor workspace in this lab and destroyed it on 2026-10-28.",
+    "Basic Endpoint": "NOT USED. 6.00/month per monitored endpoint under Azure Monitor SCOM Managed Instance -- a separate product that requires a SCOM managed instance, which this week does not deploy. Priced under armRegionName 'Global', so the gate's region-only filter never showed it until 2026-11-22; the invoice for this week was read afterwards and carried no such line."
   },
-
   "usage_meters_that_DO_apply": {
     "_comment": "The real exposure. Week 12 ingested one free table; this week deliberately turns ingestion on, and there is no free data type to hide behind.",
-
     "Analytics Logs Data Ingestion": "2.76 per GB, and it APPLIES. Bounded three ways rather than hoped about: (1) the workspace carries daily_quota_gb, so ingestion stops rather than bills past the cap; (2) categoryGroup is a deliberate parameter, not left at a value nobody chose; (3) the subscription blast radius was enumerated before assigning -- 1 virtual network, 1 route table, 1 network watcher, of which only the virtual network is covered by any built-in policy at all.",
-
     "Analytics Logs Data Retention": "0.12 per GB per month beyond the free 31 days. Retention is left at the default and the workspace is destroyed well inside it.",
-
     "Key Vault operations": "3.00 per 10,000 operations for a standard vault. The vault exists to emit audit logs, not to serve traffic; expected operation count is in the low hundreds."
   },
-
   "predicted_volume": {
     "_comment": "Stated BEFORE deployment so the measurement can contradict it. Week 11's cost note was wrong because nothing was predicted and therefore nothing could be checked.",
     "expected_gb_per_day": "under 0.05",
@@ -54,5 +42,10 @@
     "daily_cap_gb": 0.5,
     "worst_case_per_day_usd": 1.38,
     "note": "If the measured volume approaches the cap, the prediction was wrong and the write-up says so."
+  },
+  "acknowledged_patterns": {
+    "Azure Monitor::^(SMS|Voice Calls|Notifications|Emails)": "NOT REACHED. Per notification DELIVERED by an action group -- an SMS, a voice call, a push or an ITSM event. Priced with unitOfMeasure '1', which the gate now treats as flat because it cannot tell 'one month' from 'one message'. These are per-message: nothing bills until an alert fires and a receiver exists. This week creates no action group and no receiver.",
+    "Azure Monitor::^(API Calls|Logs Processed|Standard Web Test|Observability Agent)": "NOT REACHED. Per API call, per GB processed, per web test execution and per agent credit. Same bare '1' unit, same reason it is listed: all four are consumption and none has a standing charge.",
+    "Key Vault::^(Premium HSM-protected|Certificate Renewal Request|Secret Renewal)": "NOT USED. Per key and per renewal operation on a PREMIUM (HSM-backed) key vault. Week 13's vault is Standard, software-protected, and creates one secret from validate.sh -- no HSM key, no certificate, no renewal."
   }
 }

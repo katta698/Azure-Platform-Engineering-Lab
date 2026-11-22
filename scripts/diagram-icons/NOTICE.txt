@@ -76,6 +76,13 @@ Added 2026-10-31 for the weeks 01-10 backfill, same package, same terms:
     diagnostic-setting.svg   00008-icon-service-Diagnostics-Settings.svg
     key-vault.svg            10245-icon-service-Key-Vaults.svg
 
+Added 2026-11-22 for week 14, from Azure_Public_Service_Icons_V25.zip
+(same page, same terms; V25 is the current package as of that date):
+
+    postgresql.svg           10131-icon-service-Azure-Database-PostgreSQL-Server.svg
+    private-endpoint.svg     02579-icon-service-Private-Endpoints.svg
+    nat-gateway.svg          10310-icon-service-NAT.svg
+
 THINGS WITH NO OFFICIAL ICON ARE DRAWN AS A PLAIN CARD
 ------------------------------------------------------
 HCP Terraform, GitHub Actions, an ARM template, "100 rows sent". The terms

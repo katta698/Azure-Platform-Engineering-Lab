@@ -1,0 +1,132 @@
+{
+  "title": "Week 14 — a database with no password, reachable only from inside the network",
+  "alt": "Architecture diagram. A virtual network holds two subnets. In the application subnet, an Ubuntu virtual machine with no public IP address carries a user-assigned managed identity, and reaches the internet only outbound through a NAT gateway with a single public IP. In the database subnet, a private endpoint holds the address 10.60.1.4. A private DNS zone named privatelink.postgres.database.azure.com resolves the server's public hostname to that private address, so the client connects using the documented FQDN. The PostgreSQL flexible server sits outside the virtual network as a platform service, with public network access disabled, password authentication disabled, and no local administrator account at all; its only administrator is the managed identity. A standby replica in the same availability zone receives synchronous commits and is what a forced failover promotes. Microsoft Entra ID issues the access token that the virtual machine fetches from the instance metadata service and sends as its password.",
+  "width": 960,
+  "height": 440,
+  "groups": [
+    {
+      "id": "vnet",
+      "style": "vnet",
+      "label": "vnet-wk14-dev — 10.60.0.0/16",
+      "x": 24,
+      "y": 70,
+      "w": 540,
+      "h": 330
+    },
+    {
+      "id": "app",
+      "style": "logical",
+      "label": "snet-app — 10.60.2.0/24",
+      "x": 44,
+      "y": 100,
+      "w": 230,
+      "h": 170
+    },
+    {
+      "id": "db",
+      "style": "logical",
+      "label": "snet-db — 10.60.1.0/24",
+      "x": 300,
+      "y": 100,
+      "w": 230,
+      "h": 170
+    },
+    {
+      "id": "paas",
+      "style": "logical",
+      "label": "platform — outside the virtual network",
+      "x": 600,
+      "y": 70,
+      "w": 336,
+      "h": 350
+    }
+  ],
+  "nodes": [
+    {
+      "id": "vm",
+      "icon": "virtual-machine.svg",
+      "label": "Client VM + user-assigned managed identity",
+      "x": 159,
+      "y": 185,
+      "w": 200
+    },
+    {
+      "id": "pe",
+      "icon": "private-endpoint.svg",
+      "label": "Private endpoint — 10.60.1.4",
+      "x": 415,
+      "y": 185
+    },
+    {
+      "id": "dns",
+      "icon": "dns-zone.svg",
+      "label": "privatelink.postgres.database.azure.com",
+      "x": 240,
+      "y": 300,
+      "w": 220
+    },
+    {
+      "id": "entra",
+      "label": "Microsoft Entra ID — issues the token",
+      "x": 768,
+      "y": 130,
+      "w": 180
+    },
+    {
+      "id": "psql",
+      "icon": "postgresql.svg",
+      "label": "PostgreSQL flexible server — password auth disabled",
+      "x": 768,
+      "y": 232,
+      "w": 190
+    },
+    {
+      "id": "standby",
+      "icon": "postgresql.svg",
+      "label": "Standby replica — same zone",
+      "x": 768,
+      "y": 352,
+      "w": 170
+    }
+  ],
+  "edges": [
+    {
+      "from": "vm",
+      "to": "pe",
+      "label": "5432 · TLS",
+      "label_at": [
+        352,
+        174
+      ]
+    },
+    {
+      "from": "pe",
+      "to": "psql",
+      "label": "Private Link",
+      "label_at": [
+        648,
+        196
+      ]
+    },
+    {
+      "from": "entra",
+      "to": "psql",
+      "style": "dashed"
+    },
+    {
+      "from": "psql",
+      "to": "standby",
+      "style": "dashed",
+      "via": [
+        [
+          915,
+          245
+        ],
+        [
+          915,
+          366
+        ]
+      ]
+    }
+  ]
+}

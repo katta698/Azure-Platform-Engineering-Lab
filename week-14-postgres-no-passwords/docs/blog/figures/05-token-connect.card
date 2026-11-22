@@ -1,0 +1,37 @@
+title: A login with no password, and the same server refusing one
+subtitle: week-14 — the positive and the negative, from the client inside the network
+width: 1100
+---
+$ az vm run-command invoke -g rg-pgnopass-lab-dev-scus-001 -n vm-app-wk14-dev-scus-001 \
+    --command-id RunShellScript --scripts "$(cat connect.sh)"
+
+# connect.sh, running on the client. The credential is minted on demand for
+# the VM's own identity and never stored anywhere.
+export PGPASSWORD=$(curl -sS -H Metadata:true \
+  "http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01\
+&resource=https%3A%2F%2Fossrdbms-aad.database.windows.net&client_id=$CLIENT_ID" \
+  | jq -r .access_token)
+
+psql "host=psql-wk14-dev-scus-001.postgres.database.azure.com \
+      user=id-app-wk14-dev-scus-001 dbname=orders sslmode=require" \
+     -c "select 'connected-as='||current_user"
+
+    connected-as=id-app-wk14-dev-scus-001
+
+# THE CONTROL. Same host, same user, a password instead of a token.
+$ PGPASSWORD=not-a-real-password psql "host=... user=id-app-wk14-dev-scus-001 ..."
+
+    psql: error: connection to server at
+    "psql-wk14-dev-scus-001.postgres.database.azure.com" (10.60.1.4), port 5432
+    failed: FATAL:  The access token has invalid format. Try again after making
+    sure that the token is passed exactly as returned by the authentication
+    endpoint.
+
+# And as the local administrator a server like this usually has:
+$ PGPASSWORD=whatever psql "host=... user=pgadmin ..."
+
+    failed: FATAL:  password authentication failed for user "pgadmin"
+
+# The first refusal is the sharper one: the server does not evaluate the
+# string as a password at all, it tries to parse it as a token. The second
+# role does not exist, because no administrator_login was ever set.

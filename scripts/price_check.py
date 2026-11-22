@@ -71,7 +71,9 @@ import json
 import os
 import re
 import sys
+import time
 import urllib.parse
+import urllib.error
 import urllib.request
 
 API = "https://prices.azure.com/api/retail/prices"
@@ -82,15 +84,44 @@ API = "https://prices.azure.com/api/retail/prices"
 FLAT_UNITS = ("1/Month", "1/Day", "1/Hour", "1 Month", "1 Day", "1 Hour")
 
 
+def _get(url, tries=5):
+    """One page, retried through the API's rate limit.
+
+    Services with thousands of meters page enough times to earn an HTTP 429.
+    Untreated it surfaces as "could not price Virtual Machines", which reads
+    as a wrong service name -- a rate limit looking exactly like a design
+    mistake. The gate still refuses to certify a service it could not read;
+    this only stops it refusing for a reason that resolves itself.
+    """
+    for attempt in range(tries):
+        try:
+            with urllib.request.urlopen(url, timeout=90) as r:
+                return json.load(r)
+        except urllib.error.HTTPError as exc:
+            if exc.code != 429 or attempt == tries - 1:
+                raise
+            time.sleep(2 ** attempt)
+    raise RuntimeError("unreachable")
+
+
 def fetch(service, region):
-    """Every meter for one service in one region, following paging."""
-    flt = "serviceName eq '%s' and armRegionName eq '%s'" % (service, region)
+    """Every meter for one service in one region, following paging.
+
+    'Global' and the empty region are included deliberately. Several meters
+    that bill in a region are PRICED globally -- a private endpoint is
+    `Standard Private Endpoint` at 0.01/hour under armRegionName 'Global',
+    and a private DNS zone is `Private Zone` at 0.50/month under no region at
+    all. A region-only filter returns neither, so the gate reported a clean
+    run on a week whose two cheapest-looking resources it had never seen.
+    """
+    flt = ("serviceName eq '%s' and (armRegionName eq '%s' or "
+           "armRegionName eq 'Global' or armRegionName eq '')"
+           % (service, region))
     url = API + "?" + urllib.parse.urlencode({"$filter": flt})
     out = []
     seen = 0
     while url:
-        with urllib.request.urlopen(url, timeout=90) as r:
-            page = json.load(r)
+        page = _get(url)
         out.extend(page.get("Items", []))
         url = page.get("NextPageLink")
         seen += 1
@@ -114,7 +145,17 @@ def is_reservation(item):
 def is_flat(item):
     if is_reservation(item):
         return False
-    return any(item.get("unitOfMeasure", "").startswith(u) for u in FLAT_UNITS)
+    unit = item.get("unitOfMeasure", "")
+    if unit.strip() == "1":
+        # A bare "1" says nothing about WHAT one of. Azure prices a private
+        # DNS zone (0.50 per zone per month) and a DNS Private Resolver
+        # endpoint (180.00 per month) on it, and also prices a single SMS
+        # notification on it. The first two are the Grafana shape exactly --
+        # flat, recurring, charged for existing -- so an ambiguous unit is
+        # treated as flat and has to be acknowledged. Patterns make the
+        # per-operation ones affordable to dismiss in one line.
+        return True
+    return any(unit.startswith(u) for u in FLAT_UNITS)
 
 
 # Meters come in families that are ONE decision, not many. Azure prices every
@@ -140,6 +181,44 @@ def family(meter_name):
     return out.strip()
 
 
+# Some services price every SKU as its own meter, so a family-per-decision
+# still arrives here in the thousands -- Virtual Machines and Storage together
+# produce about 12,600 flat families in one region. Writing 12,600 reasons is
+# not a gate, it is a dare.
+#
+# A pattern acknowledges a whole shape of meter, and is only honest when the
+# reason names the MECHANISM that makes the shape unreachable -- a pinned
+# sku_name plus the deny policy at mg-katta, not an intention. So a pattern
+# prints the number of families it covers and the DEAREST meter among them:
+# the ceiling a reader is being asked to accept stays on screen.
+#
+#     "acknowledged_patterns": {
+#       "Virtual Machines::.": "size pinned in Terraform and denied outside
+#           the 1-2 vCPU allowlist by the guardrail at mg-katta"
+#     }
+#
+# A pattern matching nothing is a hard failure. It reads as cover for a
+# family that may have been renamed, and there is no way to tell from the
+# file which.
+def parse_patterns(spec):
+    out = []
+    for key, reason in (spec or {}).items():
+        svc, _, rx = key.partition("::")
+        if not rx:
+            svc, rx = "*", key
+        out.append((svc, re.compile(rx), reason, key))
+    return out
+
+
+def pattern_for(patterns, svc, fam):
+    for p_svc, rx, reason, key in patterns:
+        if p_svc not in ("*", svc):
+            continue
+        if reason and rx.search(fam):
+            return key
+    return None
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("week", nargs="?",
@@ -151,7 +230,7 @@ def main():
                     help="also list zero-priced and usage meters in full")
     args = ap.parse_args()
 
-    ack = {}
+    ack, patterns = {}, []
     if args.week:
         path = os.path.join(args.week, "meters.json")
         if not os.path.isfile(path):
@@ -167,6 +246,7 @@ def main():
         services = spec["services"]
         region = spec.get("region", args.region)
         ack = spec.get("acknowledged", {})
+        patterns = parse_patterns(spec.get("acknowledged_patterns"))
     elif args.services:
         services, region = args.services, args.region
     else:
@@ -217,14 +297,34 @@ def main():
         fams[key] = (fams[key][0], fams[key][1] + 1)
 
     unacked = []
+    by_pattern = {}
     for (svc, fam), (i, n) in sorted(fams.items(), key=lambda x: -x[1][0]["retailPrice"]):
         covered = fam in ack or i["meterName"] in ack
         if not covered:
+            key = pattern_for(patterns, svc, fam)
+            if key:
+                seen = by_pattern.setdefault(key, [0, i])
+                seen[0] += 1
+                if i["retailPrice"] > seen[1]["retailPrice"]:
+                    seen[1] = i
+                continue                   # summarised under its pattern
             unacked.append((svc, fam, i, n))
         span = ("  [%d tiers]" % n) if n > 1 else ""
         print("    %s%10.5f %-10s %-36s %s%s"
               % ("ack " if covered else "    ", i["retailPrice"],
                  i["unitOfMeasure"], fam[:36], svc, span))
+
+    if by_pattern:
+        print()
+        print("  ACKNOWLEDGED BY PATTERN -- families collapsed, ceiling shown")
+        print("  " + "-" * 62)
+        for key, (n, worst) in sorted(by_pattern.items(),
+                                      key=lambda x: -x[1][1]["retailPrice"]):
+            print("    pat %10.5f %-10s %-36s %d families"
+                  % (worst["retailPrice"], worst["unitOfMeasure"],
+                     worst["meterName"][:36], n))
+            print("        %s" % key)
+    dead = [p[3] for p in patterns if p[2] and p[3] not in by_pattern]
 
     # ---- usage meters --------------------------------------------------
     billed_usage = [(s, i) for s, i in usage_all if i.get("retailPrice", 0) > 0]
@@ -250,6 +350,16 @@ def main():
         print("  FAILED: a service could not be priced, so this run proves")
         print("  nothing about it. Fix the service name and run again.")
         return 2
+    if dead:
+        print("  %d PATTERN(S) MATCH NOTHING." % len(dead))
+        print()
+        print("  A pattern that covers no family is not protecting anything.")
+        print("  Either the meter was renamed -- in which case something is")
+        print("  now unexamined -- or the pattern was never right:")
+        print()
+        for key in dead:
+            print("      %s" % key)
+        return 1
     if unacked:
         print("  %d FLAT METER(S) NOT ACKNOWLEDGED." % len(unacked))
         print()

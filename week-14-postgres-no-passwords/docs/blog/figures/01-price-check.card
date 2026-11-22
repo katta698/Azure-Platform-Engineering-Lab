@@ -1,0 +1,39 @@
+title: Every meter this week can bill on, before anything was deployed
+subtitle: week-14 — and two of them were invisible to this gate until today
+width: 1060
+---
+$ python scripts/price_check.py week-14-postgres-no-passwords
+Meters that can bill, region southcentralus
+==================================================================
+
+  FLAT RECURRING METERS -- bill while the thing exists (12960)
+  --------------------------------------------------------------
+    ack  180.00000 1          Private Resolver Inbound Endpoint    Azure DNS
+    ack  180.00000 1          Private Resolver Outbound Endpoint   Azure DNS
+    ack   76.97900 1 Hour     vCore                                Azure Database for PostgreSQL  [32 tiers]
+    ack   14.00000 1 Hour     Fixed Private Endpoint T1            Virtual Network
+    ack    4.00000 1/Month    StandardV2 Log Enabled               NAT Gateway
+    ...
+    ack    0.50000 1          Private Zone                         Azure DNS  [2 tiers]
+    ack    0.08160 1 Hour     2 vCore                              Azure Database for PostgreSQL  [2 tiers]
+    ack    0.04500 1 Hour     Standard Gateway                     NAT Gateway
+    ack    0.01000 1 Hour     Standard Private Endpoint            Virtual Network
+    ack    0.00500 1 Hour     Standard IPv4 Static Public IP       Virtual Network  [4 tiers]
+
+  ACKNOWLEDGED BY PATTERN -- families collapsed, ceiling shown
+  --------------------------------------------------------------
+    pat 4915.20000 1/Month    P80 ZRS Disk                         173 families
+        Storage::.
+    pat  533.69600 1 Hour     M896ixds_32_v3                       4287 families
+        Virtual Machines::.
+
+  OK -- every flat recurring meter is acknowledged in meters.json.
+
+  This says what CAN be billed. It is not an estimate, and it is
+  not the cost of the week. Read that from the invoice after
+  teardown.
+
+# Two meters above were invisible before this week. `Standard Private
+# Endpoint` is priced under region 'Global' and `Private Zone` on a bare
+# unit of "1" -- the gate filtered by region and only treated "1/Hour"
+# and "1/Month" as recurring, so it had never seen either.

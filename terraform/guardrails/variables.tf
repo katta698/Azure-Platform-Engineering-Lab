@@ -24,12 +24,19 @@ variable "allowed_vm_sizes" {
 variable "allowed_postgres_skus" {
   type = list(string)
   default = [
-    "B_Standard_B1ms", "B_Standard_B2s",
-    "GP_Standard_D2ds_v4", "GP_Standard_D2ds_v5", "GP_Standard_D2s_v3",
+    "Standard_B1ms", "Standard_B2s",
+    "Standard_D2ds_v4", "Standard_D2ds_v5", "Standard_D2s_v3",
   ]
   description = <<-EOT
     2 vCores maximum. The dearest PostgreSQL meter in this region is a
     ~96-vCore Memory Optimized server at $76.98/hour; this list is what stops
     a typo reaching it.
+
+    These are ARM `sku.name` values, NOT the `GP_Standard_D2ds_v5` form that
+    Terraform and the CLI accept. That form is a convenience which the
+    provider splits into sku.name plus sku.tier, so an allowlist written in
+    it matches nothing and the policy denies every PostgreSQL server --
+    including the small ones it is supposed to permit. Corrected 2026-11-22,
+    after it refused week 14's own 2-vCore server.
   EOT
 }

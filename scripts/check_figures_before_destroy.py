@@ -39,11 +39,15 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # | 01 | `01-hcp-run-applied.png` | Section | ... |
 SLOT = re.compile(r"^\|\s*(\d+)\s*\|\s*`([^`]+\.png)`\s*\|", re.M)
 
-# A cost figure is taken from Cost Explorer once AWS posts the charges, which
-# is about a day after the resources are gone. Requiring it before teardown
-# would make the gate impossible to satisfy, and an impossible gate gets
-# bypassed on every run until someone deletes it.
-COST_HINT = re.compile(r"cost", re.I)
+# Two kinds of slot cannot exist before the destroy, and requiring them would
+# make the gate impossible to satisfy -- an impossible gate gets bypassed on
+# every run until someone deletes it.
+#
+#   cost      the charges post about a day after the resources are gone
+#   teardown  it is a picture OF the destroy
+#
+# Everything else has to be on disk first.
+COST_HINT = re.compile(r"cost|teardown|cleanup", re.I)
 
 
 def missing_figures(plan_text, on_disk, declared_unused):
@@ -76,6 +80,8 @@ def self_test():
              PLAN, {"01-hcp-run-applied.png", "02-service.png"}, {"03-retired.png"})]),
         ("the cost slot is never required before teardown",
          "06-cost-explorer.png" not in [f for _, f in missing_figures(PLAN, set(), set())]),
+        ("nor is the teardown slot, which is a picture of the destroy itself",
+         "07-teardown.png" not in [f for _, f in missing_figures(PLAN, set(), set())]),
         ("a fully captured week passes",
          missing_figures(PLAN, {"01-hcp-run-applied.png", "02-service.png"},
                          {"03-retired.png"}) == []),

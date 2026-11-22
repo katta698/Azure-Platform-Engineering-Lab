@@ -49,7 +49,7 @@ notice if this did not exist?**
 
 | Week | Pattern | Key Azure Services | Status |
 |------|---------|-------------------|--------|
-| Week 14 | A database with **no password anywhere** — private, HA, Entra auth | PostgreSQL Flexible Server, Private Endpoint, Entra auth | 📅 Planned |
+| [Week 14](./week-14-postgres-no-passwords) | A database with **no password anywhere** — private, HA, and a failover measured at 27.57s | PostgreSQL Flexible Server, Private Endpoint, Private DNS, Entra auth, NAT Gateway | 🔨 Built, post pending |
 | Week 15 | The golden path — code to running, **without a platform engineer in the loop** | Container Apps, Container Registry, GitHub Actions + OIDC | 📅 Planned |
 | Week 16 | Prove the data tier is **not reachable from the internet** | Private Endpoints, Private DNS zones (week 05's estate) | 📅 Planned |
 | Week 17 | Config without redeploy, and **no secret in any repo** | Key Vault, App Configuration, managed identity references | 📅 Planned |
@@ -453,6 +453,19 @@ Every week follows the same pattern:
 - Four targets producing three outcomes: remediated, uncovered by the category group, and uncovered by any built-in policy
 
 **Resources:** 9 Terraform resources | **Measured:** 14 Key Vault audit rows reached the workspace | **Blog:** https://jayanthkatta.com/blog/week-13-diagnostic-settings-at-scale/
+
+
+## Week 14 — A database with no password
+
+**The story:** Every database gets an administrator account, and every administrator account gets a password that someone has to store, rotate and eventually leak. This one has no administrator account at all — the portal's own **Reset password** button is greyed out, because there is nothing to reset. The only credential is a token the platform mints for a managed identity, and the only way in is from inside the network.
+
+**What it builds:**
+- A PostgreSQL flexible server with `administrator_login` and `administrator_password` both omitted, password authentication disabled, and a managed identity as its only Entra administrator
+- No public endpoint: a private endpoint in its own subnet, with a private DNS zone rewriting the documented hostname to a private address
+- A client VM with no public IP, reached through the Azure control plane, and a NAT gateway because default outbound access is retired
+- High availability, and a forced failover with the downtime measured from the client rather than from the operation log
+
+**Resources:** 20 Terraform resources | **Measured:** 27.57 seconds of client downtime across a forced failover; 10/10 validation checks | **Blog:** pending
 
 ---
 

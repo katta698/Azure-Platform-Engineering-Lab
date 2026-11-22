@@ -1,0 +1,35 @@
+title: A forced failover, measured from the client
+subtitle: week-14 — 32.16 seconds of application downtime inside a 6-minute operation
+width: 1020
+---
+$ bash week-14-postgres-no-passwords/scripts/failover.sh
+
+Week 14 failover — 2026-11-22T19:14:29Z
+  mode     SameZone   primary zone 1, standby zone 1
+
+== starting the writer on the client
+  215 successful writes before the failover
+
+== forced failover   19:16:12Z
+  request returned 19:22:19Z -- letting the client write through it
+
+== the gap, from the client's log
+writes attempted : 616
+succeeded        : 544
+failed           : 72
+last write before: 1795374983.291
+first write after: 1795375015.451
+CLIENT DOWNTIME  : 32.16 seconds (72 failed attempts)
+
+== server state after
+Mode      State    PrimaryZone    StandbyZone
+--------  -------  -------------  -------------
+SameZone  Healthy  1              1
+
+# Read the two timestamps together. The CLI call did not return for SIX
+# MINUTES, because it waits for the whole workflow -- promote the standby,
+# update DNS, then build a new standby. The application was writing again
+# after 32 seconds and never saw the rest of it.
+#
+# This is why Microsoft's guidance says to measure from the client. An
+# earlier failover the same afternoon measured 27.57s by the same method.

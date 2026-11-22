@@ -1,0 +1,35 @@
+title: Teardown, verified against Azure rather than against the exit code
+subtitle: week-14 — a failed teardown here costs about $13 a day
+width: 1000
+---
+$ bash week-14-postgres-no-passwords/scripts/cleanup.sh
+
+== figures first -- teardown is the only irreversible step in a week
+  week-14-postgres-no-passwords: 8 slot(s) declared, 6 captured
+  every declared figure is captured or retired -- safe to destroy.
+
+== deleting the resource group   19:28:16Z
+
+== terraform destroy (clears state of anything already gone)
+Plan: 0 to add, 0 to change, 1 to destroy.
+Destroy complete! Resources: 1 destroyed.
+  destroy exit: 0  -- not trusted, see the counts below
+
+== what Azure says is left   19:36:27Z
+  PostgreSQL flexible servers        0
+  virtual machines                   0
+  managed disks                      0
+  private endpoints                  0
+  NAT gateways                       0
+  public IP addresses                0
+  private DNS zones                  0
+  the resource group                 0
+
+  clean. Nothing from this week is billing.
+
+# The resource group goes first and whole, so the destroy finds 19 of the 20
+# resources already gone and removes only the throwaway SSH key from state.
+# That is why the counts are asked of Azure afterwards: a destroy can exit 0
+# having done nothing, and week 05 left a firewall billing exactly that way.
+#
+# Deployed 18:21Z, destroyed 19:36Z -- a 1h15m window against a 3h budget.

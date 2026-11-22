@@ -52,6 +52,23 @@ az apim create --sku-name Developer
 Neither attempt created anything. A guardrail nobody has watched refuse
 something is not a guardrail.
 
+**And that test was not enough.** Hours later the PostgreSQL rule refused a
+deliberately small server — week 14's 2-vCore `GP_Standard_D2ds_v5`, which the
+allowlist was written to permit:
+
+```
+RequestDisallowedByPolicy ... 'Lab guardrail: only small PostgreSQL SKUs'
+```
+
+The allowlist held `GP_Standard_D2ds_v5`, the composite form Terraform and the
+CLI accept. ARM stores `sku.name = Standard_D2ds_v5` with the tier in a separate
+field, so the list matched nothing and the policy denied **every** PostgreSQL
+server, small ones included. Corrected 2026-11-22 to ARM `sku.name` values.
+
+The denial above is exactly what a correct policy produces, which is why one
+test could not tell the two apart. **A deny needs a pair, like a detection
+rule does: something it refuses and something it must let through.**
+
 ## What it does NOT protect against
 
 - **Many cheap things.** Nothing here caps a total, only a unit price.
