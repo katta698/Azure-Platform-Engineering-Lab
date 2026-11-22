@@ -1,0 +1,73 @@
+{
+  "_comment": [
+    "Produced by: python scripts/price_check.py week-14-postgres-no-passwords",
+    "Written before deployment. Committed so the charges this week accepted are public.",
+    "",
+    "THIS IS THE FIRST WEEK SINCE 11 WITH REAL PER-HOUR COMPUTE, and the first",
+    "where the headline feature is the expensive one. Zone-redundant HA is not a",
+    "checkbox: the Burstable tier does not support HA at all, so HA forces",
+    "General Purpose, and HA then doubles that compute.",
+    "",
+    "CORRECTED 2026-11-22: an earlier version of this file claimed a $1,883/hour",
+    "meter. That was a 3-year reservation term total misread as an hourly rate by",
+    "price_check.py. Jay questioned the number; it did not survive the check."
+  ],
+  "region": "southcentralus",
+  "services": [
+    "Azure Database for PostgreSQL",
+    "Azure Monitor",
+    "Log Analytics"
+  ],
+  "acknowledged": {
+    "vCore": "NOT REACHED. 32 tiers, dearest 76.979/hr -- a ~96-vCore Memory Optimized server, about $1,847/day. Real and reachable if the wrong SKU is picked, which is why the server's sku_name is pinned in Terraform. CORRECTED 2026-11-22: this previously read 1,883.00/hr. That figure was a THREE-YEAR RESERVATION TOTAL that price_check.py was reading as an hourly rate -- the same SKU's consumption rate is 0.1791/hr. The tool now excludes type=Reservation rows; 28 were being counted here.",
+    "1 vCore": "NOT REACHED. 14 tiers up to 0.23814/hr -- per-vCore rates for SKU generations this week does not use. The chosen generation is pinned.",
+    "2 vCore": "THE ONE THIS WEEK USES, at the General Purpose rate of 0.1026/hr per vCore = 0.2052/hr, doubled to 0.4104/hr by zone-redundant HA. Acknowledged because it is deliberate, bounded by a 3-hour window, and is the point of the week.",
+    "B1MS": "NOT USED. 0.0204/hr, the cheapest compute available and rejected on purpose: the Burstable tier supports no form of high availability, so it cannot carry this week's claim.",
+    "B2S": "NOT USED. Burstable, same reason.",
+    "Basic": "NOT USED. Burstable, same reason.",
+    "B2ms vCore": "NOT USED. Burstable family, no HA support.",
+    "B4ms vCore": "NOT USED. Burstable family, no HA support.",
+    "B8ms vCore": "NOT USED. Burstable family, no HA support.",
+    "B12ms vCore": "NOT USED. Burstable family, no HA support.",
+    "B16ms vCore": "NOT USED. Burstable family, no HA support.",
+    "B20ms vCore": "NOT USED. 1.63200/hr. Burstable family, no HA support.",
+    "Extended Support vCore": "NOT USED. 0.084/hr, charged for running a PostgreSQL major version past its community end-of-life. This week deploys a currently supported major version.",
+    "Auto Tune vCore": "NOT USED. The Autonomous Database Tuning Service is not enabled.",
+    "Ultra Disk Throughput Prov Throughput (MBps)": "NOT USED. Storage is left at the default tier; no Ultra Disk is provisioned.",
+    "Ultra Disk IOPS Provisioned IOPS": "NOT USED. Same.",
+    "Premium SSDv2 Throughput Prov Throughput (MBps)": "NOT USED. Premium SSD v2 is an opt-in storage type this week does not select.",
+    "Premium SSD v2 IOPS Provisioned IOPS": "NOT USED. Same.",
+    "IOPS Scaling Provisioned IOPS": "NOT USED. IOPS scaling is not enabled; storage stays at the provisioned default.",
+    "Commitment Tier Capacity Reservation": "NOT USED. Azure Monitor commitment tiers start at 100 GB/day and must be chosen explicitly. Any workspace here is PerGB2018.",
+    "Alerts System Log Monitored": "NOT USED. Azure Monitor log-search-alert meter for scheduledQueryRules. This week creates none.",
+    "Health System Log Monitored": "NOT USED. Same family, health signals.",
+    "Alerts Resource Monitored": "NOT USED. Metric alerts per monitored resource. None created.",
+    "Alerts Metric Monitored": "NOT USED. Per-monitored-metric alert meter. None created.",
+    "Health Metric Monitored": "NOT USED. Same family.",
+    "Alerts Dynamic Threshold": "NOT USED. Dynamic threshold alerts. None created.",
+    "Health Dynamic Threshold Signal": "NOT USED. Same family.",
+    "Health Prom Monitored Metric Monitored": "NOT USED. Managed Prometheus health metrics; week 11 built the only Azure Monitor workspace and destroyed it."
+  },
+  "the_tier_decision": {
+    "burstable_b1ms": "0.0204/hr. Cheapest, and REJECTED: the Burstable tier supports no form of high availability, zone-redundant or same-zone. Choosing it would mean dropping HA from the week's claim.",
+    "general_purpose_2_vcore": "0.1026/hr per vCore, minimum 2 vCores = 0.2052/hr.",
+    "general_purpose_2_vcore_with_zone_redundant_ha": "0.4104/hr -- HA doubles compute because it runs a standby. CHOSEN.",
+    "why": "A configured HA setting proves nothing. The week's claim is a failover actually performed with the downtime measured, and that is only possible on a tier that supports HA."
+  },
+  "predicted_cost": {
+    "_comment": "Stated BEFORE deployment so the invoice can contradict it.",
+    "bound": "a TIME window, not a daily cap -- this meter bills per hour and cannot be capped like ingestion",
+    "planned_window_hours": 3,
+    "compute_usd_at_3h": 1.23,
+    "storage": "32 GB minimum, ~0.115/GB/month, prorated -- pennies for a 3 hour window",
+    "backup_storage": "0.114 per GB/month, free up to the provisioned storage size",
+    "predicted_total_usd": "under 2.00",
+    "if_left_running_24h": "9.85 compute alone -- more than week 11's entire 7.19 invoice",
+    "discipline": "deploy, validate, fail over, measure, destroy in one sitting. There is no cap that saves this one; only teardown does."
+  },
+  "residual_risks": [
+    "A per-hour meter has no equivalent of week 13's daily_quota_gb. The only bound is destroying it, so cleanup.sh runs the same day and the figure plan has no slot that requires the server to survive overnight.",
+    "A failed teardown here costs ~$10/day rather than ~$0, so cleanup verification asserts the server is gone against Azure rather than trusting the destroy exit code.",
+    "Storage is billed from creation to deletion and is not prorated by usage, so an idle server still charges for its disk."
+  ]
+}

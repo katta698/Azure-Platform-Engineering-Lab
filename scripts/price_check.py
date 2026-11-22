@@ -99,7 +99,21 @@ def fetch(service, region):
     return out
 
 
+def is_reservation(item):
+    """A reservation is a purchase, not a meter that accrues.
+
+    These rows carry type=Reservation and a reservationTerm, and their
+    retailPrice is the TERM TOTAL -- a 3-year PostgreSQL reservation reads
+    1883.00 against unitOfMeasure "1 Hour" while the same SKU's consumption
+    rate is 0.1791/hour. Counting them as hourly meters overstated the
+    dearest meter in week 14 by about 10,000x.
+    """
+    return bool(item.get("reservationTerm")) or item.get("type") == "Reservation"
+
+
 def is_flat(item):
+    if is_reservation(item):
+        return False
     return any(item.get("unitOfMeasure", "").startswith(u) for u in FLAT_UNITS)
 
 
@@ -162,6 +176,7 @@ def main():
     print("=" * 66)
 
     flat_all, usage_all, failed = [], [], []
+    reserved = 0
     for svc in services:
         try:
             items = fetch(svc, region)
@@ -172,6 +187,9 @@ def main():
             failed.append((svc, "no meters returned -- check the service name"))
             continue
         for i in items:
+            if is_reservation(i):
+                reserved += 1
+                continue
             (flat_all if is_flat(i) else usage_all).append((svc, i))
 
     if failed:
@@ -223,6 +241,8 @@ def main():
     free = [i for s, i in flat_all + usage_all if i.get("retailPrice", 0) == 0]
     print()
     print("  %d meter(s) priced at zero (free tiers and benefits)" % len(free))
+    if reserved:
+        print("  %d reservation row(s) excluded -- term totals, not rates" % reserved)
 
     # ---- the gate ------------------------------------------------------
     print()
