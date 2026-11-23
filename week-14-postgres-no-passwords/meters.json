@@ -119,5 +119,21 @@
     "Storage is billed from creation to deletion and is not prorated by usage, so an idle server still charges for its disk -- and with HA it charges for the standby's disk too.",
     "HA doubles compute whichever mode this region grants. If zone-redundant is refused and the week falls back to same-zone, the cost is identical and only the resilience claim changes.",
     "The gate found two of its own blind spots on this week -- meters priced under region 'Global' and meters priced on a bare '1' unit. Both are closed. Anything priced in a way neither the region filter nor the unit list anticipates is still invisible, which is why the published figure comes from the invoice."
-  ]
+  ],
+  "measured_cost": {
+    "_comment": "Read from Cost Management 2026-11-23, the day after teardown. The prediction above was written before deploying so this could contradict it.",
+    "read_on": "2026-11-23",
+    "window": "18:21Z to 19:36Z on 2026-11-22, 1h15m",
+    "by_service": {
+      "Azure Database for PostgreSQL": 0.4403,
+      "Virtual Machines": 0.1026,
+      "NAT Gateway": 0.0739,
+      "Virtual Network": 0.022,
+      "Storage": 0.0073,
+      "Azure DNS": 0.0016
+    },
+    "total_usd": 0.6478,
+    "vs_prediction": "predicted 1.74 for 3 hours, about 0.73 for the 1h15m actually run; measured 0.6478, roughly 11% under",
+    "note": "Virtual Network and Azure DNS are the private endpoint and the private zone -- the two meters this gate was blind to until 2026-11-22. They billed."
+  }
 }

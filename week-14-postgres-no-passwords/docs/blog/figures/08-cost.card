@@ -1,0 +1,25 @@
+title: What it actually cost, read from the bill
+subtitle: week-14 — $0.6478 against a $1.74 prediction, and two meters that were invisible a day earlier
+width: 1000
+---
+$ az rest --method post --url ".../Microsoft.CostManagement/query?api-version=2024-08-01" \
+    --body '{"type":"ActualCost","timeframe":"Custom", ... }'
+
+    0.4403  Azure Database for PostgreSQL
+    0.1026  Virtual Machines
+    0.0739  NAT Gateway
+    0.0220  Virtual Network
+    0.0073  Storage
+    0.0016  Azure DNS
+  --------
+    0.6478  TOTAL
+
+# Predicted BEFORE deploying, in meters.json: 1.74 for a three-hour window
+# at 0.5808/hour. The resources existed 18:21Z - 19:36Z, one hour fifteen,
+# which at those rates is about 0.73. The bill came in 11% under.
+#
+# The Virtual Network and Azure DNS rows are the private endpoint and the
+# private DNS zone -- the two meters price_check.py could not see until the
+# day before, one priced under region 'Global' and one on a bare "1" unit.
+# Small, and not zero. A DNS Private Resolver sits on the same shelf at
+# $180/month.

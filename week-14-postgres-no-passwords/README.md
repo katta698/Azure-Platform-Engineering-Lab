@@ -11,14 +11,30 @@ the CLI six minutes to return.
 
 ## Cost note
 
-**Measured: pending.** The invoice is read a day after teardown, per the
-standing rule that cost comes from the bill and never from a rate card. The
-**prediction**, written into [`meters.json`](meters.json) before deploying, was
-**$1.74 for a three-hour window** at $0.5808/hour.
+**Measured: $0.6478.** Read from Cost Management on 2026-11-23, the day after
+teardown, per the standing rule that cost comes from the bill and never from a
+rate card.
 
-The resources existed from **18:21Z to 19:36Z** — one hour fifteen, which at
-those rates is about **$0.73**. That is still a rate card multiplied by a clock,
-not a cost; the invoice decides.
+| Service | Measured |
+| --- | --- |
+| Azure Database for PostgreSQL | $0.4403 |
+| Virtual Machines | $0.1026 |
+| NAT Gateway | $0.0739 |
+| Virtual Network — the private endpoint | $0.0220 |
+| Storage — the VM's OS disk | $0.0073 |
+| Azure DNS — the private zone | $0.0016 |
+| **Total** | **$0.6478** |
+
+The **prediction** written into [`meters.json`](meters.json) before deploying
+was **$1.74 for a three-hour window** at $0.5808/hour. The resources existed
+from **18:21Z to 19:36Z** — one hour fifteen, which at those rates is about
+$0.73. The bill came in **11% under** that.
+
+**The last two rows are the point of yesterday's gate fix.** The private
+endpoint and the private DNS zone are the meters `price_check.py` could not see
+— one priced under region `Global`, one on a bare `1` unit. They are small, and
+they are not zero. A DNS Private Resolver endpoint sits on the same invisible
+shelf at $180/month.
 
 **What runs continuously: nothing.** `scripts/cleanup.sh` destroys the week and
 then asks Azure for the counts rather than trusting the destroy's exit code.
