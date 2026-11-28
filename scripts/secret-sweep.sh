@@ -136,6 +136,13 @@ if ! python "$(dirname "$0")/next_week.py" --check; then
   exit 1
 fi
 
+if ! python "$(dirname "$0")/check_figure_evidence.py"; then
+  echo
+  echo "A figure promises evidence in its NAME that its content does not carry."
+  echo "Weeks 12-14 shipped 02-terraform-apply.png showing a state list."
+  exit 1
+fi
+
 if ! python "$(dirname "$0")/check_root_readme_current.py"; then
   echo ""
   echo "ROOT README ROADMAP IS STALE — do not push."

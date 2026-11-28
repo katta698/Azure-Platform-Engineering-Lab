@@ -1,32 +1,40 @@
-title: What the week creates
-subtitle: week-14 — twenty resources, one public IP, and it faces outward only
-width: 1000
+title: The apply, and the two refusals before it
+subtitle: week-14 — twenty resources took three attempts, and the server alone took 9m6s
+width: 1060
 ---
-$ terraform state list
-    azurerm_resource_group.lab
-    azurerm_virtual_network.lab
-    azurerm_subnet.db                                    # the private endpoint
-    azurerm_subnet.app                                   # the client
-    azurerm_network_security_group.app                   # deny all inbound
-    azurerm_subnet_network_security_group_association.app
-    azurerm_public_ip.nat                                # egress only
-    azurerm_nat_gateway.egress
-    azurerm_nat_gateway_public_ip_association.egress
-    azurerm_subnet_nat_gateway_association.app
-    azurerm_private_dns_zone.psql                        # privatelink.postgres.database.azure.com
-    azurerm_private_dns_zone_virtual_network_link.psql
-    azurerm_postgresql_flexible_server.db                # no administrator_login
-    azurerm_postgresql_flexible_server_active_directory_administrator.app
-    azurerm_postgresql_flexible_server_database.orders
-    azurerm_private_endpoint.db
-    azurerm_user_assigned_identity.app                   # the database's only admin
-    azurerm_network_interface.app
-    azurerm_linux_virtual_machine.app
-    tls_private_key.unused                               # Azure demands one; nothing uses it
+# ATTEMPT 1 — 16 of 20 created, then the database was refused.
+$ terraform apply
+Plan: 20 to add, 0 to change, 0 to destroy.
+azurerm_linux_virtual_machine.app: Creation complete after 48s
+azurerm_postgresql_flexible_server.db: Creating...
 
-$ terraform output ha_mode
-    "SameZone"
+  Error: creating Flexible Server: unexpected status 403 (403 Forbidden)
+  RequestDisallowedByPolicy: Resource 'psql-wk14-dev-scus-001' was disallowed
+  by policy. Policy identifiers: 'Lab guardrail: only small PostgreSQL SKUs'
 
-# ZoneRedundant was asked for and REFUSED: southcentralus returns
-# MultiAzHaIsOfferRestricted on this subscription. Same price, same
-# standby, same failover -- one availability zone instead of two.
+# The guardrail from the previous session refused a deliberately SMALL
+# server: its allowlist held GP_Standard_D2ds_v5, the composite form the CLI
+# accepts, while ARM stores sku.name = Standard_D2ds_v5 with the tier apart.
+# It matched nothing, so it denied every PostgreSQL server.
+
+# ATTEMPT 2 — allowlist corrected. The region refused zone-redundant HA.
+$ terraform apply
+Plan: 4 to add, 0 to change, 0 to destroy.
+
+  Status: "MultiAzHaIsOfferRestricted"
+  Message: "Multi-Zone HA is not supported in this region."
+
+# ATTEMPT 3 — ha_mode = SameZone. Same price, same standby, same failover.
+$ terraform apply
+azurerm_postgresql_flexible_server.db: Creating...
+azurerm_postgresql_flexible_server.db: Creation complete after 9m6s
+azurerm_private_endpoint.db: Creation complete after 54s
+azurerm_postgresql_flexible_server_active_directory_administrator.app: Creation complete after 1m1s
+azurerm_postgresql_flexible_server_database.orders: Creation complete after 13s
+
+Apply complete! Resources: 4 added, 0 changed, 0 destroyed.
+
+Outputs:
+db_user     = "id-app-wk14-dev-scus-001"
+ha_mode     = "SameZone"
+server_fqdn = "psql-wk14-dev-scus-001.postgres.database.azure.com"

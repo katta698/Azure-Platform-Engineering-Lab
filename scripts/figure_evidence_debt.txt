@@ -1,0 +1,18 @@
+# Figures already PUBLISHED whose name promises more than their content shows.
+#
+# Listed here they are reported on every run but do not fail the gate. Nothing
+# else gets that treatment: a new figure breaking its own promise is a hard
+# failure, which is the whole point.
+#
+# These two cannot be fixed the way week 14 was. Their apply transcripts are
+# from sessions in November that no longer exist, and inventing one would be
+# fabricating deployment evidence. The honest fix is to rename the slot to
+# 02-terraform-state -- which renames a committed PNG the live post embeds by
+# raw URL, so the lab and the blog have to move in the same push or the image
+# 404s on a published page.
+#
+# Remove a line here only by doing that coordinated rename, never by deleting
+# the line.
+
+week-12-detections-as-code/docs/blog/figures/02-terraform-apply.card
+week-13-diagnostic-settings-at-scale/docs/blog/figures/02-terraform-apply.card
